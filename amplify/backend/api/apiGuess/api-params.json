@@ -1,0 +1,35 @@
+{
+    "paths": [
+        {
+            "name": "/number",
+            "lambdaFunction": "aiothingLambdaResource",
+            "privacy": {
+                "private": true,
+                "auth": "rw"
+            }
+        }
+    ],
+    "resourceName": "apiGuess",
+    "apiName": "aiotthings2cb244cda",
+    "functionArns": [
+        {
+            "lambdaFunction": "aiothingLambdaResource"
+        }
+    ],
+    "privacy": {
+        "auth": 1,
+        "unauth": 0,
+        "authRoleName": "aiotthings2-20180921164441-authRole",
+        "unAuthRoleName": "aiotthings2-20180921164441-unauthRole"
+    },
+    "dependsOn": [
+        {
+            "category": "function",
+            "resourceName": "aiothingLambdaResource",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
+        }
+    ]
+}

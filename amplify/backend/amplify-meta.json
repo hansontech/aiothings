@@ -1,0 +1,33 @@
+{
+	"providers": {
+		"awscloudformation": {
+			"AuthRoleName": "aiotthings2-20180921173434-authRole",
+			"UnauthRoleArn": "arn:aws:iam::414327512415:role/aiotthings2-20180921173434-unauthRole",
+			"AuthRoleArn": "arn:aws:iam::414327512415:role/aiotthings2-20180921173434-authRole",
+			"Region": "ap-southeast-2",
+			"DeploymentBucketName": "aiotthings2-20180921173434-deployment",
+			"UnauthRoleName": "aiotthings2-20180921173434-unauthRole",
+			"StackName": "aiotthings2-20180921173434",
+			"StackId": "arn:aws:cloudformation:ap-southeast-2:414327512415:stack/aiotthings2-20180921173434/c9ed0260-bd70-11e8-8bca-06647d71be30"
+		}
+	},
+	"auth": {
+		"cognito60eb5b14": {
+			"service": "Cognito",
+			"providerPlugin": "awscloudformation",
+			"providerMetadata": {
+				"s3TemplateURL": "https://s3.amazonaws.com/aiotthings2-20180921173434-deployment/amplify-cfn-templates/auth/cognito60eb5b14-cloudformation-template.yml",
+				"logicalId": "authcognito60eb5b14"
+			},
+			"lastPushTimeStamp": "2018-09-21T07:44:07.199Z",
+			"output": {
+				"AppClientSecret": "11tq2knr543vflfj6n3qi0hapd2iatuinqb9us88c8rrlm34lb4s",
+				"UserPoolId": "ap-southeast-2_IulUEVNt3",
+				"AppClientIDWeb": "2vrsh2qhr92dbe1pkk7j7kbpb3",
+				"AppClientID": "1mcb6bp26mbq6u0masni5ejqvk",
+				"UserPoolName": "aiothings_amplify_userpool"
+			},
+			"lastPushDirHash": "cRoz18+pyAVafMZEqnQqjItPvtM="
+		}
+	}
+}

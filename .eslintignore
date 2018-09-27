@@ -1,0 +1,10 @@
+/build/
+/config/
+/dist/
+/*.js
+/test/unit/coverage/
+/src/aws-exports.js
+/src/aws-settings.js
+/src/amplify
+/src/lib
+/src/config

@@ -1,0 +1,6 @@
+{
+    "resource": "/things",
+    "path": "/things",
+    "httpMethod": "POST",
+    "body": "{\"username\": \"denniskung68\"}"
+}

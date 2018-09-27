@@ -1,0 +1,35 @@
+{
+    "paths": [
+        {
+            "name": "/things",
+            "lambdaFunction": "thingObject",
+            "privacy": {
+                "private": true,
+                "auth": "rw"
+            }
+        }
+    ],
+    "resourceName": "thingApi",
+    "apiName": "aiotthings2c5e25b0b",
+    "functionArns": [
+        {
+            "lambdaFunction": "thingObject"
+        }
+    ],
+    "privacy": {
+        "auth": 1,
+        "unauth": 0,
+        "authRoleName": "aiotthings2-20180921164441-authRole",
+        "unAuthRoleName": "aiotthings2-20180921164441-unauthRole"
+    },
+    "dependsOn": [
+        {
+            "category": "function",
+            "resourceName": "thingObject",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
+        }
+    ]
+}
