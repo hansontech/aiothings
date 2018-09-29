@@ -1,9 +1,9 @@
 # aiothings
 
 > A sub project of AIoThings - AI + IoT Kit 
-> Web frontend is a Vue.js project, that allows user to create and maintain IoT devices
-> Node-RED flows and AWS services are managed and activated per user bases to construct AI + IoT applications
-> Serverless backend functions are created through AWS Amplify toolchain
+* Web frontend is a Vue.js project, that allows user to create and maintain IoT devices
+* Node-RED flows and AWS services are managed and activated per user bases to construct AI + IoT applications
+* Serverless backend functions are created through AWS Amplify toolchain
 
 ## Backend services setup using AWS Amplify 
 
