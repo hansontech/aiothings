@@ -55,9 +55,9 @@
             <span class="text-primary">MQTT broker</span>: iot.aiothings.com <br />
             <span class="text-primary">Certificates and keys></span> set to files downloaded <br />
             <span class="text-primary">Username/password</span>: please leave blank. <br />
-            <span class="text-primary">Client Id</span>: an unique name or leave blank. <br />
+            <span class="text-primary">Client Id</span>: set as Thing name. <br />
             <span class="text-primary">QoS</span>: set to 1 or higher <br />
-            <span class="text-primary">MQTT port</span>: 8883 (or 443) <br />
+            <span class="text-primary">MQTT port</span>: 8883 <br />
           </b-card>
       </b-row>
     </div>

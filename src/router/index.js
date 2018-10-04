@@ -10,6 +10,8 @@ import EditThing from '@/components/EditThing'
 import MyFavorites from '@/components/MyFavorites'
 import MyApplications from '@/components/MyApplications'
 import Recommended from '@/components/Recommended'
+import Solution from '@/components/Solution'
+import Solutions from '@/components/Solutions'
 import Login from '@/components/Login'
 // import Default from '@/components/Default'
 import MyThingsList from '@/components/MyThingsList'
@@ -54,6 +56,34 @@ const router = new VueRouter({
         title: 'home',
         auth: false
       }
+    },
+    {
+      path: '/solutions',
+      component: Solution,
+      meta: {
+        title: 'Solutions',
+        auth: false
+      },
+      children: [
+        {
+          path: '',
+          name: 'solutions',
+          component: Solutions,
+          meta: {
+            title: 'solution default',
+            auth: false
+          }
+        },
+        {
+          path: 'solutions',
+          name: 'queriedSolutions',
+          component: Solutions,
+          meta: {
+            title: 'solution list',
+            auth: false
+          }
+        }
+      ]
     },
     {
       path: '/user',

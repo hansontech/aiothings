@@ -1,4 +1,4 @@
-# aiotthings-2
+# aiothings
 
 > A Vue.js project
 

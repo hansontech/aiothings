@@ -16,10 +16,13 @@ export default {
     var verification = generateVerification()
     store.commit('setVerification', verification)
     var scope = 'openid%20profile'
+    // console.log('redirect: ', redirectSignIn)
     responseType = 'code'
+    // let redirectCallback = 'https://www.aiothings.com/callback' // for test
+
     const url = 'https://' + domain + '/login?redirect_uri=' + redirectSignIn + '&response_type=' + responseType + '&client_id=' + clientId + '&state=' + verification + '&scope=' + scope
 
-    console.log('url:: ', url)
+    // console.log('url:: ', url)
     // Launch hosted UI
     window.location.assign(url)
   },
@@ -47,6 +50,7 @@ export default {
     var callback = window.location.protocol + '//' + window.location.host + '/callback'
 
     console.log('callback: ', callback)
+
     // Save the 'verification' value, so it can be verified later to prevent CSRF attacks
     var verification = generateVerification()
     store.commit('setVerification', verification)

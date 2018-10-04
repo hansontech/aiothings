@@ -37,13 +37,13 @@
       <p class="h4">Thing Name</p>
     </div>
     <div>
-      <b-form-input v-model="thingNameTag" placeholder="thing's name"></b-form-input>
+      <b-form-input class="at-border" v-model="thingNameTag" placeholder="thing's name"></b-form-input>
     </div>
     <div class="mt-3">
       <p class="h4">Description</p>
     </div>
     <div style="height: 200px; background-color: rgba(255,0,0,0.1);">
-      <textarea class="w-100 h-100" v-model="thingDesc" placeholder="thing's description"></textarea>
+      <textarea class="at-border w-100 h-100" v-model="thingDesc" placeholder="thing's description"></textarea>
     </div>
   </b-container>
 </template>
@@ -110,3 +110,10 @@ export default {
   }
 }
 </script>
+
+<style>
+.at-border {
+  border: 1px solid #a78;
+  padding: 5px;
+}
+</style>

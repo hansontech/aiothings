@@ -21,7 +21,7 @@ export default {
   components: {
     sidebar: Sidebar
   },
-  name: 'my node-RED',
+  name: 'my-node-RED',
   props: ['url'],
   data: function () {
     return {

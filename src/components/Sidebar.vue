@@ -47,6 +47,10 @@
       <b-button :variant="reachRoute('myfavorites')" @click="toMyFavorites()">My favorites</b-button>
       <b-button :variant="reachRoute('recommended')" @click="toRecommended()">Recommended</b-button>
       <b-button v-if="isBackButtonNeed" :variant="reachRoute('recommended')" @click="toQuit()">Quit</b-button>
+    </b-button-group> 
+
+    <b-button-group vertical class="at-sidebar-button" style="width:100%">
+      <b-button :variant="reachRoute('solutions')" @click="toSolutions()">Solutions</b-button>
     </b-button-group>  
     </div>
     <!-- 
@@ -152,8 +156,15 @@ export default {
       eventBus.$emit('pageBack')
     },
     reachRoute (matchRoute, defaultRoot) {
-      let currentRoute = this.$route.path.split('/')[2]
-      // console.log('currentRoute: ', currentRoute, ' : ', matchRoute)
+      let paths = this.$route.path.split('/')
+      let currentRoute = ''
+      if (paths[1] === 'user') {
+        currentRoute = paths[2]
+      } else {
+        currentRoute = paths[1]
+      }
+
+      // console.log('currentRoute: ', currentRoute, ' : ', matchRoute, ' :path: ', this.$route.path)
       if ((defaultRoot === '' && (currentRoute === undefined || currentRoute === '')) || currentRoute === matchRoute) {
         return 'primary'
       }
@@ -177,6 +188,9 @@ export default {
     },
     toRecommended () {
       this.$router.replace('/user/recommended')
+    },
+    toSolutions () {
+      this.$router.replace({name: 'solutions'})
     },
     onSubmit () {
       this.makeGuess(this.guess)

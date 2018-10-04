@@ -6,20 +6,34 @@
     "Parameters": {
         
     
+    
+          "functionthingObjectName": {
+            "Type": "String",
+            "Default": "functionthingObjectName"
+          },
+        
+          
+          "functionthingObjectArn": {
+            "Type": "String",
+            "Default": "functionthingObjectArn"
+          }
+        
+          
+          
         },
     
     "Resources": {
         
         
-        "PolicyAPIGWaiotthings2dba90302auth": {
+        "PolicyAPIGWaiotesteb31660dauth": {
             "DependsOn": [
-              "aiotthings2dba90302"
+              "aiotesteb31660d"
             ],
             "Type": "AWS::IAM::Policy",
             "Properties": {
-              "PolicyName": "PolicyAPIGWaiotthings2dba90302auth",
+              "PolicyName": "PolicyAPIGWaiotesteb31660dauth",
               "Roles": [
-                "aiotthings2-20180921164441-authRole"
+                "aiotest-20180927202803-authRole"
               ],
               "PolicyDocument": {
                 "Version": "2012-10-17",
@@ -47,7 +61,7 @@
                             },
                             ":",
                             {
-                              "Ref": "aiotthings2dba90302"
+                              "Ref": "aiotesteb31660d"
                             },
                             "/Prod/*",
                             "/iot-allow/*"
@@ -68,7 +82,7 @@
                             },
                             ":",
                             {
-                              "Ref": "aiotthings2dba90302"
+                              "Ref": "aiotesteb31660d"
                             },
                             "/Prod/*",
                             "/iot-allow"
@@ -89,16 +103,16 @@
           },
         
         
-      "aiotthings2dba90302": {
+      "aiotesteb31660d": {
         "Type": "AWS::ApiGateway::RestApi",
         "Properties": {
           "Description": "",
-          "Name": "aiotthings2dba90302",
+          "Name": "aiotesteb31660d",
           "Body": {
             "swagger": "2.0",
             "info": {
               "version": "2018-05-24T17:52:00Z",
-              "title": "aiotthings2dba90302"
+              "title": "aiotesteb31660d"
             },
             "host": {
                 "Fn::Join": [
@@ -207,8 +221,11 @@
                               "Ref": "AWS::Region"
                             },
                             ":lambda:path/2015-03-31/functions/",
-                             
-                            "arn:aws:lambda:ap-southeast-2:414327512415:function:thingObject", 
+                            
+                            {
+                                
+                                "Ref": "functionthingObjectArn"
+                            },
                             
                             "/invocations"
                           ]
@@ -309,8 +326,11 @@
                             "Ref": "AWS::Region"
                           },
                           ":lambda:path/2015-03-31/functions/",
-                           
-                            "arn:aws:lambda:ap-southeast-2:414327512415:function:thingObject",
+                          
+                          {
+                            
+                            "Ref": "functionthingObjectArn"
+                          },
                           
                           "/invocations"
                         ]
@@ -366,10 +386,14 @@
                   
         
         
-        "functionthingObjectPermissionaiotthings2dba90302": {
+        "functionthingObjectPermissionaiotesteb31660d": {
             "Type": "AWS::Lambda::Permission",
             "Properties": {
-                "FunctionName":  "arn:aws:lambda:ap-southeast-2:414327512415:function:thingObject", 
+                "FunctionName": 
+                    {
+                        "Ref":  "functionthingObjectName"
+                    },
+                    
                     "Action": "lambda:InvokeFunction",
                 "Principal": "apigateway.amazonaws.com",
                 "SourceArn": {
@@ -386,7 +410,7 @@
                             },
                             ":",
                             {
-                                "Ref": "aiotthings2dba90302"
+                                "Ref": "aiotesteb31660d"
                             },
                             "/*/*/*"
                         ]
@@ -399,13 +423,13 @@
         
         
         
-      "DeploymentAPIGWaiotthings2dba90302": {
+      "DeploymentAPIGWaiotesteb31660d": {
         "Type": "AWS::ApiGateway::Deployment",
         "Properties": {
           "Description": "The Development stage deployment of your API.",
           "StageName": "Prod",
           "RestApiId": {
-            "Ref": "aiotthings2dba90302"
+            "Ref": "aiotesteb31660d"
           }
         }
       }
@@ -413,7 +437,7 @@
     "Outputs": {
         "RootUrl": {
             "Description": "Root URL of the API gateway",
-            "Value": {"Fn::Join": ["", ["https://", {"Ref": "aiotthings2dba90302"}, ".execute-api.", {"Ref": "AWS::Region"}, ".amazonaws.com/Prod"]]}
+            "Value": {"Fn::Join": ["", ["https://", {"Ref": "aiotesteb31660d"}, ".execute-api.", {"Ref": "AWS::Region"}, ".amazonaws.com/Prod"]]}
         },
         "ApiName": {
           "Description": "API Friendly name",

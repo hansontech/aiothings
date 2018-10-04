@@ -39,7 +39,7 @@
               </b-row>
               <b-row class="ml-3 mt-1">  
                 <p class="card-text">
-                  {{index}} {{thing.ThingDesc}}
+                  {{thing.ThingDesc}}
                 </p>
               </b-row>
             </b-card>
@@ -157,7 +157,8 @@ export default {
   },
   methods: {
     launchThingNodeRed (ipAddr) {
-      this.$router.push({name: 'thing', params: { url: ipAddr }})
+      // this.$router.push({name: 'thing', params: { url: ipAddr }})
+      window.open('http://' + ipAddr + ':1880')
     },
     connectCallback () {
       console.log('connectCallback')

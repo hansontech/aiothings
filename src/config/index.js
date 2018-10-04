@@ -17,7 +17,7 @@ import awsexports from '../aws-exports'
 export default {
   awsIotHost: config.AwsIotHost,
   awsRegion: config.AwsRegion,
-  awsCognitoDomain: 'aiothings-amplify.auth.ap-southeast-2.amazoncognito.com',
+  awsCognitoDomain: 'aiotest.auth.ap-southeast-2.amazoncognito.com',
   awsCognitoUserPoolId: awsexports.aws_user_pools_id,
   awsCognitoUserPoolAppClientId: awsexports.aws_user_pools_web_client_id,
   awsCognitoIdentityPoolId: config.IdentityPoolId,

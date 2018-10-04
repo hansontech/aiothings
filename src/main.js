@@ -18,12 +18,19 @@ import { AWSIoTProvider } from '@aws-amplify/PubSub/lib/Providers'
 import awsmobile from './aws-exports'
 import config from './config'
 import atHelper from './aiot-helper'
+import atWhitepaper from './assets/aiothings-wp'
 
 Amplify.configure(awsmobile)
 
-// const hostUrl = window.location.protocol + '//' + window.location.host
-// const hostUrl = 'https://d2hfv3g2kqqll0.cloudfront.net'
-const hostUrl = 'http://localhost:8080'
+// AWS CLI cloudfront reference:
+// https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Invalidation.html
+// to invalidate cloudfront cache, force to update contents to edges.
+// > aws cloudfront create-invalidation --distribution-id $CDN_DISTRIBUTION_ID --paths "/*"
+
+const hostUrl = window.location.protocol + '//' + window.location.host
+// const hostUrl = 'https://d3n2wrf9ttsajg.cloudfront.net'
+// const hostUrl = 'https://www.aiothings.com'
+// const hostUrl = 'http://localhost:8080'
 
 const oauth = {
   // Domain name
@@ -100,8 +107,10 @@ Vue.use(BootstrapVue)
 Vue.use(Vuex)
 
 Vue.use(VueAxios, axios)
+
+// 'http://localhost:3000' ??
 Vue.use(VueAuthenticate, {
-  baseUrl: 'http://localhost:3000', // Your API domain
+  baseUrl: hostUrl, // Your API domain
   providers: {
     facebook: {
       clientId: '265383824068284',
@@ -160,6 +169,7 @@ Vue.component('at-sidebar', Sidebar)
 
 export var eventBus = new Vue({})
 
+Vue.component('at-whitepaper', atWhitepaper)
 Vue.config.productionTip = false
 // window.LOG_LEVEL = 'DEBUG'
 // Amplify.Logger.LOG_LEVEL = 'DEBUG'

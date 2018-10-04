@@ -1,7 +1,0 @@
-
-{
-    "resource": "/number",
-    "path": "/number",
-    "httpMethod": "POST",
-    "body": "{\"username\": \"denniskung68\"}"
-}

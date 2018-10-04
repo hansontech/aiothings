@@ -5,6 +5,7 @@ import persist from 'vuex-localstorage'
 // Modules
 import auth from './auth.js'
 import things from './things.js'
+import usage from './usage.js'
 
 Vue.use(Vuex)
 
@@ -16,7 +17,8 @@ const store = new Vuex.Store({
   })],
   modules: {
     auth,
-    things
+    things,
+    usage
   }
 })
 

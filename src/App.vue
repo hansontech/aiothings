@@ -22,8 +22,10 @@
               </b-form-select>
           </b-nav-form>
           <b-nav-form>
-            <b-form-input type="text" placeholder="Or search for solutions?"/>
-            <b-button type="submit">Search</b-button>
+            <b-form-input v-model="searchText" type="text" placeholder="Or search for solutions?"/>
+          </b-nav-form>
+          <b-nav-form>
+            <b-button type="button" @click="searchSolutions()">Search</b-button>
           </b-nav-form>
         </b-navbar-nav>
         <b-navbar-nav class="ml-auto">
@@ -42,7 +44,7 @@
           <b-nav-item-dropdown right v-if="isAuthenticated">
             <!-- Using button-content slot -->
             <template slot="button-content">
-              <img v-if="userHasPhoto" v-bind:src="pictureUrl" height="25" width="25" />
+              <img class="at-imageRound" v-if="userHasPhoto" v-bind:src="pictureUrl" height="25" width="25" />
               <em>{{userName}}</em>
             </template>
             <b-dropdown-item href="#">Profile</b-dropdown-item>
@@ -62,7 +64,7 @@
 
 import { eventBus } from './main'
 import auth from './services/auth'
-import { Auth } from 'aws-amplify'
+import { Auth, API } from 'aws-amplify'
 
 // Helpers
 /* import {
@@ -88,21 +90,53 @@ export default {
       languages: {'EN': 'English', 'CN': '中文', 'JP': '日本語', 'KR': '한국어'},
       activeUser: null,
       selected: null,
+      searchText: null,
+      searchKeywordsMap: {'x': 1},
       options: [
-        { value: null, text: 'Select solution' },
-        { value: 'a', text: 'First option' },
-        { value: 'b', text: 'Second option' },
-        { value: {'C': '3PO'}, text: 'With object value' },
-        { value: 'd', text: 'Disabled', disabled: true }
+        { value: null, text: 'Select from solutions' },
+        { value: null, text: '━━━━━━━━━━━', disabled: true },
+        { value: 'video', text: 'Video Processing' },
+        { value: 'security', text: 'Security', keyword: 'security' },
+        { value: 'retail', text: 'Retail and Hospitality', keyword: 'retail shop' },
+        { value: 'agriculture', text: 'Precision Agriculture', keyword: 'agriculture' },
+        { value: 'industry', text: 'Industrial Maintenance', keyword: 'industry' },
+        { value: 'home', text: 'Home Automation', keyword: 'home automation' },
+        { value: null, text: '━━━━━━━━━━━', disabled: true },
+        { value: 'video_image_detect', text: 'Detect from Image', keyword: 'image recognition' },
+        { value: 'video_detect', text: 'Detect from Video', keyword: 'video recognition' },
+        { value: 'speech_tts', text: 'Text to Speech', keyword: 'text to speech' },
+        { value: 'speech_stt', text: 'Audio to Text', keyword: 'speech to text' },
+        { value: 'machine_learnig', text: 'Machine Learning', keyword: 'machine learning' },
+        { value: 'modbus', text: 'Modbus', keyword: 'modbus' },
+        { value: 'bacnet', text: 'BACnet', keyword: 'backnet' }
+        // add horitontal line, patterns, between options
+        // https://stackoverflow.com/questions/4317025/how-do-i-add-a-horizontal-line-in-a-html-select-control
       ]
+    }
+  },
+  watch: {
+    selected: function (newValue, oldValue) {
+      this.$store.commit('setSearchArea', this.selected)
+      let keyword = this.searchKeywordsMap[this.selected]
+      console.log('keyword: ', keyword)
+      this.$store.commit('setSearchKeywords', keyword)
+    },
+    searchText: function (newValue, oldValue) {
+      this.$store.commit('setSearchText', this.searchText)
     }
   },
   created () {
     console.log('App.vue created')
+    // console.log('profile: ', this.profile)
+    for (let i in this.options) {
+      this.searchKeywordsMap[this.options[i].value] = this.options[i].keyword
+    }
+    console.log('map: ', this.searchKeywordsMap)
   },
   mounted () {
     console.log('App.vue mounted')
-
+    this.selected = this.$store.getters.searchArea
+    this.searchText = this.$store.getters.searchText
     /* loadFbSdk(this.fbData.facebookAppId, this.fbData.facebookVersion)
       .then(response => {
         console.log('fb loadFbSdk completed')
@@ -170,6 +204,30 @@ export default {
     }
   },
   methods: {
+    async searchSolutions () {
+      /*
+      let result = await API.get('solutionApi', '/solutions', {
+          'queryStringParameters': {
+            SolutionId: 'smart-greenhouse-iot'
+          }
+      })
+      console.log('seach result: ', result)
+      */
+      let queryResult = await API.get('solutionApi', '/solutions', {
+          'queryStringParameters': {
+            SolutionCategory: this.selected,
+            SearchText: this.searchText
+          }
+      })
+      console.log('seach result: ', queryResult)
+      // if (queryResult.length > 0) {
+      this.$store.commit('setQueriedSolutions', queryResult)
+      console.log('searchText : ', this.searchText)
+      this.$router.push({name: 'queriedSolutions'})
+      eventBus.$emit('pageRefresh')
+      //, params: { queryString: this.searchText }
+      // }
+    },
     changeLanguage (newLang) {
       let e = document.getElementById('langDropDown')
       console.log('e: ', e)
@@ -265,7 +323,7 @@ header span {
   padding-top: 16px;
 }
 
-img {
+img.at-imageRound {
     border-radius: 50%;
 }
 /*
