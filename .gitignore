@@ -7,6 +7,7 @@ yarn-debug.log*
 yarn-error.log*
 /test/unit/coverage
 /test/e2e/reports
+**/test/
 selenium-debug.log
 
 # Editor directories and files
@@ -25,6 +26,8 @@ selenium-debug.log
 
 # amplify
 amplify/\#current-cloud-backend/
+**/dist/
+**/node_modules/
 amplify/.config
 .amplifyrc
 
