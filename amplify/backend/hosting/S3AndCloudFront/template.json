@@ -6,7 +6,7 @@
             "Type": "AWS::S3::Bucket",
             "DeletionPolicy": "Retain",
             "Properties": {
-                "BucketName": "aiotest-20180927202952--hostingbucket",
+                "BucketName": "aiotthings2-20180921162705--hostingbucket",
                 "AccessControl": "PublicRead",
                 "WebsiteConfiguration": {
                     "IndexDocument": "index.html",
@@ -62,68 +62,6 @@
                     "Ref": "S3Bucket"
                 }
             }
-        },
-        "CloudFrontDistribution": {
-            "Type": "AWS::CloudFront::Distribution",
-            "DependsOn": "S3Bucket",
-            "Properties": {
-                "DistributionConfig": {
-                    "Origins": [
-                        {
-                            "DomainName": {
-                                "Fn::GetAtt": [
-                                    "S3Bucket",
-                                    "DomainName"
-                                ]
-                            },
-                            "Id": "hostingS3Bucket",
-                            "S3OriginConfig": {}
-                        }
-                    ],
-                    "Enabled": "true",
-                    "DefaultCacheBehavior": {
-                        "AllowedMethods": [
-                            "DELETE",
-                            "GET",
-                            "HEAD",
-                            "OPTIONS",
-                            "PATCH",
-                            "POST",
-                            "PUT"
-                        ],
-                        "TargetOriginId": "hostingS3Bucket",
-                        "ForwardedValues": {
-                            "QueryString": "false"
-                        },
-                        "ViewerProtocolPolicy": "allow-all",
-                        "DefaultTTL": 86400,
-                        "MaxTTL": 31536000,
-                        "MinTTL": 60,
-                        "Compress": true
-                    },
-                    "DefaultRootObject": "index.html",
-                    "CustomErrorResponses": [
-                        {
-                            "ErrorCachingMinTTL": 300,
-                            "ErrorCode": 400,
-                            "ResponseCode": 200,
-                            "ResponsePagePath": "/"
-                        },
-                        {
-                            "ErrorCachingMinTTL": 300,
-                            "ErrorCode": 403,
-                            "ResponseCode": 200,
-                            "ResponsePagePath": "/"
-                        },
-                        {
-                            "ErrorCachingMinTTL": 300,
-                            "ErrorCode": 404,
-                            "ResponseCode": 200,
-                            "ResponsePagePath": "/"
-                        }
-                    ]
-                }
-            }
         }
     },
     "Outputs": {
@@ -163,35 +101,6 @@
                 ]
             },
             "Description": "Name of S3 bucket to hold website content"
-        },
-        "CloudFrontDistributionID": {
-            "Value": {
-                "Ref": "CloudFrontDistribution"
-            }
-        },
-        "CloudFrontDomainName": {
-            "Value": {
-                "Fn::GetAtt": [
-                    "CloudFrontDistribution",
-                    "DomainName"
-                ]
-            }
-        },
-        "CloudFrontSecureURL": {
-            "Value": {
-                "Fn::Join": [
-                    "",
-                    [
-                        "https://",
-                        {
-                            "Fn::GetAtt": [
-                                "CloudFrontDistribution",
-                                "DomainName"
-                            ]
-                        }
-                    ]
-                ]
-            }
         }
     }
 }

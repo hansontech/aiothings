@@ -16,15 +16,15 @@
 				"Runtime": "nodejs8.10",
 				"Timeout": "25",
 				"Code": {
-					"S3Bucket": "aiotest-20180927202803-deployment",
-					"S3Key": "amplify-builds/thingObject-1538119249-latest-build.zip"
+					"S3Bucket": "aiotthings2-20180921164441-deployment",
+					"S3Key": "amplify-builds/thingObject-1537011582-latest-build.zip"
 				}
 			}
 		},
 		"LambdaExecutionRole": {
 			"Type": "AWS::IAM::Role",
 			"Properties": {
-				"RoleName": "aiotestLambdaRolee647a06a",
+				"RoleName": "aiotthings2LambdaRolecdd81085",
 				"AssumeRolePolicyDocument": {
 					"Version": "2012-10-17",
 					"Statement": [
@@ -38,49 +38,6 @@
 							"Action": [
 								"sts:AssumeRole"
 							]
-						}
-					]
-				}
-			}
-		},
-		"lambdaexecutionpolicy": {
-			"DependsOn": [
-				"LambdaExecutionRole"
-			],
-			"Type": "AWS::IAM::Policy",
-			"Properties": {
-				"PolicyName": "lambda-execution-policy",
-				"Roles": [
-					{
-						"Ref": "LambdaExecutionRole"
-					}
-				],
-				"PolicyDocument": {
-					"Version": "2012-10-17",
-					"Statement": [
-						{
-							"Effect": "Allow",
-							"Action": [
-								"logs:CreateLogGroup",
-								"logs:CreateLogStream",
-								"logs:PutLogEvents"
-							],
-							"Resource": {
-								"Fn::Sub": [
-									"arn:aws:logs:${region}:${account}:log-group:/aws/lambda/${lambda}:log-stream:*",
-									{
-										"region": {
-											"Ref": "AWS::Region"
-										},
-										"account": {
-											"Ref": "AWS::AccountId"
-										},
-										"lambda": {
-											"Ref": "LambdaFunction"
-										}
-									}
-								]
-							}
 						}
 					]
 				}

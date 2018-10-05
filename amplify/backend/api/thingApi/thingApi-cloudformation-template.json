@@ -25,15 +25,15 @@
     "Resources": {
         
         
-        "PolicyAPIGWaiotest8f526e08auth": {
+        "PolicyAPIGWaiotthings2c5e25b0bauth": {
             "DependsOn": [
-              "aiotest8f526e08"
+              "aiotthings2c5e25b0b"
             ],
             "Type": "AWS::IAM::Policy",
             "Properties": {
-              "PolicyName": "PolicyAPIGWaiotest8f526e08auth",
+              "PolicyName": "PolicyAPIGWaiotthings2c5e25b0bauth",
               "Roles": [
-                "aiotest-20180927202803-authRole"
+                "aiotthings2-20180921164441-authRole"
               ],
               "PolicyDocument": {
                 "Version": "2012-10-17",
@@ -61,7 +61,7 @@
                             },
                             ":",
                             {
-                              "Ref": "aiotest8f526e08"
+                              "Ref": "aiotthings2c5e25b0b"
                             },
                             "/Prod/*",
                             "/things/*"
@@ -82,7 +82,7 @@
                             },
                             ":",
                             {
-                              "Ref": "aiotest8f526e08"
+                              "Ref": "aiotthings2c5e25b0b"
                             },
                             "/Prod/*",
                             "/things"
@@ -103,16 +103,16 @@
           },
         
         
-      "aiotest8f526e08": {
+      "aiotthings2c5e25b0b": {
         "Type": "AWS::ApiGateway::RestApi",
         "Properties": {
           "Description": "",
-          "Name": "aiotest8f526e08",
+          "Name": "aiotthings2c5e25b0b",
           "Body": {
             "swagger": "2.0",
             "info": {
               "version": "2018-05-24T17:52:00Z",
-              "title": "aiotest8f526e08"
+              "title": "aiotthings2c5e25b0b"
             },
             "host": {
                 "Fn::Join": [
@@ -386,7 +386,7 @@
                   
         
         
-        "functionthingObjectPermissionaiotest8f526e08": {
+        "functionthingObjectPermissionaiotthings2c5e25b0b": {
             "Type": "AWS::Lambda::Permission",
             "Properties": {
                 "FunctionName": 
@@ -410,7 +410,7 @@
                             },
                             ":",
                             {
-                                "Ref": "aiotest8f526e08"
+                                "Ref": "aiotthings2c5e25b0b"
                             },
                             "/*/*/*"
                         ]
@@ -423,13 +423,13 @@
         
         
         
-      "DeploymentAPIGWaiotest8f526e08": {
+      "DeploymentAPIGWaiotthings2c5e25b0b": {
         "Type": "AWS::ApiGateway::Deployment",
         "Properties": {
           "Description": "The Development stage deployment of your API.",
           "StageName": "Prod",
           "RestApiId": {
-            "Ref": "aiotest8f526e08"
+            "Ref": "aiotthings2c5e25b0b"
           }
         }
       }
@@ -437,7 +437,7 @@
     "Outputs": {
         "RootUrl": {
             "Description": "Root URL of the API gateway",
-            "Value": {"Fn::Join": ["", ["https://", {"Ref": "aiotest8f526e08"}, ".execute-api.", {"Ref": "AWS::Region"}, ".amazonaws.com/Prod"]]}
+            "Value": {"Fn::Join": ["", ["https://", {"Ref": "aiotthings2c5e25b0b"}, ".execute-api.", {"Ref": "AWS::Region"}, ".amazonaws.com/Prod"]]}
         },
         "ApiName": {
           "Description": "API Friendly name",

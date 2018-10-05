@@ -2,6 +2,7 @@
     "paths": [
         {
             "name": "/iot-allow",
+            "lambdaArn": "arn:aws:lambda:ap-southeast-2:414327512415:function:thingObject",
             "lambdaFunction": "thingObject",
             "privacy": {
                 "private": true,
@@ -10,26 +11,18 @@
         }
     ],
     "resourceName": "thingAllow",
-    "apiName": "aiotesteb31660d",
+    "apiName": "aiotthings2dba90302",
     "functionArns": [
         {
-            "lambdaFunction": "thingObject"
+            "lambdaFunction": "thingObject",
+            "lambdaArn": "arn:aws:lambda:ap-southeast-2:414327512415:function:thingObject"
         }
     ],
     "privacy": {
         "auth": 1,
         "unauth": 0,
-        "authRoleName": "aiotest-20180927202803-authRole",
-        "unAuthRoleName": "aiotest-20180927202803-unauthRole"
+        "authRoleName": "aiotthings2-20180921164441-authRole",
+        "unAuthRoleName": "aiotthings2-20180921164441-unauthRole"
     },
-    "dependsOn": [
-        {
-            "category": "function",
-            "resourceName": "thingObject",
-            "attributes": [
-                "Name",
-                "Arn"
-            ]
-        }
-    ]
+    "dependsOn": []
 }
