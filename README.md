@@ -10,6 +10,9 @@
 > AWS Amplify is a tool from AWS to build web application and serverless functions conveniently.
 > For details, please check [AWS Amplify CLI home](https://github.com/aws-amplify/amplify-cli)
 
+>> We are looking for a better way to do version control, installtion and intetrations to CI/CD
+>> Which is prevented by current Amplify CLI. Please kindly let us know if you have suggestions to this issue.
+ 
 ``` bash
 # setup authorization and authentication
 amplify add auth
@@ -42,6 +45,8 @@ amplify status
 
 # publish to cloud
 amplify publish
+
+## first time publish may take a VERY long time, please be patient and wait.
 ```
 
 ## Web Frontend Build Setup
