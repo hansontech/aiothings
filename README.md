@@ -16,8 +16,13 @@ amplify add auth
 
 # setup Api Gateways and Lambda functions
 ## there are two Api Gateways - thingApi, thingAllow, both them are using lambda function thingObject
+
 amplify add api
-## setup lambda function thingObject
+
+## resource name: thingApi, path: /things, function name: thingObject
+## resource name: thingAllow, path: /iot-allow, function name: thingObject
+## need to create new lambda function thingObject
+
 amplify add function
 
 # setup hosting service, this will create a static site on S3 storage, and a CloudFront HTTPS secured url too
