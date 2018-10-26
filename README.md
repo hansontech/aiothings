@@ -25,6 +25,7 @@ amplify add api
 ## resource name: thingApi, path: /things, function name: thingObject
 ## resource name: thingAllow, path: /iot-allow, function name: thingObject
 ## need to create new lambda function thingObject
+## resource name: solutionApi, path: /solutions, function name: solutionFunction  
 
 amplify add function
 
@@ -35,14 +36,17 @@ amplify add hosting
 amplify status
 
 ## after above settings, the status result will looks like below:
-| Category | Resource name   | Operation | Provider plugin   |
-| -------- | --------------- | --------- | ----------------- |
-| Function | thingObject     | Update    | awscloudformation |
-| Hosting  | S3AndCloudFront | No Change | awscloudformation |
-| Auth     | cognito006f18e5 | No Change | awscloudformation |
-| Api      | thingApi        | No Change | awscloudformation |
-| Api      | thingAllow      | No Change | awscloudformation |
+| Category | Resource name     | Operation | Provider plugin   |
+| -------- | ----------------- | --------- | ----------------- |
+| Api      | solutionApi       | Create    | awscloudformation |
+| Function | solutionFunction | Create    | awscloudformation |
+| Auth     | cognitoAiot1026   | No Change | awscloudformation |
+| Api      | thingApi          | No Change | awscloudformation |
+| Api      | thingAllow        | No Change | awscloudformation |
+| Function | thingFunction     | No Change | awscloudformation |
+| Hosting  | S3AndCloudFront   | No Change | awscloudformation |
 
+Hosting endpoint: https://xxxxxxxx.cloudfront.net
 # publish to cloud
 amplify publish
 
@@ -78,7 +82,8 @@ npm test
 
 ## Additonal settings using AWS console
 
-* Attach IOT Full Access Policy, and DynamoDB Full Access Policy to Lambda function thingObject.
+* Attach IOT Full Access Policy, and DynamoDB Full Access Policy to Lambda function thingFunction.
+* Attach DynamoDB Full Access Policy to Lambda function solutionFunction.
 * Attach IOT Full Access Policy, and DynamoDB Full Access Policy to Auth Role, that is assigned to the Identity Pool created through Amplify add auth. 
 * Enter AWS Congnito console -> User Pool (created for this app) -> App integration -> domain name -> and set the domain name similar like 
 https://xxxx.auth.ap-southeast-2.amazoncognito.com, and reflect that url to awsCognitoDomain of src/config/index.js .
