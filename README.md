@@ -39,7 +39,7 @@ amplify status
 | Category | Resource name     | Operation | Provider plugin   |
 | -------- | ----------------- | --------- | ----------------- |
 | Api      | solutionApi       | Create    | awscloudformation |
-| Function | solutionFunction | Create    | awscloudformation |
+| Function | solutionFunction  | Create    | awscloudformation |
 | Auth     | cognitoAiot1026   | No Change | awscloudformation |
 | Api      | thingApi          | No Change | awscloudformation |
 | Api      | thingAllow        | No Change | awscloudformation |
