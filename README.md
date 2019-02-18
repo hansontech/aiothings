@@ -5,7 +5,10 @@
 * Node-RED flows and AWS services are managed and activated per user bases to construct AI + IoT applications
 * Serverless backend functions are created through AWS Amplify toolchain
 
-## AWS Amplify programming information can be found from [here](https://aws-amplify.github.io/docs/js/start)
+## AWS Amplify
+
+> The application uses AWS Amplify as the underline framework.
+> Amplify programming information can be found from [here](https://aws-amplify.github.io/docs/js/start).
 
 ## Backend services setup using AWS Amplify 
 
