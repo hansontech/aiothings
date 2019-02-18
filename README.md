@@ -8,11 +8,13 @@
 ## AWS Amplify
 
 > The application uses AWS Amplify as the underline framework.
+
 > Amplify programming information can be found from [here](https://aws-amplify.github.io/docs/js/start).
 
 ## Backend services setup using AWS Amplify 
 
 > AWS Amplify is a tool from AWS to build web application and serverless functions conveniently.
+
 > For details, please check [AWS Amplify CLI home](https://github.com/aws-amplify/amplify-cli)
 
 >> From recent releases, Amplify already enhanced its capability to support multiple environment and miltiple teams working together, in more specific, the supports to Git Repositiories and to CI/CD.
