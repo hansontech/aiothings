@@ -10,16 +10,13 @@
 > AWS Amplify is a tool from AWS to build web application and serverless functions conveniently.
 > For details, please check [AWS Amplify CLI home](https://github.com/aws-amplify/amplify-cli)
 
->> We are looking for a better way to do version control, installtion and intetrations to CI/CD
->> Which is prevented by current Amplify CLI. Please kindly let us know if you have suggestions to this issue.
+>> From recent releases, Amplify already enhanced its capability to support multiple environment and miltiple teams working together, in more specific, the supports to Git Repositiories and to CI/CD.
  
 ``` bash
 # setup authorization and authentication
 amplify add auth
 
 # setup Api Gateways and Lambda functions
-## there are two Api Gateways - thingApi, thingAllow, both them are using lambda function thingObject
-
 amplify add api
 
 ## resource name: thingApi, path: /things, function name: thingObject
@@ -32,30 +29,91 @@ amplify add function
 # setup hosting service, this will create a static site on S3 storage, and a CloudFront HTTPS secured url too
 amplify add hosting
 
+## thingApi
+### /things
+### /iot-allow 
+### /edge 
+### /edge/deploy 
+### /edge/deploy/status 
+### /edge/definition 
+#### thingFunction
+
+## solutionApi
+### /solutions
+#### solutionFunction
+
+## mservicesApi
+### /checkname 
+### /favorites 
+### /favorite-mservices 
+### /messagetrees 
+### /mservices 
+#### mservicesFunction 
+
+## userApi
+### /users 
+#### userFunction
+
+## iftttApi
+### /ifttt/v1/status 
+### /ifttt/v1/user/info 
+### /ifttt/v1/triggers 
+### /ifttt/v1/actions 
+### /ifttt/v1/test/setup
+### For all paths, the authorization types are set to 'none' instead of AWS_IAM
+#### iftttFunction
+
+## AWS policy requirements for each Lambda function:
+## thingFunction
+### AmazonDynamoDBFullAccess
+### AWSIoTFullAccess
+### AWSGreengrassFullAccess
+
+## servicesFunction
+### AdministratorAccess ??
+### AmazonS3FullAccess
+### AmazonDynamoDBFullAccess
+### AWSLambdaFullAccess
+
+## userFunction
+### AmazonCognitoReadOnly
+
+## solutionFunciton
+### AmazonDynamoDBFullAccess
+
 # check setting status
 amplify status
 
 ## after above settings, the status result will looks like below:
-| Category | Resource name     | Operation | Provider plugin   |
-| -------- | ----------------- | --------- | ----------------- |
-| Api      | solutionApi       | Create    | awscloudformation |
-| Function | solutionFunction  | Create    | awscloudformation |
-| Auth     | cognitoAiot1026   | No Change | awscloudformation |
-| Api      | thingApi          | No Change | awscloudformation |
-| Api      | thingAllow        | No Change | awscloudformation |
-| Function | thingFunction     | No Change | awscloudformation |
-| Hosting  | S3AndCloudFront   | No Change | awscloudformation |
+
+Current Environment: prod
+
+| Category | Resource name    | Operation | Provider plugin   |
+| -------- | ---------------- | --------- | ----------------- |
+| Auth     | cognitoAiot      | No Change | awscloudformation |
+| Hosting  | S3AndCloudFront  | No Change | awscloudformation |
+| Storage  | aiotStorage      | No Change | awscloudformation |
+| Function | iftttFunction    | No Change | awscloudformation |
+| Function | thingFunction    | No Change | awscloudformation |
+| Function | solutionFunction | No Change | awscloudformation |
+| Function | mserviceFunction | No Change | awscloudformation |
+| Function | userFunction     | No Change | awscloudformation |
+| Api      | iftttApi         | No Change | awscloudformation |
+| Api      | thingApi         | No Change | awscloudformation |
+| Api      | solutionApi      | No Change | awscloudformation |
+| Api      | mserviceApi      | No Change | awscloudformation |
+| Api      | userApi          | No Change | awscloudformation |
 
 Hosting endpoint: https://xxxxxxxx.cloudfront.net
 # publish to cloud
 amplify publish
 
-## first time publish may take a VERY long time, please be patient and wait.
+## first time publish may take a pretty long time, please be patient and wait for its completion.
 ```
 
 ## Web Frontend Build Setup
 
-> For detailed explanation on how things work, checkout the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+> For detail explanation, checkout the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
 
 ``` bash
 # install dependencies
