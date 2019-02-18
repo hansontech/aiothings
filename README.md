@@ -1,9 +1,11 @@
-# aiothings
+# AIoThings
 
 > A sub project of AIoThings - AI + IoT Kit 
 * Web frontend is a Vue.js project, that allows user to create and maintain IoT devices
 * Node-RED flows and AWS services are managed and activated per user bases to construct AI + IoT applications
 * Serverless backend functions are created through AWS Amplify toolchain
+
+## AWS Amplify programming information can be found from [here](https://aws-amplify.github.io/docs/js/start)
 
 ## Backend services setup using AWS Amplify 
 
@@ -16,54 +18,65 @@
 # setup authorization and authentication
 amplify add auth
 
+## Add the AWS policies to the IAM role of Cognito Identity Pool which is used by the User Pool created:
+AWSLambdaFullAccess
+AmazonDynamoDBFullAccess
+AWSIoTFullAccess
+AmazonCognitoReadOnly
+AWSIoTFullAccess
+
+## Currently, Amplify is unable to attach the policies to individual resources through CLI, and a convinient trick can be to define a common AWS Role with attached pollicies sufficient enough to use the resources. 
+## The role creation and assignment tasks must be done by AWS console separately. And the side-effect of the works, actions of removing a resource may be failed, if the role is used by other resources as well.
+
 # setup Api Gateways and Lambda functions
 amplify add api
 
-## resource name: thingApi, path: /things, function name: thingObject
-## resource name: thingAllow, path: /iot-allow, function name: thingObject
-## need to create new lambda function thingObject
-## resource name: solutionApi, path: /solutions, function name: solutionFunction  
+# it defines thingApi, solutionApi, mserviceApi, userApi, iftttApi.
+
+# setup Lambda functions that are used by API gateways. 
+# API gateways define paths that will be filtered and processed by the corresponding Lambda functions.
 
 amplify add function
 
-# setup hosting service, this will create a static site on S3 storage, and a CloudFront HTTPS secured url too
-amplify add hosting
+# Further definitions of Apis and functions are:
+# In general, the authentication option of the API gateways are set to AWS_IAM, unless otherwise sepecified.
 
-## thingApi
+# thingApi
 ### /things
 ### /iot-allow 
 ### /edge 
 ### /edge/deploy 
 ### /edge/deploy/status 
 ### /edge/definition 
-#### thingFunction
+# to use thingFunction
 
-## solutionApi
+# solutionApi
 ### /solutions
-#### solutionFunction
+# to use solutionFunction
 
-## mservicesApi
+# mservicesApi
 ### /checkname 
 ### /favorites 
 ### /favorite-mservices 
 ### /messagetrees 
 ### /mservices 
-#### mservicesFunction 
+# to use mservicesFunction 
 
-## userApi
+# userApi
 ### /users 
-#### userFunction
+# to use userFunction
 
-## iftttApi
+# iftttApi
 ### /ifttt/v1/status 
 ### /ifttt/v1/user/info 
 ### /ifttt/v1/triggers 
 ### /ifttt/v1/actions 
 ### /ifttt/v1/test/setup
-### For all paths, the authorization types are set to 'none' instead of AWS_IAM
-#### iftttFunction
+# For all paths, the authorization types are set to 'none', instead of AWS_IAM
+# iftttFunction
 
-## AWS policy requirements for each Lambda function:
+# AWS policy requirements for each Lambda function:
+
 ## thingFunction
 ### AmazonDynamoDBFullAccess
 ### AWSIoTFullAccess
@@ -80,6 +93,10 @@ amplify add hosting
 
 ## solutionFunciton
 ### AmazonDynamoDBFullAccess
+
+# setup hosting service, this will create a static site on S3 storage, and a CloudFront HTTPS secured url too
+# The service uses aiot-bucket andaiot-greengrass-bucket two S3 buckets.
+amplify add hosting
 
 # check setting status
 amplify status
@@ -153,7 +170,9 @@ https://xxxx.auth.ap-southeast-2.amazoncognito.com, and reflect that url to awsC
 
 * AWS has [document](https://aws.amazon.com/cloudfront/custom-ssl-domains/) to guide how to complete the settings. 
 * Among the two approaches of it, SNI Custom SSL is recommended.
-* After the verification of the domain name ownership, the a certificate will be available to assign to the CloudFront distribution.
+* For SNI Custom SSL, go through Amazon Certificate Manager (ACM) service to request AWS generate a certificate for your domain.
+* After the verification of the domain name ownership, the certificate will be available to select from the CloudFront setting.
+* In CloudFront, enter your domain name (www.abc.com) as CNAMEs field, and select the generated SSL Certificate.
 
 ## Tricks for debug online or local test
 
