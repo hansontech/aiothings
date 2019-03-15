@@ -29,6 +29,7 @@ AmazonDynamoDBFullAccess
 AWSIoTFullAccess
 AmazonCognitoReadOnly
 AWSIoTFullAccess
+AWSGreengrassResourceAccessRolePolicy
 
 ## Currently, Amplify is unable to attach the policies to individual resources through CLI, and a convinient trick can be to define a common AWS Role with attached pollicies sufficient enough to use the resources. 
 ## The role creation and assignment tasks must be done by AWS console separately. And the side-effect of the works, actions of removing a resource may be failed, if the role is used by other resources as well.
