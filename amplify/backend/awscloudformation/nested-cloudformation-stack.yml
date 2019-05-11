@@ -78,45 +78,318 @@
 				}
 			}
 		},
-		"authcognito60eb5b14": {
+		"authcognitoAiot": {
 			"Type": "AWS::CloudFormation::Stack",
 			"Properties": {
-				"TemplateURL": "https://s3.amazonaws.com/aiotthings2-20180921173434-deployment/amplify-cfn-templates/auth/cognito60eb5b14-cloudformation-template.yml",
+				"TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/auth/cognitoAiot-cloudformation-template.yml",
 				"Parameters": {
-					"userPoolName": "aiothings_amplify_userpool",
+					"identityPoolName": "aiotIdentityPool",
+					"allowUnauthenticatedIdentities": true,
+					"thirdPartyAuth": true,
+					"lambdaLogPolicy": "cognitoAiot_lambda_log_policy",
+					"openIdLambdaRoleName": "cognitoAiot_openid_lambda_role",
+					"openIdRolePolicy": "cognitoAiot_openid_pass_role_policy",
+					"openIdLambdaIAMPolicy": "cognitoAiot_openid_lambda_iam_policy",
+					"openIdLogPolicy": "cognitoAiot_openid_lambda_log_policy",
+					"userPoolName": "aiotUserPool",
 					"autoVerifiedAttributes": "email",
 					"mfaConfiguration": "OFF",
 					"mfaTypes": "SMS Text Message",
-					"roleName": "cognito60eb5b14_sns-role",
-					"roleExternalId": "cognito60eb5b14_role_external_id",
-					"policyName": "cognito60eb5b14-sns-policy",
+					"roleName": "cognitoAiot_sns-role",
+					"roleExternalId": "cognitoAiot_role_external_id",
+					"policyName": "cognitoAiot-sns-policy",
 					"smsAuthenticationMessage": "Your authentication code is {####}",
 					"smsVerificationMessage": "Your verification code is {####}",
-					"emailVerificationSubject": "Your verification code",
+					"emailVerificationSubject": "Your AIoThings verification code",
 					"emailVerificationMessage": "Your verification code is {####}",
-					"defaultPasswordPolicy": false,
+					"defaultPasswordPolicy": true,
 					"passwordPolicyMinLength": 8,
-					"passwordPolicyCharacters": "Requires Lowercase,Requires Uppercase,Requires Numbers,Requires Symbols",
-					"requiredAttributes": "email",
-					"userpoolClientName": "cognito60eb5b14_app_client",
+					"passwordPolicyCharacters": "",
+					"requiredAttributes": "name,picture,email",
+					"userpoolClientName": "cognitoAiot_app_client",
 					"userpoolClientGenerateSecret": true,
 					"userpoolClientRefreshTokenValidity": 30,
 					"userpoolClientReadAttributes": "email",
-					"mfaLambdaRole": "cognito60eb5b14_totp_lambda_role",
-					"mfaLambdaLogPolicy": "cognito60eb5b14_totp_lambda_log_policy",
-					"mfaPassRolePolicy": "cognito60eb5b14_totp_pass_role_policy",
-					"mfaLambdaIAMPolicy": "cognito60eb5b14_totp_lambda_iam_policy",
-					"userpoolClientLambdaRole": "cognito60eb5b14_userpoolclient_lambda_role",
-					"userpoolClientLogPolicy": "cognito60eb5b14_userpoolclient_lambda_log_policy",
-					"userpoolClientLambdaPolicy": "cognito60eb5b14_userpoolclient_lambda_iam_policy",
+					"mfaLambdaRole": "cognitoAiot_totp_lambda_role",
+					"mfaLambdaLogPolicy": "cognitoAiot_totp_lambda_log_policy",
+					"mfaPassRolePolicy": "cognitoAiot_totp_pass_role_policy",
+					"mfaLambdaIAMPolicy": "cognitoAiot_totp_lambda_iam_policy",
+					"userpoolClientLambdaRole": "cognitoAiot_userpoolclient_lambda_role",
+					"userpoolClientLogPolicy": "cognitoAiot_userpoolclient_lambda_log_policy",
+					"userpoolClientLambdaPolicy": "cognitoAiot_userpoolclient_lambda_iam_policy",
 					"userpoolClientSetAttributes": false,
 					"useDefault": "manual",
-					"authSelections": "userPoolOnly",
-					"resourceName": "cognito60eb5b14",
-					"unAuthRoleName": "aiotthings2-20180921173434-unauthRole",
-					"authRoleName": "aiotthings2-20180921173434-authRole",
-					"unAuthRoleArn": "arn:aws:iam::414327512415:role/aiotthings2-20180921173434-unauthRole",
-					"authRoleArn": "arn:aws:iam::414327512415:role/aiotthings2-20180921173434-authRole"
+					"authSelections": "identityPoolAndUserPool",
+					"resourceName": "cognitoAiot",
+					"authProviders": "graph.facebook.com,accounts.google.com",
+					"selectedParties": "{\"graph.facebook.com\":\"265383824068284\",\"accounts.google.com\":\"168989735160-otcg9fqm5d0ip4l0gbjd8n6vg75mguf8.apps.googleusercontent.com\"}",
+					"authRoleName": {
+						"Ref": "AuthRoleName"
+					},
+					"unauthRoleName": {
+						"Ref": "UnauthRoleName"
+					},
+					"authRoleArn": {
+						"Fn::GetAtt": [
+							"AuthRole",
+							"Arn"
+						]
+					},
+					"unauthRoleArn": {
+						"Fn::GetAtt": [
+							"UnauthRole",
+							"Arn"
+						]
+					},
+					"facebookAppId": "265383824068284",
+					"googleClientId": "168989735160-otcg9fqm5d0ip4l0gbjd8n6vg75mguf8.apps.googleusercontent.com",
+					"env": "prod"
+				}
+			}
+		},
+		"hostingS3AndCloudFront": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/hosting/template.json",
+				"Parameters": {
+					"bucketName": "aiothings-20190217143527-hostingbucket",
+					"env": "prod"
+				}
+			}
+		},
+		"storageaiotStorage": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/storage/s3-cloudformation-template.json",
+				"Parameters": {
+					"bucketName": "aiot-bucket",
+					"authPolicyName": "s3_amplify_66d9d8c2",
+					"unauthPolicyName": "s3_amplify_66d9d8c2",
+					"authRoleName": {
+						"Ref": "AuthRoleName"
+					},
+					"unauthRoleName": {
+						"Ref": "UnauthRoleName"
+					},
+					"authPermissions": "rw",
+					"unauthPermissions": "rw",
+					"env": "prod"
+				}
+			}
+		},
+		"functioniftttFunction": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/iftttFunction-cloudformation-template.json",
+				"Parameters": {
+					"env": "prod"
+				}
+			}
+		},
+		"functionthingFunction": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/thingFunction-cloudformation-template.json",
+				"Parameters": {
+					"env": "prod"
+				}
+			}
+		},
+		"functionsolutionFunction": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/solutionFunction-cloudformation-template.json",
+				"Parameters": {
+					"env": "prod"
+				}
+			}
+		},
+		"functionmserviceFunction": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/mserviceFunction-cloudformation-template.json",
+				"Parameters": {
+					"env": "prod"
+				}
+			}
+		},
+		"functionuserFunction": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/userFunction-cloudformation-template.json",
+				"Parameters": {
+					"env": "prod"
+				}
+			}
+		},
+		"functionapiFunction": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/apiFunction-cloudformation-template.json",
+				"Parameters": {
+					"env": "prod"
+				}
+			}
+		},
+		"apiiftttApi": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/api/iftttApi-cloudformation-template.json",
+				"Parameters": {
+					"authRoleName": {
+						"Ref": "AuthRoleName"
+					},
+					"unauthRoleName": {
+						"Ref": "UnauthRoleName"
+					},
+					"functioniftttFunctionName": {
+						"Fn::GetAtt": [
+							"functioniftttFunction",
+							"Outputs.Name"
+						]
+					},
+					"functioniftttFunctionArn": {
+						"Fn::GetAtt": [
+							"functioniftttFunction",
+							"Outputs.Arn"
+						]
+					},
+					"env": "prod"
+				}
+			}
+		},
+		"apithingApi": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/api/thingApi-cloudformation-template.json",
+				"Parameters": {
+					"authRoleName": {
+						"Ref": "AuthRoleName"
+					},
+					"unauthRoleName": {
+						"Ref": "UnauthRoleName"
+					},
+					"functionthingFunctionName": {
+						"Fn::GetAtt": [
+							"functionthingFunction",
+							"Outputs.Name"
+						]
+					},
+					"functionthingFunctionArn": {
+						"Fn::GetAtt": [
+							"functionthingFunction",
+							"Outputs.Arn"
+						]
+					},
+					"env": "prod"
+				}
+			}
+		},
+		"apisolutionApi": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/api/solutionApi-cloudformation-template.json",
+				"Parameters": {
+					"authRoleName": {
+						"Ref": "AuthRoleName"
+					},
+					"unauthRoleName": {
+						"Ref": "UnauthRoleName"
+					},
+					"functionsolutionFunctionName": {
+						"Fn::GetAtt": [
+							"functionsolutionFunction",
+							"Outputs.Name"
+						]
+					},
+					"functionsolutionFunctionArn": {
+						"Fn::GetAtt": [
+							"functionsolutionFunction",
+							"Outputs.Arn"
+						]
+					},
+					"env": "prod"
+				}
+			}
+		},
+		"apimserviceApi": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/api/mserviceApi-cloudformation-template.json",
+				"Parameters": {
+					"authRoleName": {
+						"Ref": "AuthRoleName"
+					},
+					"unauthRoleName": {
+						"Ref": "UnauthRoleName"
+					},
+					"functionmserviceFunctionName": {
+						"Fn::GetAtt": [
+							"functionmserviceFunction",
+							"Outputs.Name"
+						]
+					},
+					"functionmserviceFunctionArn": {
+						"Fn::GetAtt": [
+							"functionmserviceFunction",
+							"Outputs.Arn"
+						]
+					},
+					"env": "prod"
+				}
+			}
+		},
+		"apiuserApi": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/api/userApi-cloudformation-template.json",
+				"Parameters": {
+					"authRoleName": {
+						"Ref": "AuthRoleName"
+					},
+					"unauthRoleName": {
+						"Ref": "UnauthRoleName"
+					},
+					"functionuserFunctionName": {
+						"Fn::GetAtt": [
+							"functionuserFunction",
+							"Outputs.Name"
+						]
+					},
+					"functionuserFunctionArn": {
+						"Fn::GetAtt": [
+							"functionuserFunction",
+							"Outputs.Arn"
+						]
+					},
+					"env": "prod"
+				}
+			}
+		},
+		"apiapiApi": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/api/apiApi-cloudformation-template.json",
+				"Parameters": {
+					"authRoleName": {
+						"Ref": "AuthRoleName"
+					},
+					"unauthRoleName": {
+						"Ref": "UnauthRoleName"
+					},
+					"functionapiFunctionName": {
+						"Fn::GetAtt": [
+							"functionapiFunction",
+							"Outputs.Name"
+						]
+					},
+					"functionapiFunctionArn": {
+						"Fn::GetAtt": [
+							"functionapiFunction",
+							"Outputs.Arn"
+						]
+					},
+					"env": "prod"
 				}
 			}
 		}

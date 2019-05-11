@@ -2,24 +2,24 @@
   <b-container fluid>
     <div>
        <b-row align-v="center" style="border-bottom: 1px solid grey">
-          <b-col cols="7" class="mt-2">
-            <h2>New IoT Device</h2>
+          <b-col align="start">
+            <h3>New IoT Device</h3>
           </b-col>
-          <b-col cols="5" align="end" >
+          <b-col sm="auto" align="end" >
             <b-button variant="success" @click="$router.go(-1)">Cancel</b-button>
             <b-button variant="success" @click="createThing()"
-                  v-b-popover.hover="'Create new thing'">
+                  v-b-popover.hover.bottom="'Create new thing'">
                     Create
             </b-button>
-            <b-modal ref="downloadModal" hide-footer title="Using Component Methods">
-              <div class="d-block text-center">
-                <h3>Do you want to download the certificates and private key?</h3>
-              </div>
-              <b-btn class="mt-3" variant="outline-danger" block @click="download()">Yes</b-btn>
-              <b-btn class="mt-3" variant="outline-danger" block @click="hideDownloadModal()">No</b-btn>
-            </b-modal>
           </b-col>
       </b-row>
+      <b-modal ref="downloadModal" hide-footer>
+              <div class="d-block text-center">
+                <h4>Do you want to download the certificates and private key?</h4>
+              </div>
+              <b-btn class="mt-3" variant="outline-danger" block @click="downloadCert()">Yes</b-btn>
+              <b-btn class="mt-3" variant="outline-danger" block @click="hideDownloadModal()">No</b-btn>
+      </b-modal>
       <b-row align-v="center" class="mt-3">
         <b-col>
         </b-col>
@@ -45,6 +45,11 @@
     <div style="height: 200px; background-color: rgba(255,0,0,0.1);">
       <textarea class="at-border w-100 h-100" v-model="thingDesc" placeholder="thing's description"></textarea>
     </div>
+    <div>
+      <pre>
+
+      </pre>
+    </div>  
   </b-container>
 </template>
 
@@ -88,23 +93,23 @@ export default {
         console.log('result: ', result)
         this.thing = result
         this.showDownloadModal()
-        // TODO popup for save certificates and keys
+        // popup for save certificates and keys
       }
     },
     showDownloadModal () {
       this.$refs.downloadModal.show()
     },
-    hideDownloadModal () {
+    async hideDownloadModal () {
       this.$refs.downloadModal.hide()
-      this.returnSuccess()
+      await this.returnSuccess()
     },
-    download () {
-      this.hideDownloadModal()
-      atHelper.downloadCertKey(this.thing)
-      this.returnSuccess()
+    async downloadCert () {
+      this.$refs.downloadModal.hide()
+      await atHelper.downloadCertKey(this.thing)
+      await this.returnSuccess()
     },
-    returnSuccess () {
-      atHelper.reloadThings()
+    async returnSuccess () {
+      await atHelper.reloadThings()
       this.$router.go(-1)
     }
   }

@@ -1,13 +1,13 @@
 <template>
   <b-container fluid> 
     <div>
-       <b-row align-v="center" class="at-sidebar">
-          <b-col col cols="7" class="mt-2">
-            <h2 class="h2">IoT Devices</h2>
+       <b-row align-v="center" class="at-bottombar">
+          <b-col align="start">
+            <h4>IoT Devices ({{things.length}})</h4>
           </b-col>
-          <b-col align="end">
-            <b-button variant="primary" @click="refreshThings()">Refresh</b-button>
-            <b-button aligh="end" variant="success" @click="createThing()" >Add new device</b-button>
+          <b-col sm="auto" align="end">
+            <b-button variant="info" @click="refreshThings()">Refresh</b-button>
+            <b-button variant="success" @click="createThing()" v-b-popover.hover.bottom="'Create new IoT device'" >Create</b-button>
           </b-col>
       </b-row>
       <!-- VUE reference https://vuejs.org/v2/guide/list.html -->
@@ -15,32 +15,41 @@
        <!-- style="max-width: 20rem;" 
        :title="thing.ThingId"
        <b-button :href="'/user/edit/'+index" variant="primary">Go somewhere</b-button>
+       v-if="typeof thingsMap[thing.ThingId] !== 'undefined'"
        -->
+       <div class="text-center mt-5" v-if="things.length === 0">
+              No IoT devices available.
+      </div>
       <b-row class="mt-2">
         <div class="at-scroll">
           <b-card-group columns>
            <b-card v-for="(thing, index) in things" :key="thing.ThingId"
-              img-src="https://picsum.photos/600/300/?image=25"
+              img-src="/static/photo-54.png"
               img-alt="Image"
               img-top
-              @click = "showThingDetail(index)"
               tag="article"
               class="mb-2 at-card">
               <b-row>
                 <b-col align="start">
-                  <b-button size="sm" v-if="thingsMap[thing.ThingId] !== undefined" variant="success" @click.stop="launchThingNodeRed(thingsMap[thing.ThingId])">{{thingsMap[thing.ThingId]}}</b-button>
+                  <h5 class="card-text">
+                    {{thing.ThingName}}
+                  </h5>
                 </b-col>
                 <b-col align="end">   
-                  <b-dropdown variant="success" class="mx-1" right >
+                  <b-dropdown variant="secondary" class="mx-0" right >
                     <!-- VUE reference: https://vuejs.org/v2/guide/events.html -->
+                    <b-dropdown-item @click.stop="showThingDetail(index)">Edit</b-dropdown-item>
                     <b-dropdown-item @click.stop="deleteThing(index)" >Delete</b-dropdown-item>
                   </b-dropdown>
                 </b-col>
               </b-row>
-              <b-row class="ml-3 mt-1">  
-                <p class="card-text">
-                  {{thing.ThingDesc}}
-                </p>
+              <b-row>
+                <b-col align="start">
+                  <b-button size="sm" variant="success" v-b-popover.hover.bottomright="'Launch Node-RED from device'" v-if="typeof thingsMap[thing.ThingId] !== 'undefined'" @click.stop="launchThingNodeRed(thingsMap[thing.ThingId])">{{thingsMap[thing.ThingId]}}</b-button>
+                </b-col>
+              </b-row>
+              <b-row class="ml-0 mt-1">
+                <b-col class="at-border" style="white-space: pre-wrap;">{{thing.ThingDesc}}</b-col>
               </b-row>
             </b-card>
           </b-card-group>
@@ -55,7 +64,6 @@
 import atHelper from '../aiot-helper'
 // import * as IoT from '../lib/aws-iot'
 import { API, PubSub } from 'aws-amplify'
-// import AWS from 'aws-sdk'
 
 // AWS Amplify API reference
 // https://aws-amplify.github.io/amplify-js/media/api_guide.html
@@ -94,14 +102,25 @@ export default {
     }
   },
   watch: {
-    things: function () {
-      // this.testFlag = true
+    things: {
+        handler: function (newList, oldList) {
+          this.$forceUpdate()
+        },
+        deep: true
     }
   },
   async created () {
       console.log('MyThingsList created:')
       this.things = this.$store.getters.things
+      if (this.things === null) {
+        this.things = []
+      }
+      // console.log('things now: ', this.things)
       this.thingsMap = new Map()
+      if (this.things.length === 0) {
+        await this.refreshThings()
+      }
+
       for (let i in this.things) {
         let thing = this.things[i]
 
@@ -144,7 +163,7 @@ export default {
         }))
         // Publish client alive-req, wait for alive-resp
         await PubSub.publish('aiot/' + thing.ThingId + '/alive/req', { msg: 'update alive' })
-      }
+      } // for loop
   },
   beforeDestroy () {
     // Unsubscribe client connected
@@ -169,14 +188,19 @@ export default {
     closeCallback () {
       console.log('closeCallback')
     },
-    refreshThings () {
-      atHelper.reloadThings()
+    async refreshThings () {
+      await atHelper.reloadThings()
+      this.things = this.$store.getters.things
+      if (this.things === null) {
+        this.things = []
+      }
     },
     createThing () {
       console.log('createThing')
       this.$router.push({ name: 'newthing' })
     },
     showThingDetail (index) {
+      console.log('detail things:')
       this.$router.push({name: 'edit', params: { thingIndex: index }})
     },
     deleteThing (index) {
@@ -193,10 +217,10 @@ export default {
       }).then(response => {
         // TODO remove the thing entry from list
         console.log('response: ', response)
-        if (response === 'success') {
-          let things = this.$store.getters.things
-          things.splice(index, 1)
-          this.$store.commit('setThings', things)
+        if (response === 'success' || response.hasOwnProperty('success')) {
+          console.log('update things local')
+          this.things.splice(index, 1)
+          this.$store.commit('setThings', this.things)
         }
       }).catch(error => {
         console.log(error.response)
@@ -208,21 +232,26 @@ export default {
 
 <style>
 
+.at-border {
+  border: 1px solid #a78;
+  padding: 5px;
+}
 
 .at-scroll {
-  // height : 500px ;
+  /* height : 500px ; */
   overflow-y: auto;
 }
 
 .at-card:hover {
-  // background-color: red;
-  // opacity: 0.5;
+  /* background-color: red;
+     opacity: 0.5;
+  */
   box-shadow : 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-  // box-shadow: 1px -1px teal;
+  /* box-shadow: 1px -1px teal; */
 }
 
-div.at-sidebar {
-  // background-color : grey;
+div.at-bottombar {
+  /* background-color : grey; */
   border-bottom: 1px solid grey
 }
 </style>

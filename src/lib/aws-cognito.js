@@ -12,7 +12,7 @@
 */
 
 import { CognitoUserPool, CognitoUser, CognitoUserAttribute, AuthenticationDetails } from 'amazon-cognito-identity-js';
-import AWS from 'aws-sdk';
+import AWS from '@aws-amplify/core';
 import * as log from 'loglevel';
 
 import Config from '../config';

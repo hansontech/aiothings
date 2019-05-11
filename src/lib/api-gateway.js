@@ -11,7 +11,7 @@
   specific language governing permissions and limitations under the License.
 */
 
-import AWS from 'aws-sdk';
+import AWS from '@aws-amplify/core';
 import * as log from 'loglevel';
 
 import Config from '../config';

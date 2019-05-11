@@ -26,19 +26,6 @@ export default {
       } catch (e) {
         return null
       }
-    },
-    pictureUrl: state => {
-      try {
-        let photo = state.profile.picture
-        if (photo != null) {
-          let picJson = JSON.parse(state.profile.picture)
-          return picJson.data.url
-        } else {
-          return null
-        }
-      } catch (e) {
-        return null
-      }
     }
   },
   mutations: {
@@ -70,6 +57,10 @@ export default {
       router.push({ name: 'login' })
     },
     profileUpdate: function (context, payload) {
+      if (context.getters.username !== payload['cognito:username']) {
+        context.dispatch('resetLoadedMserviceCaches')
+        context.dispatch('resetLoadedThingsCaches')
+      }
       context.commit('setProfile', payload)
       context.commit('setAuthenticated', true)
     },

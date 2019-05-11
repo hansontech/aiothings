@@ -4,14 +4,27 @@ export default {
     searchArea: null,
     searchText: null,
     searchKeywords: null,
-    solutions: null
+    solutions: null,
+    consoleOutputs: null,
+    consoleInputTopic: null,
+    consoleInputBody: null
   },
 
   getters: {
     searchArea: state => state.searchArea,
     searchText: state => state.searchText,
     searchKeywords: state => state.searchKeywords,
-    solutions: state => state.solutions
+    solutions: state => state.solutions,
+    consoleOutputs: state => state.consoleOutputs,
+    consoleInputTopic: state => state.consoleInputTopic,
+    consoleInputBody: state => {
+      console.log('read body: ', state.consoleInputBody)
+      if (state.consoleInputBody !== null) {
+        return state.consoleInputBody
+      } else {
+        return ''
+      }
+    }
   },
   mutations: {
     setSearchArea: (state, area) => {
@@ -25,6 +38,19 @@ export default {
     },
     setQueriedSolutions: (state, solutions) => {
       state.solutions = solutions
+    },
+    setConsoleOutputs: (state, consoleOutputs) => {
+      state.consoleOutputs = consoleOutputs
+    },
+    setConsoleInput: (state, consoleInput) => {
+      if (consoleInput.hasOwnProperty('topic')) {
+        state.consoleInputTopic = consoleInput.topic
+        console.log('write topic: ', consoleInput.topic)
+      }
+      if (consoleInput.hasOwnProperty('body')) {
+        state.consoleInputBody = consoleInput.body
+        console.log('write body: ', consoleInput.body)
+      }
     }
   },
   actions: {

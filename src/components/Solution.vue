@@ -1,15 +1,17 @@
 <template>
-  <div>
-    <!-- <b-alert :show="loading" variant="info">Loading...</b-alert> -->
-    <b-row style="height: 600px">
-      <b-col cols="2" style=" border-right: 1px solid blue">
-        <at-sidebar menu="solution"></at-sidebar>
-      </b-col>
-      <b-col cols="10">
-        <router-view />
-      </b-col>
-    </b-row>
-  </div>
+  <b-container fluid >
+    <div>
+      <!-- <b-alert :show="loading" variant="info">Loading...</b-alert> -->
+      <b-row style="min-height: 500px">
+        <b-col sm="3" lg="2" style=" border-right: 1px solid blue">
+          <at-sidebar menu="solution"></at-sidebar>
+        </b-col>
+        <b-col sm="9" lg="10">
+          <router-view />
+        </b-col>
+      </b-row>
+    </div>
+  </b-container>
 </template>
 
 <script>

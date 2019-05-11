@@ -10,7 +10,11 @@ var awsServerlessExpressMiddleware = require('aws-serverless-express/middleware'
 var bodyParser = require('body-parser')
 var express = require('express')
 
-AWS.config.update({ region: process.env.TABLE_REGION });
+// AWS.config.update({ region: process.env.TABLE_REGION });
+var config = {
+  region: "ap-southeast-2",
+};
+AWS.config.update({ region: config.region });
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
@@ -56,7 +60,7 @@ const convertUrlType = (param, type) => {
 app.get(path, function(req, res) {
   var condition = {}
   let queryParams = {}
-
+  let needQuery = false
   let event = req.apiGateway.event
   let query = event.queryStringParameters
   console.log('apiGateway: query: ', query)
@@ -70,8 +74,9 @@ app.get(path, function(req, res) {
     queryParams = {
       TableName: tableName,
       KeyConditions: condition
-    } 
-  }else if (query.SolutionCategory) {
+    }
+    neeedQuery = true
+  }else if (query.SolutionCategory && query.SolutionCategory !== '') {
     const partitionKeyName = 'SolutionCategory'
     condition[partitionKeyName] = {
       ComparisonOperator: 'EQ'
@@ -82,15 +87,19 @@ app.get(path, function(req, res) {
       IndexName: indexName,
       KeyConditions: condition
     } 
+    needQuery = true
   }
-
-  dynamodb.query(queryParams, (err, data) => {
-    if (err) {
-      res.json({error: 'Could not load items: ' + err});
-    } else {
-      res.json(data.Items);
-    }
-  });
+  if (needQuery) {
+    dynamodb.query(queryParams, (err, data) => {
+      if (err) {
+        res.json({error: 'Could not load items: ' + err});
+      } else {
+        res.json(data.Items);
+      }
+    });
+  } else {
+    res.json(null);
+  }
 });
 
 /*****************************************

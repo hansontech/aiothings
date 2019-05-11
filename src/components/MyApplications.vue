@@ -1,29 +1,12 @@
 <template>
-  <div>
-    <h1 class="h1">Applications page</h1>
-    <em>{{what}}</em>
-  </div>
+  <b-container fluid> 
+    <!-- component matched by the route will render here -->
+    <router-view /> 
+  </b-container> 
 </template>
 
 <script>
-import Sidebar from './Sidebar'
-
-export default {
-  components: {
-    sidebar: Sidebar
-  },
-  name: 'applications',
-  data: function () {
-    return {
-      activeMenu: 'app',
-      response: 'unknown',
-      guess: 123,
-      what: 0,
-      loading: false
-    }
-  },
-  computed: {},
-  created () {},
-  methods: {}
-}
 </script>
+
+<style>
+</style>

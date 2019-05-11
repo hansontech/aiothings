@@ -1,7 +1,12 @@
 <template>
-  <div>
-    <h1>Authenticating...</h1>
-  </div>
+  <b-container fluid >
+    <div style="min-height: 500px">
+      <b-row align-v="center" align-h="center" > 
+        <spinner size="large" />
+        <h2>Authenticating...</h2>
+      </b-row>
+    </div>
+  </b-container>
 </template>
 
 <script>

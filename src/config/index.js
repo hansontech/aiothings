@@ -17,9 +17,12 @@ import awsexports from '../aws-exports'
 export default {
   awsIotHost: config.AwsIotHost,
   awsRegion: config.AwsRegion,
-  awsCognitoDomain: 'aiotest.auth.ap-southeast-2.amazoncognito.com',
+  awsMserviceBucket: 'aiot-bucket',
+  awsGreengrassBucket: 'aiot-bucket',
+  awsCognitoDomain: 'aiothings1026.auth.ap-southeast-2.amazoncognito.com',
   awsCognitoUserPoolId: awsexports.aws_user_pools_id,
   awsCognitoUserPoolAppClientId: awsexports.aws_user_pools_web_client_id,
+  amplifyEnvironment: awsexports.aws_content_delivery_bucket.substring(awsexports.aws_content_delivery_bucket.lastIndexOf('-')),
   awsCognitoIdentityPoolId: config.IdentityPoolId,
   awsApiGatewayInvokeUrl: config.AwsApiGatewayInvokeUrl,
   socialFacebookAppId: config.FacebookAppId,

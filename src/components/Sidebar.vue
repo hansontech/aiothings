@@ -42,16 +42,28 @@
     <div >
     <!-- <p>{{$route.path}}</p> -->
     <b-button-group vertical class="at-sidebar-button" style="width:100%">
-      <b-button :variant="reachRoute('mythings','')" @click="toMyThings()">My IoT devices</b-button>
-      <b-button :variant="reachRoute('myapps')" @click="toMyApps()">My applications</b-button>
-      <b-button :variant="reachRoute('myfavorites')" @click="toMyFavorites()">My favorites</b-button>
-      <b-button :variant="reachRoute('recommended')" @click="toRecommended()">Recommended</b-button>
+      <b-button size=" " :variant="reachRoute('mythings','')" @click="toMyThings()" :disabled="!isLoggedIn" >My IoT Devices</b-button>
+      <b-button size=" " :variant="reachRoute('myapps')" @click="toMyApps()" :disabled="!isLoggedIn">My &#181Services</b-button>
+      <b-button size=" " :variant="reachRoute('myapis')" @click="toMyApis()" :disabled="!isLoggedIn">My REST APIs </b-button>
+      <!-- &#160&#160&#160&#160&#160 -->
+      <b-button size=" " :variant="reachRoute('myfavorites')" @click="toMyFavorites()" :disabled="!isLoggedIn">My Favorites</b-button>
+      <!-- <b-button :variant="reachRoute('recommended')" @click="toRecommended()">Recommended</b-button> -->
       <b-button v-if="isBackButtonNeed" :variant="reachRoute('recommended')" @click="toQuit()">Quit</b-button>
     </b-button-group> 
 
     <b-button-group vertical class="at-sidebar-button" style="width:100%">
-      <b-button :variant="reachRoute('solutions')" @click="toSolutions()">Solutions</b-button>
+      <b-button size=" " v-b-popover.hover.bottom="'Shared microservices and Node-RED flows'" :variant="reachRoute('solutions')" @click="toSolutions()">Shared Solutions</b-button>
     </b-button-group>  
+
+    <p></p>
+    <b-button-group vertical class="at-sidebar-button" style="width:100%">
+      <b-button size=" " v-b-popover.hover.bottom="'Console IO from/to services'" :variant="reachRoute('myconsole')" @click="toMyConsole()" :disabled="!isLoggedIn">My Console</b-button>
+    </b-button-group> 
+  
+    <b-button-group vertical class="at-sidebar-button" style="width:100%">
+      <b-button size=" " :variant="reachRoute('docs')" @click="toDocs()">Docs</b-button>
+    </b-button-group> 
+  
     </div>
     <!-- 
     <b-button-group vertical>
@@ -107,6 +119,10 @@ export default {
     }
   },
   computed: {
+    isLoggedIn () {
+      let status = this.$store.getters.isAuthenticated
+      return status
+    },
     routeName () {
       return this.$route.path
     },
@@ -168,7 +184,7 @@ export default {
       if ((defaultRoot === '' && (currentRoute === undefined || currentRoute === '')) || currentRoute === matchRoute) {
         return 'primary'
       }
-      return 'success'
+      return 'warning'
     },
     async toMyApps () {
       /*
@@ -180,17 +196,26 @@ export default {
       */
       this.$router.replace('/user/myapps')
     },
+    async toMyApis () {
+      this.$router.replace('/user/myapis')
+    },
     toMyThings () {
       this.$router.replace('/user/mythings')
     },
     toMyFavorites () {
       this.$router.replace('/user/myfavorites')
     },
+    toMyConsole () {
+      this.$router.replace('/user/myconsole')
+    },
     toRecommended () {
       this.$router.replace('/user/recommended')
     },
     toSolutions () {
       this.$router.replace({name: 'solutions'})
+    },
+    toDocs () {
+      this.$router.replace({name: 'docs'})
     },
     onSubmit () {
       this.makeGuess(this.guess)

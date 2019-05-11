@@ -9,11 +9,24 @@ export default {
   mutations: {
     setThings: (state, things) => {
       state.things = things
-    },
-    setUsername: (state, username) => {
-      state.username = username
     }
   },
   actions: {
+    resetLoadedThingsCaches: function (context) {
+      context.commit('setThings', null)
+    },
+    replaceThing: function (context, newThing) {
+      let things = context.getters.things
+      let newList = things.map(th => {
+        if (th.ThingId !== newThing.ThingId) {
+          return th
+        } else {
+          let modifiedThing = Object.assign({}, newThing)
+          return modifiedThing
+        }
+      })
+      things = newList
+      context.commit('setThings', things)
+    }
   }
 }

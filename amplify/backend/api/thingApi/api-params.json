@@ -2,30 +2,76 @@
     "paths": [
         {
             "name": "/things",
-            "lambdaFunction": "thingObject",
+            "lambdaFunction": "thingFunction",
             "privacy": {
-                "private": true,
-                "auth": "rw"
+                "protected": true,
+                "auth": "rw",
+                "unauth": "rw"
+            }
+        },
+        {
+            "name": "/iot-allow",
+            "lambdaFunction": "thingFunction",
+            "privacy": {
+                "protected": true,
+                "auth": "rw",
+                "unauth": "rw"
+            }
+        },
+        {
+            "name": "/edge",
+            "lambdaFunction": "thingFunction",
+            "privacy": {
+                "protected": true,
+                "auth": "rw",
+                "unauth": "rw"
+            }
+        },
+        {
+            "name": "/edge/deploy",
+            "lambdaFunction": "thingFunction",
+            "privacy": {
+                "protected": true,
+                "auth": "rw",
+                "unauth": "rw"
+            }
+        },
+        {
+            "name": "/edge/deploy/status",
+            "lambdaFunction": "thingFunction",
+            "privacy": {
+                "protected": true,
+                "auth": "rw",
+                "unauth": "rw"
+            }
+        },
+        {
+            "name": "/edge/definition",
+            "lambdaFunction": "thingFunction",
+            "privacy": {
+                "protected": true,
+                "auth": "rw",
+                "unauth": "rw"
             }
         }
     ],
     "resourceName": "thingApi",
-    "apiName": "aiotthings2c5e25b0b",
+    "apiName": "thingApi",
     "functionArns": [
         {
-            "lambdaFunction": "thingObject"
+            "lambdaFunction": "thingFunction"
         }
     ],
     "privacy": {
-        "auth": 1,
-        "unauth": 0,
-        "authRoleName": "aiotthings2-20180921164441-authRole",
-        "unAuthRoleName": "aiotthings2-20180921164441-unauthRole"
+        "auth": 6,
+        "unauth": 6,
+        "authRoleName": "aiothings-20190217141129-authRole",
+        "unAuthRoleName": "aiothings-20190217141129-unauthRole"
     },
     "dependsOn": [
         {
             "category": "function",
-            "resourceName": "thingObject",
+            "resourceName": "thingFunction",
             "attributes": [
                 "Name",
                 "Arn"

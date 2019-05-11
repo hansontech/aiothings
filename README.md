@@ -1,4 +1,4 @@
-# aiothings
+# AIoThings
 
 > A sub project of AIoThings - AI + IoT Kit 
 * Web frontend is a Vue.js project, that allows user to create and maintain IoT devices

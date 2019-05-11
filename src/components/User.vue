@@ -1,32 +1,17 @@
 <template>
-  <div>
-    <!-- <b-alert :show="loading" variant="info">Loading...</b-alert> -->
-    <b-row style="height: 600px">
-      <b-col cols="2" style=" border-right: 1px solid blue">
-        <at-sidebar menu="user"></at-sidebar>
-      </b-col>
-      <b-col cols="10">
-        <!-- component matched by the route will render here -->
-        <!-- <router-view></router-view> -->
-        <router-view />
-        <!--
-        <b-card :title="(model.id ? 'Edit Post ID#' + model.id : 'New Post')">
-          <form @submit.prevent="savePost">
-            <b-form-group label="Title">
-              <b-form-input type="text" v-model="model.title"></b-form-input>
-            </b-form-group>
-            <b-form-group label="Body">
-              <b-form-textarea rows="4" v-model="model.body"></b-form-textarea>
-            </b-form-group>
-            <div>
-              <b-btn type="submit" variant="success">Save Post</b-btn>
-            </div>
-          </form>
-        </b-card>
-        -->
-      </b-col>
-    </b-row>
-  </div>
+  <b-container fluid class="bv-example-row" >
+    <div style="min-height: 500px">
+      <!-- <b-alert :show="loading" variant="info">Loading...</b-alert> -->
+      <b-row>
+        <b-col sm="3" lg="2" style="border-right: 1px solid blue">
+          <at-sidebar menu="user"></at-sidebar>
+        </b-col>
+        <b-col sm="9" lg="10">
+          <router-view />
+        </b-col>
+      </b-row>
+    </div>
+  </b-container>
 </template>
 
 <script>
@@ -34,6 +19,9 @@
 // import { Auth } from 'aws-amplify'
 // import * as apiGateway from '../lib/api-gateway'
 // import jwt from 'jwt-decode'
+
+import { PubSub } from 'aws-amplify'
+import { eventBus } from '../main'
 
 export default {
   /*
@@ -47,7 +35,13 @@ export default {
       response: 'unknown',
       guess: 123,
       what: 0,
-      loading: false
+      loading: false,
+      inputMessage: {
+        date: 0,
+        body: null
+      },
+      consoleOutputs: [],
+      consoleSub: null
     }
   },
   computed: {
@@ -66,6 +60,29 @@ export default {
     }
   },
   created () {
+    // Subscribe
+    let subscribeConsoleOutputTopic = 'aiot/' + this.$store.getters.username + '/console/output'
+
+    console.log('subscribe topic: ', subscribeConsoleOutputTopic)
+    this.consoleSub = PubSub.subscribe(subscribeConsoleOutputTopic).subscribe({
+          next: data => {
+              console.log('console output:', data)
+              this.consoleOutputs = this.$store.getters.consoleOutputs
+              this.inputMessage.date = (new Date().toLocaleTimeString())
+              this.inputMessage.body = data.value
+              let newMessage = Object.assign({}, this.inputMessage)
+              if (this.consoleOutputs === null) {
+                this.consoleOutputs = []
+              }
+              this.consoleOutputs.push(newMessage)
+              this.$store.commit('setConsoleOutputs', this.consoleOutputs)
+              eventBus.$emit('newConsoleOutput')
+          },
+          error: error => console.error('error: ', error)
+    })
+  },
+  beforeDestroy () {
+    this.consoleSub.unsubscribe()
   },
   methods: {
 
