@@ -1,0 +1,13 @@
+{
+    "bucketName": "aiot-bucket",
+    "authPolicyName": "s3_amplify_66d9d8c2",
+    "unauthPolicyName": "s3_amplify_66d9d8c2",
+    "authRoleName": {
+        "Ref": "AuthRoleName"
+    },
+    "unauthRoleName": {
+        "Ref": "UnauthRoleName"
+    },
+    "authPermissions": "rw",
+    "unauthPermissions": "rw"
+}

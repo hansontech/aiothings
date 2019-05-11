@@ -1,0 +1,23 @@
+{
+  "name": "mserviceFunction",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "aws-serverless-express": "^3.3.5",
+    "body-parser": "^1.17.1",
+    "express": "^4.15.2",
+    "fs-extra": "^7.0.0",
+    "gulp": "^4.0.0",
+    "gulp-install": "^1.1.0",
+    "gulp-replace": "^1.0.0",
+    "gulp-zip": "^4.2.0",
+    "splitargs": "0.0.7"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

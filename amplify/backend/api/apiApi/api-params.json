@@ -1,0 +1,46 @@
+{
+    "paths": [
+        {
+            "name": "/apis",
+            "lambdaFunction": "apiFunction",
+            "privacy": {
+                "protected": true,
+                "auth": "rw",
+                "unauth": "rw"
+            }
+        },
+        {
+            "name": "/checkname",
+            "lambdaFunction": "apiFunction",
+            "privacy": {
+                "protected": true,
+                "auth": "rw",
+                "unauth": "rw"
+            }
+        }
+    ],
+    "resourceName": "apiApi",
+    "apiName": "apiApi",
+    "functionArns": [
+        {
+            "lambdaFunction": "apiFunction"
+        }
+    ],
+    "privacy": {
+        "auth": 2,
+        "unauth": 2,
+        "authRoleName": "aiothings-20190217141129-authRole",
+        "unAuthRoleName": "aiothings-20190217141129-unauthRole"
+    },
+    "dependsOn": [
+        {
+            "category": "function",
+            "resourceName": "apiFunction",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
+        }
+    ],
+    "uuid": "096d5df5"
+}

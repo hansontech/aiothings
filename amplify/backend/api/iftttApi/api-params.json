@@ -1,0 +1,62 @@
+{
+    "paths": [
+        {
+            "name": "/ifttt/v1/status",
+            "lambdaFunction": "iftttFunction",
+            "privacy": {
+                "open": true
+            }
+        },
+        {
+            "name": "/ifttt/v1/user/info",
+            "lambdaFunction": "iftttFunction",
+            "privacy": {
+                "open": true
+            }
+        },
+        {
+            "name": "/ifttt/v1/triggers",
+            "lambdaFunction": "iftttFunction",
+            "privacy": {
+                "open": true
+            }
+        },
+        {
+            "name": "/ifttt/v1/actions",
+            "lambdaFunction": "iftttFunction",
+            "privacy": {
+                "open": true
+            }
+        },
+        {
+            "name": "/ifttt/v1/test/setup",
+            "lambdaFunction": "iftttFunction",
+            "privacy": {
+                "open": true
+            }
+        }
+    ],
+    "resourceName": "iftttApi",
+    "apiName": "iftttApi",
+    "functionArns": [
+        {
+            "lambdaFunction": "iftttFunction"
+        }
+    ],
+    "privacy": {
+        "auth": 0,
+        "unauth": 0,
+        "authRoleName": "aiothings-20190217141129-authRole",
+        "unAuthRoleName": "aiothings-20190217141129-unauthRole"
+    },
+    "dependsOn": [
+        {
+            "category": "function",
+            "resourceName": "iftttFunction",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
+        }
+    ]
+}

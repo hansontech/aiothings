@@ -1,0 +1,36 @@
+{
+    "paths": [
+        {
+            "name": "/users",
+            "lambdaFunction": "userFunction",
+            "privacy": {
+                "protected": true,
+                "auth": "rw",
+                "unauth": "rw"
+            }
+        }
+    ],
+    "resourceName": "userApi",
+    "apiName": "userApi",
+    "functionArns": [
+        {
+            "lambdaFunction": "userFunction"
+        }
+    ],
+    "privacy": {
+        "auth": 1,
+        "unauth": 1,
+        "authRoleName": "aiothings-20190217141129-authRole",
+        "unAuthRoleName": "aiothings-20190217141129-unauthRole"
+    },
+    "dependsOn": [
+        {
+            "category": "function",
+            "resourceName": "userFunction",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
+        }
+    ]
+}

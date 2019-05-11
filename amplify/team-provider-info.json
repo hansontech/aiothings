@@ -1,0 +1,22 @@
+{
+    "prod": {
+        "awscloudformation": {
+            "AuthRoleName": "aiothings-20190217141129-authRole",
+            "UnauthRoleArn": "arn:aws:iam::414327512415:role/aiothings-20190217141129-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::414327512415:role/aiothings-20190217141129-authRole",
+            "Region": "ap-southeast-2",
+            "DeploymentBucketName": "aiothings-20190217141129-deployment",
+            "UnauthRoleName": "aiothings-20190217141129-unauthRole",
+            "StackName": "aiothings-20190217141129",
+            "StackId": "arn:aws:cloudformation:ap-southeast-2:414327512415:stack/aiothings-20190217141129/1a476700-326a-11e9-a34c-0667dfb77996"
+        },
+        "categories": {
+            "auth": {
+                "cognitoAiot": {
+                    "facebookAppId": "265383824068284",
+                    "googleClientId": "168989735160-otcg9fqm5d0ip4l0gbjd8n6vg75mguf8.apps.googleusercontent.com"
+                }
+            }
+        }
+    }
+}

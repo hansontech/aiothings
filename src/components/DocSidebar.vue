@@ -1,0 +1,259 @@
+<template>
+  <!-- <div class="container-fluid mt-4"> -->
+  <div style="margin-left:0px; margin-top:5px">
+    <tree :data="menuData" :options="treeOptions" v-model="selectedNode" @node:selected="onNodeSelected"/>
+    <b-button-group  vertical class="at-sidebar-button" style="width:100%">
+      <b-button variant="warning" @click="toMain()" class="text-left">Back to Main</b-button>
+    </b-button-group>
+  </div>
+</template>
+
+<script>
+// import axios from 'axios'
+// import { API } from 'aws-amplify'
+// import { eventBus } from '../main'
+// import { Auth } from 'aws-amplify'
+// import * as apiGateway from '../lib/api-gateway'
+// import jwt from 'jwt-decode'
+
+export default {
+  name: 'user',
+  props: {
+  },
+  data: function () {
+    return {
+      tag: '',
+      selectedNode: null,
+      treeOptions: {
+        multiple: false
+      },
+      menuData: [
+        { 'text': 'Introduction', data: { 'link': 'DocIntroduction' } },
+        { 'text': 'Get Started', data: { 'link': 'DocGetStarted' } },
+        { 'text': 'AIoThings Services',
+          state: { expanded: true },
+          'children': [
+            { 'text': 'IoT Objects', data: { 'link': 'DocThingObject' } },
+            { 'text': 'IoT Enabler Hardware',
+              data: { 'link': 'DocThingEnabler' },
+              state: { expanded: true },
+              'children': [
+                { 'text': 'Raspberry Pi',
+                  data: { 'link': 'DocPi' },
+                  children: [
+                    { 'text': 'Node-RED', data: { 'link': 'DocNodeRed' } }
+                  ]
+                },
+                { 'text': 'ESP32/ESP8266', data: { 'link': 'DocESP8266' } }
+               ]
+            },
+            { 'text': 'Microservices', data: { 'link': 'DocMicroservice' } },
+            { 'text': 'REST APIs' },
+            { 'text': 'App Connectors' },
+            { 'text': 'Shared Solutions' },
+            { 'text': 'Console', data: { 'link': 'DocConsole' } }
+          ]
+        },
+        { 'text': 'Microservice APIs',
+          state: { expanded: true },
+          'children': [
+            { 'text': 'Node.js',
+              state: { expanded: false },
+              'children': [
+                { 'text': 'messagePublish' },
+                { 'text': 'messageQueueSend' },
+                { 'text': 'messageQueueGet' },
+                { 'text': 'storePutObject' },
+                { 'text': 'storeGetObject' },
+                { 'text': 'consoleOutput' }
+              ]
+            }
+           ]
+        },
+        { 'text': 'Examples',
+          state: { expanded: true },
+          'children': [
+            { 'text': 'Cloud to Claw machine', data: { 'link': 'DocExamplesClawMachine' } },
+            { 'text': 'Online Order to POS' }
+          ]
+        }
+      ]
+    }
+  },
+  computed: {
+    isLoggedIn () {
+      let status = this.$store.getters.isAuthenticated
+      return status
+    },
+    routeName () {
+      return this.$route.path
+    },
+    isActiveMenu (order) {},
+    accessToken () {
+      return this.$store.getters.accessToken
+    },
+    idToken () {
+      return this.$store.getters.idToken
+    },
+    profile () {
+      return this.$store.getters.profile
+    },
+    firstname () {
+      return this.$store.getters.profile.name.split(' ')[0]
+    },
+    isBackButtonNeed () {
+      let { title } = this.$route.meta
+      if (title && title === 'thing') {
+        return true
+      } else {
+        return false
+      }
+    }
+  },
+  created () {
+  },
+  methods: {
+    onNodeSelected (node) {
+      console.log(node)
+      // this.$router.replace('/docs', undefined, () => { window.location.href = '#SHARED_ECONOMY' })
+      if (node.data.hasOwnProperty('link')) {
+        this.tag = '#' + node.data.link
+        // console.log(this.tag)
+        // https://router.vuejs.org/guide/essentials/navigation.html
+        // onComplete and onAbort callbacks to router.push or router.replace as the 2nd and 3rd arguments.
+        this.$router.replace('/docs/main', () => { window.location.href = this.tag; this.$forceUpdate() }, () => { window.location.href = this.tag; this.$forceUpdate() })
+      } else if (node.hasOwnProperty('children')) {
+        // DO Nothing
+      } else {
+        this.$router.replace('/docs')
+      }
+    },
+    toMain () {
+      this.$router.replace('/user')
+    }
+  }
+}
+</script>
+
+<style>
+.nav-pills.at-sidebar a.router-link-active {
+   background-color : #2c8fbb;
+   color : #ffff;
+}
+
+div.a {
+    outline-color:black;
+    outline-style: solid;
+    background-color : red
+}
+
+.center {
+  margin: auto;
+  width: 50%;
+  border: 3px solid green;
+}
+
+.at-sidebar-button button {
+  margin-bottom : 5px;
+  width: 80%
+}
+
+/* --------------- */
+      .hello {
+        font-size: 1em;
+        padding: 0;
+        height: 80px;
+        vertical-align: middle;
+        box-sizing: border-box;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+      }
+
+      #app {
+        position: absolute;
+        top: 0;
+        width: 100%;
+        bottom: 0;
+        right: 0;
+      }
+
+      .navigation {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 280px;
+        overflow-y: scroll;
+        background-color: #f9f9f9;
+      }
+
+      .navigation-filter {
+        padding: 5px 10px;
+      }
+
+      .navigation-filter input {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: 100%;
+        font-size: .875rem;
+        background: #fff;
+        border: 1px solid;
+        border-color: #d2d2d2;
+        border-radius: 3px;
+        padding: 6px;
+        box-sizing: border-box;
+      }
+
+      .content {
+        overflow: auto;
+        position: absolute;
+        left: 280px;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      /*
+      .tree-arrow.has-child:after {
+        background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAAmJLR0QA/4ePzL8AAAAJcEhZcwAADdcAAA3XAUIom3gAAAAHdElNRQfiBBQOCQ0YTpzfAAAAjklEQVQoz2NmYGBgYGAIdAw/LPHu6kUGDMAEoXjt+WXM5kck4VTAwMDAwMhoOgdTCRMyB5sSJlQuphImdCPRlTBhOgtVCRYFECWBjngUMDAwMDAy4VVwJnvdXjwKTmcvn47HDadzlk/D44szecun4gmHM/nLJuMJyTMFyyahm8gCoT4f+fz8ZtuyKZguAgDLtyS94NiAKwAAAABJRU5ErkJggg==')
+;
+        border: 0;
+        width: 16px;
+        height: 16px;
+        background-repeat: no-repeat;
+        transform: rotate(0deg) translateY(-50%) translateX(-2px);
+      }
+
+      .tree-arrow.expanded.has-child:after {
+        transform: rotate(90deg) translateY(0%) translateX(-8px);
+      }
+      
+
+      .tree-node.selected > .tree-content {
+        background: #398df0;
+      }
+
+      .tree-node.selected > .tree-content > .tree-anchor {
+        color: #fff;
+      }
+      */
+
+      .tree-content {
+        padding: 2px 0;
+      }
+
+      .tree-scope {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .release {
+        color: #a9a9a9;
+      }
+</style>

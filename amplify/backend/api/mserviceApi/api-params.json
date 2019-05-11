@@ -1,0 +1,71 @@
+{
+    "paths": [
+        {
+            "name": "/checkname",
+            "lambdaFunction": "mserviceFunction",
+            "privacy": {
+                "protected": true,
+                "auth": "rw",
+                "unauth": "rw"
+            }
+        },
+        {
+            "name": "/favorites",
+            "lambdaFunction": "mserviceFunction",
+            "privacy": {
+                "open": true
+            }
+        },
+        {
+            "name": "/messagetrees",
+            "lambdaFunction": "mserviceFunction",
+            "privacy": {
+                "protected": true,
+                "auth": "rw",
+                "unauth": "rw"
+            }
+        },
+        {
+            "name": "/mservices",
+            "lambdaFunction": "mserviceFunction",
+            "privacy": {
+                "protected": true,
+                "auth": "rw",
+                "unauth": "rw"
+            }
+        },
+        {
+            "name": "/favorite-mservices",
+            "lambdaFunction": "mserviceFunction",
+            "privacy": {
+                "protected": true,
+                "auth": "rw",
+                "unauth": "rw"
+            }
+        }
+    ],
+    "resourceName": "mserviceApi",
+    "apiName": "mserviceApi",
+    "functionArns": [
+        {
+            "lambdaFunction": "mserviceFunction"
+        }
+    ],
+    "privacy": {
+        "auth": 4,
+        "unauth": 4,
+        "authRoleName": "aiothings-20190217141129-authRole",
+        "unAuthRoleName": "aiothings-20190217141129-unauthRole"
+    },
+    "dependsOn": [
+        {
+            "category": "function",
+            "resourceName": "mserviceFunction",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
+        }
+    ],
+    "uuid": "a5dbd5ed"
+}
