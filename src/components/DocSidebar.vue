@@ -1,7 +1,7 @@
 <template>
   <!-- <div class="container-fluid mt-4"> -->
   <div style="margin-left:0px; margin-top:5px">
-    <tree :data="menuData" :options="treeOptions" v-model="selectedNode" @node:selected="onNodeSelected"/>
+    <tree ref="tree" :data="menuData" :options="treeOptions" v-model="selectedNode" @node:selected="onNodeSelected"/>
     <b-button-group  vertical class="at-sidebar-button" style="width:100%">
       <b-button variant="warning" @click="toMain()" class="text-left">Back to Main</b-button>
     </b-button-group>
@@ -9,12 +9,7 @@
 </template>
 
 <script>
-// import axios from 'axios'
-// import { API } from 'aws-amplify'
-// import { eventBus } from '../main'
-// import { Auth } from 'aws-amplify'
-// import * as apiGateway from '../lib/api-gateway'
-// import jwt from 'jwt-decode'
+import { eventBus } from '../main'
 
 export default {
   name: 'user',
@@ -22,6 +17,7 @@ export default {
   },
   data: function () {
     return {
+      treeObj: null,
       tag: '',
       selectedNode: null,
       treeOptions: {
@@ -44,28 +40,49 @@ export default {
                     { 'text': 'Node-RED', data: { 'link': 'DocNodeRed' } }
                   ]
                 },
-                { 'text': 'ESP32/ESP8266', data: { 'link': 'DocESP8266' } }
+                { 'text': 'ESP32/ESP8266',
+                  data: { 'link': 'DocESP8266' },
+                  children: [
+                    { 'text': 'Mongoose OS', data: { 'link': 'DocMongooseOs' } }
+                  ]
+                }
                ]
             },
             { 'text': 'Microservices', data: { 'link': 'DocMicroservice' } },
-            { 'text': 'REST APIs' },
-            { 'text': 'App Connectors' },
-            { 'text': 'Shared Solutions' },
+            { 'text': 'REST APIs', data: { 'link': 'DocApi' } },
+            { 'text': 'App Connectors', data: { 'link': 'DocAppConnector' } },
+            { 'text': 'Shared Solutions', data: { 'link': 'DocSharedSolution' } },
             { 'text': 'Console', data: { 'link': 'DocConsole' } }
           ]
         },
         { 'text': 'Microservice APIs',
+          data: { 'link': 'DocMicroserviceApi' },
           state: { expanded: true },
           'children': [
             { 'text': 'Node.js',
-              state: { expanded: false },
+              state: { expanded: true },
               'children': [
-                { 'text': 'messagePublish' },
-                { 'text': 'messageQueueSend' },
-                { 'text': 'messageQueueGet' },
-                { 'text': 'storePutObject' },
-                { 'text': 'storeGetObject' },
-                { 'text': 'consoleOutput' }
+                { 'text': 'messagePublish',
+                  data: { 'link': 'DocNodejsMessagePublish' }
+                },
+                { 'text': 'messageQueueSend',
+                  data: { 'link': 'DocNodejsMessageQueueSend' }
+                },
+                { 'text': 'messageQueueGet',
+                  data: { 'link': 'DocNodejsMessageQueueGet' }
+                },
+                { 'text': 'storePutObject',
+                  data: { 'link': 'DocNodejsStorePutObject' }
+                },
+                { 'text': 'storeGetObject',
+                  data: { 'link': 'DocNodejsStoreGetObject' }
+                },
+                { 'text': 'consoleOutput',
+                  data: { 'link': 'DocNodejsConsoleOutput' }
+                },
+                { 'text': 'Database access',
+                  data: { 'link': 'DocNodejsDatabase' }
+                }
               ]
             }
            ]
@@ -73,8 +90,9 @@ export default {
         { 'text': 'Examples',
           state: { expanded: true },
           'children': [
-            { 'text': 'Cloud to Claw machine', data: { 'link': 'DocExamplesClawMachine' } },
-            { 'text': 'Online Order to POS' }
+            { 'text': 'Cloud to Claw machine', data: { 'link': 'DocExamplesClawMachine' } }
+            // ,
+            // { 'text': 'Online Order to POS' }
           ]
         }
       ]
@@ -111,10 +129,23 @@ export default {
     }
   },
   created () {
+    eventBus.$on('changeDocId', this.onChangeDocId)
+    // this on handler must be a separate function instead of an instant function parameter
+    // otherwise, it cannot access the local variables such as this.xxx
+  },
+  mounted () {
+    this.treeObj = this.$refs.tree
   },
   methods: {
+    onChangeDocId (id) {
+      // console.log('onChangeDocId: ', id)
+      // https://amsik.github.io/liquor-tree/#Tree-selected
+      let selection = this.treeObj.find({ data: { link: id } })
+      if (selection !== undefined && selection !== null) {
+        selection.select(true)
+      }
+    },
     onNodeSelected (node) {
-      console.log(node)
       // this.$router.replace('/docs', undefined, () => { window.location.href = '#SHARED_ECONOMY' })
       if (node.data.hasOwnProperty('link')) {
         this.tag = '#' + node.data.link

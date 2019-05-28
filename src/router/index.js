@@ -22,8 +22,9 @@ import Solution from '@/components/Solution'
 import Solutions from '@/components/Solutions'
 import Login from '@/components/Login'
 import Documents from '@/components/Documents'
-import DocIntroduction from '@/components/DocIntroduction'
+// import DocIntroduction from '@/components/DocIntroduction'
 import DocMain from '@/components/DocMain'
+import AboutUs from '@/components/AboutUs'
 // import Default from '@/components/Default'
 import MyThingsList from '@/components/MyThingsList'
 import Thing from '@/components/Thing'
@@ -80,7 +81,7 @@ const router = new VueRouter({
         {
           path: '',
           name: 'docs',
-          component: DocIntroduction,
+          component: DocMain,
           meta: {
             title: 'AIoT: Docs',
             auth: false
@@ -88,7 +89,7 @@ const router = new VueRouter({
         },
         {
           path: 'main',
-          name: 'main',
+          name: 'docMain',
           component: DocMain,
           meta: {
             title: 'AIoT: Documents',
@@ -99,10 +100,19 @@ const router = new VueRouter({
     },
     {
       path: '/',
-      name: 'docMain',
+      name: 'main',
       component: Home,
       meta: {
-        title: 'AIoT: Home',
+        title: 'AIoT: Main',
+        auth: false
+      }
+    },
+    {
+      path: '/aboutus',
+      name: 'aboutUs',
+      component: AboutUs,
+      meta: {
+        title: 'AIoT: About Us',
         auth: false
       }
     },
@@ -240,6 +250,7 @@ const router = new VueRouter({
               path: 'newservice',
               name: 'newService',
               component: NewService,
+              props: true,
               meta: {
                 title: 'New Service',
                 auth: true

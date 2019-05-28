@@ -185,7 +185,7 @@ export default {
     }
   },
   async created () {
-    // console.log('new service: copied? ', this.copiedService)
+    console.log('new service: copied? ', this.copiedService)
     this.updateServiceTemplate()
     if (typeof this.copiedService !== 'undefined') {
       console.log('copied from')

@@ -73,12 +73,15 @@
                 </b-col>
             </b-row>
             <b-row class="mt-3" v-if="api.ApiName !== null && api.ApiName !== ''">
-                <b-col sm="3">
-                  <h5> Invoke URL </h5>
+                <b-col sm="3" align="end">
+                  <h5 id="popoverInvokeUrl"> Invoke URL <i class="fas fa-info-circle"></i></h5>
                 </b-col>
                 <b-col >
-                  <h6>https://api.aiothings.com/{{api.ApiName.toLowerCase()}}</h6>
+                  <h6>https://api.aiothings.com/{{api.ApiName.toLowerCase()}}/{path}</h6>
                 </b-col>
+                <b-popover target="popoverInvokeUrl" triggers="hover focus">
+                    Call a REST API through HTTP methods (GET, POST..) with the URL address
+                </b-popover>
             </b-row>
             <b-row>
               <b-col>
@@ -100,7 +103,9 @@
                         <b-col sm="7">
                           <b-form-input v-model="newPath" type="text" placeholder="path1/path2/path3"></b-form-input>
                         </b-col>
-                        <b-col sm="2" align="end" class="pb-2" @click="handleNewPathSubmit" ><b-button>Enter</b-button></b-col>
+                        <b-col align="start">
+                          <b-button @click="handleNewPathSubmit">Enter</b-button>
+                        </b-col>
                       </b-row>
                     </form>
               </b-container>
@@ -113,8 +118,10 @@
                   </b-col>
                   -->
             </b-row>
-            <b-row class="mt-1" v-else>
-                  <b-col sm="3"/>
+            <b-row class="mt-1" align-v="center" v-else>
+                  <b-col align="end" sm="3">
+                    <h5> Paths </h5>
+                  </b-col>
                   <b-col>
                       <b-list-group>
                         <b-list-group-item v-for="(path, index) in api.Paths" :key="index">
@@ -134,15 +141,22 @@
             </b-row>
             <b-row class="mt-3" align-v="center">
               <b-col sm="3">
-                <h4> Authorization</h4>
+                  <h4 id="popoverAuthOption">Authorization <i class="fas fa-info-circle"></i></h4>
               </b-col>
-              <b-col sm="7">  
+              <b-col sm="7"> 
                 <b-form-select v-model="api.AuthorizationType" class="mb-3">
-                  <option :value="'NONE'">NONE</option>
-                  <option :value="'AWS_IAM'">AWS IAM - Identity and Access</option>
-                  <option :value="'COGNITO_USER_POOLS'">OAuth 2.0</option>
+                  <option :value="'NONE'">None</option>
+                  <option :value="'AWS_IAM'">Auth - Authentication required</option>
+                  <!-- <option :value="'COGNITO_USER_POOLS'">OAuth 2.0</option> -->
                 </b-form-select>
               </b-col>
+              <b-popover target="popoverAuthOption" triggers="hover focus">
+                    <template slot="title">Authorization Types</template>
+                    When <strong><span class="text-danger">Auth</span></strong> is set, Cloud verifies the caller's signature. The tokens building this signature are obtained from caller’s login procedure.
+                    <p>
+                    When <em><strong>None</strong></em> is set, the API does not need caller's authentication.
+                    </p>
+              </b-popover>
             </b-row>
             <b-row class="mt-3" align-v="center">
               <b-col sm="3">
@@ -181,7 +195,7 @@ export default {
       apiService: null,
       api: {
         UserId: this.$store.getters.username,
-        Desc: 'This is a sample api',
+        Desc: '',
         ApiName: '',
         AuthorizationType: 'NONE', // NONE | AWS_IAM | COGNITO_USER_POOLS
         Paths: []

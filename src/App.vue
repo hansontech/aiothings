@@ -91,6 +91,7 @@
 import { eventBus } from './main'
 import auth from './services/auth'
 import { Auth, API } from 'aws-amplify'
+import atHelper from './aiot-helper'
 
 // Helpers
 /* import {
@@ -202,18 +203,6 @@ export default {
     profile () {
       return this.$store.getters.profile
     },
-    userHasPhoto () {
-      try {
-        let photo = this.$store.getters.profile.picture
-        if (photo != null) {
-          return true
-        } else {
-          return false
-        }
-      } catch (e) {
-        return false
-      }
-    },
     userName () {
       try {
         let fullname = this.$store.getters.profile.name
@@ -228,6 +217,9 @@ export default {
       } catch (e) {
         return ' '
       }
+    },
+    userHasPhoto () {
+      return atHelper.userHasPhoto()
     },
     pictureUrl () {
       try {
@@ -342,6 +334,14 @@ export default {
         }
       )
     }
+    /* ,
+    userHasPhoto () {
+      console.log('going to userHasPhoto: ')
+      let result = atHelper.userHasPhoto()
+      console.log('userHasPhoto: ', result)
+      return result
+    }
+    */
   }
 }
 </script>

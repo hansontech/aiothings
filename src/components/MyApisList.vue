@@ -11,6 +11,24 @@
             </b-col>
         </b-row>
       </div>
+      <div v-if="isApiReloading" class="mb-2">
+        <b-row>
+          <b-col align="center">
+            <spinner  size="medium" />
+          </b-col>
+        </b-row>
+      </div>
+      <div v-if="isApiActionRunning" class="mb-2">
+        <b-row>
+          <b-col align="center">
+            <!-- <spinner  size="medium" />{{timeLeftBeforeActionComplete}}s -->
+            <b-button variant="primary" disabled>
+              <b-spinner type="grow"></b-spinner> &ensp;
+              <strong><font size="+2">{{timeLeftBeforeActionComplete}}s..</font></strong>
+            </b-button>
+          </b-col>
+        </b-row>
+      </div>
             <div class="text-center" v-if="apis.length === 0">
               No APIs available.
             </div>
@@ -22,7 +40,7 @@
                       <b-col class="color-box" style="background-color: MediumAquamarine; height: 30px">
                       </b-col>
                     </b-row>
-                    <b-row>
+                    <b-row class="mt-2">
                       <b-col>
                         <p class="card-text">
                           {{api.ApiName}}
@@ -37,22 +55,24 @@
                         </b-dropdown>
                       </b-col>
                     </b-row>
-                    <b-row class="ml-0 mt-1 at-bar" style="border-bottom: 1px solid green;">  
-                      <p class="card-text">
+                    <b-row class="ml-0 mt-2" style="border-bottom: 1px solid green; padding-bottom: 5px;">  
+                      <b-col>
                         {{api.Desc}}
-                      </p>
+                      </b-col>
                     </b-row>
-                    <b-row class="ml-0 mt-1 at-bar">  
-                      <p class="card-text">
+                    <b-row class="ml-0 mt-2" style="border-bottom: 1px solid green; padding-bottom: 5px;">  
+                      <b-col>
                         {{api.Handler}}
-                      </p>
+                      </b-col>
                     </b-row>
-                    <b-row class="ml-0 mt-1">  
-                      <b-list-group>
-                        <b-list-group-item v-for="(path, index) in api.Paths" :key="index">
-                          {{path}}
-                         </b-list-group-item>
-                      </b-list-group>
+                    <b-row class="ml-0 mt-2">
+                      <b-col>  
+                        <b-list-group>
+                          <b-list-group-item v-for="(path, index) in api.Paths" :key="index">
+                            {{path}}
+                          </b-list-group-item>
+                        </b-list-group>
+                      </b-col>
                     </b-row>
                 </b-card>
               </b-card-group>
@@ -74,7 +94,11 @@ export default {
       loadedUserData: null,
       loadingUsers: {},
       select_options: {text: 'toggle'},
-      apis: {}
+      apis: {},
+      isApiActionRunning: false,
+      isApiReloading: false,
+      timeLeftBeforeActionComplete: 0,
+      apiActionTimer: null
     }
   },
   computed: {
@@ -112,8 +136,24 @@ export default {
       console.log('createApi')
       this.$router.push({ name: 'newApi' })
     },
+    releaseApiActionLock () {
+      this.timeLeftBeforeActionComplete--
+      if (this.timeLeftBeforeActionComplete > 0) {
+      } else {
+        window.clearInterval(this.apiActionTimer)
+        this.isApiActionRunning = false
+        console.log('released lock')
+      }
+      this.$forceUpdate()
+    },
     deleteApi (index) {
       console.log('deleteApi')
+      if (this.isApiActionRunning) {
+        return
+      }
+      this.isApiActionRunning = true
+      this.timeLeftBeforeActionComplete = 32
+      this.apiActionTimer = window.setInterval(this.releaseApiActionLock, 1000)
       let api = this.$store.getters.apis[index]
       API.del('apiApi', '/apis', {
             'queryStringParameters': {
@@ -134,7 +174,9 @@ export default {
       })
     },
     async reloadApis () {
+      this.isApiReloading = true
       await atHelper.reloadApis()
+      this.isApiReloading = false
       this.apis = this.$store.getters.apis
       if (this.apis === null) {
         this.apis = {}
@@ -156,6 +198,13 @@ export default {
 <style>
 
 div.at-bottombar {
+  /* background-color : grey; */
+  padding-bottom: 5px;
+  margin-bottom: 5px;
+  border-bottom: 1px solid grey
+}
+
+.at-bottombar {
   /* background-color : grey; */
   padding-bottom: 5px;
   margin-bottom: 5px;

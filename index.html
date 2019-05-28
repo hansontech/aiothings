@@ -27,6 +27,7 @@
     <link rel="<%= chunk.initial?'preload':'prefetch' %>" href="<%= htmlWebpackPlugin.files.publicPath + file %>" as="<%= file.match(/\.css$/)?'style':'script' %>"><% }}} %>
   </head>
   <body>
+    <script src="https://js.stripe.com/v3/"></script> <!-- 20190512 for Stripe integration -->
     <noscript>
       This is your fallback content in case JavaScript fails to load.
     </noscript>

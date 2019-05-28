@@ -1,8 +1,13 @@
 <template> 
   <b-container fluid>
     <b-row align-v="center" align-h="center" class="at-footer-background text-center">
+      <!--
       <b-col sm="4" lg="3">
-        &copy; 2018 Copyright &nbsp; <a href="https://www.aiothings.com"> AIoThings.com </a>
+        &copy; 2018 Copyright &nbsp; <a v-b-tooltip.hover="'ABN: 63737379731'" href="https://www.aiothings.com"> Hanson Technology</a>
+      </b-col>
+      -->
+      <b-col sm="4" lg="3">
+        <a href="/aboutus">About Us</a>
       </b-col>
       <b-col>
         <a href="tel:+61-421858381">

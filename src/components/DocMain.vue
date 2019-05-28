@@ -1,5 +1,6 @@
 <template>
   <b-container>
+  <div>
  <vue-markdown id="DocIntroduction">
 ### Introduction
 AIoThings has the features to help user to build cloud and IoT applications rapidly, without the need of learning curve that often prevents people from continuing their design works.
@@ -141,6 +142,8 @@ This USB-to-Serial interface provides a convenient way to connect with developme
 
 NodeMCU-32S is the counterpart product comes with the ESP32 based module.
 
+</vue-markdown> 
+<vue-markdown id="DocMongooseOs" class="mt-5">
 ##### Mongoose OS
 
 [Mongoose OS](https://mongoose-os.com/) is the recommnended OS and development environement we are using on ESP boards to connect to AIoThings. 
@@ -238,6 +241,45 @@ During the execution of the functions, a microservice also is able to publish on
 
 </vue-markdown> 
 
+<vue-markdown id="DocApi">
+### REST API
+
+A RESTful API is an application program interface (API) that uses HTTP requests to GET, PUT, POST and DELETE data.
+The REST used by browsers can be thought of as the language of the internet. These APIs are emerging to expose web services, allow users to connect and interact with other cloud services.
+
+A REST API is defined by the following elements:
+1. API Name
+2. Description to describe what this API is for, and how to use it. It may include HTTP methods and their query parameters, and the expected responses.
+3. Path: The paths allowed to pass to th backend handler (a microservice).
+4. Handler: The backend handler to actually handler this API request. Handlers are actually microservices capable processing HTTP requests.
+5. Authorization: The authorization information is obtained from user's login. An APU can be set to require this autorization check from cloud before passing the request to the following handler, or no authorization check is required.
+
+A REST API can be accessed through the URL address with the form of 
+```URL
+  https://api.aiothings.com/{API name}/path
+```
+
+
+</vue-markdown> 
+<vue-markdown id="DocAppConnector">
+### App Connectors
+
+App Connectors are the interfaces prepared from AIoThings to popular application connectivity platforms, to help AIoThings services fast connect to external 3rd party services and mobile/home apps.
+IFTTT and Zapier are the two services AIoThings is utilizing. 
+
+An App Connector defines couple of message topics and data allow developers create / send / receive data to external services, such as Amazon Alexa, Facebook Messenger, Google Assistant. 
+Additionally, it also provide guidelines to help developers create their own App Connector, using REST API and other AIoThings functions.
+
+
+</vue-markdown> <vue-markdown id="DocSharedSolution">
+### Shared Solutions
+
+Shared Solution shows the microservices shared by other users.
+Users can search for specific message topics and microservices and use them.
+It also provide interfaces to other resources such as Node-RED Node and Flow libraries. 
+
+</vue-markdown> 
+
 <vue-markdown id="DocConsole">
 ### Console
 
@@ -250,12 +292,166 @@ User can use consoleOutput API to output debug messages during the execution of 
 
 </vue-markdown> 
 
-<vue-markdown id="DocExampleClawMachine">
-### Example Cloud to Claw Machine
+<vue-markdown id="DocMicroserviceApi">
+### Microservice APIs
 
->
+The set of APIs are used inside Microservices to achieve the functions required to implement applications, including to publish messages, to put/get from storage, and to save/retrieve from message queues.
 
-#### Background
+A microservice can use APIs from AWS SDK to realize application logics, as long as the user has the required permissions. In fact, the listed Microservice APIs here are also implemented by AWS SDKs.
+
+</vue-markdown>
+
+<vue-markdown id="DocMicroserviceApiNodejs">
+### Node.js
+
+
+&nbsp;
+&nbsp;
+&nbsp;
+
+</vue-markdown>
+<div class="borderLine">
+  <br />
+</div>
+<vue-markdown class="borderLine" id="DocNodejsMessagePublish">
+#### messagePublish
+
+```JavaScript
+messagePublish( message ) => Promise
+```
+To publish a message with this Microservice's Output Message Topic.
+* message -- (JSON)
+  * The message in JSON format that is going to be published.
+
+**Example**
+```JavaScript
+const aiot = require('aiothings');
+await aiot.messagePublish( {error: null, data: { on: true}} );
+```
+</vue-markdown> 
+
+<vue-markdown class="borderLine" id="DocNodejsMessageQueueSend">
+#### messageQueueSend
+
+```JavaScript
+messageQueueSend( queueName, message ) => Promise
+```
+To send a message to a message queue. 
+A message queue is a queue (first come first out) that is used to store messages in sequence.
+
+* queueName -- (String)
+  * Name of the message queue.
+* message -- (JSON)
+  * The message in JSON format.
+
+**Example**
+```JavaScript
+const aiot = require('aiothings');
+await aiot.messageQueueSend( 'QueueOne', {data: { on: true}} );
+```
+</vue-markdown> 
+
+<vue-markdown class="borderLine" id="DocNodejsMessageQueueGet">
+#### messageQueueGet
+
+```JavaScript
+messageQueueGet( queueName ) => Promise
+```
+To retrive a message from a message queue.
+
+* queueName -- (String)
+  * Name of the message queue.
+* message -- (JSON)
+  * The message in JSON format.
+
+**Example**
+```JavaScript
+const aiot = require('aiothings');
+let message = await aiot.messageQueueGet( 'queueOne' );
+```
+</vue-markdown> 
+
+<vue-markdown class="borderLine" id="DocNodejsStorePutObject">
+#### storePutObject
+
+```JavaScript
+storePutObject(objectName, objectData) => Promise
+```
+To store data to storage, with an object name. Any Microservice can use the object name to store or retrieve data stored from other Microservice.
+
+* objectName -- (String)
+  * The object name used to store or retrive data.
+* objectData -- (JSON)
+  * The object data to be stored to the storage.
+
+**Example**
+```JavaScript
+const aiot = require('aiothings');
+await aiot.storePutObject( 'ObjectOne', {data: { on: true}} );
+```
+</vue-markdown>
+
+<vue-markdown class="borderLine" id="DocNodejsStoreGetObject">
+#### storeGetObject
+
+```JavaScript
+storeGetObject(objectName)
+```
+To get data from a storage object, with an object name. 
+Any Microservice can use the object name to store or retrieve data stored from other Microservice.
+
+* objectName -- (String)
+  * The object name used to store or retrive data.
+
+**Example**
+```JavaScript
+const aiot = require('aiothings');
+let data = await aiot.storeGetObject( 'ObjectOne' );
+```
+</vue-markdown> 
+
+<vue-markdown class="borderLine" id="DocNodejsConsoleOutput">
+#### consoleOutput
+
+```JavaScript
+consoleOutput( message ) => Promise
+```
+To output a message to the console. 
+The console message will be displayed on the Console window.
+
+* message -- (String)
+  * The output message to Console.
+
+**Example**
+```JavaScript
+const aiot = require('aiothings');
+await aiot.consoleOutput('this is a debug message');
+```
+</vue-markdown> 
+
+<vue-markdown id="DocNodejsDatabase">
+### User Database access
+
+Typical IoT data has a form of {Device, Timestamp, Data}. Means, a device creates and sends the data at a specific time.
+A database table is available for users to save and access these IoT data - 'atUserDataTable'.
+Differnt to the storage objects, this database table is capable to query data efficiently by time periods.
+
+Users use the APIs defined at AWS SDK to access this database table, instead of providing a separate set of new APIs.
+The reason for this is that, we always provide a simplicity by creating a new API in addition to AWS SDK, if possible. However, the functionality of database access has its complexity in nature, cannot simplify them through new API creations.
+Alternatively, we decide to provide a series of examples using AWS SDK to help users' learning.
+
+
+### Examples
+
+
+</vue-markdown>
+
+<vue-markdown id="DocExamplesClawMachine">
+#### Example Cloud to Claw Machine
+
+
+
+##### Background
 Claw Machines have become popular in Taiwan in last couple of years. They are operated as unmanned stores. A new round of play starts when the user inserts coins to the machine.
 A store is normally shared by multiple leaseholders, each leaseholder takes their own efforts to attract customers, and maximize profits.
 
@@ -278,11 +474,30 @@ For this exercise, we upgrade the claw machine to accept online payments and NFC
 
 <script>
 import VueMarkdown from 'vue-markdown'
+import { eventBus } from '../main'
+
+// utility copied from https://stackoverflow.com/questions/123999/how-to-tell-if-a-dom-element-is-visible-in-the-current-viewport
+function elementInViewport (el) {
+  var top = el.offsetTop
+  var height = el.offsetHeight
+
+  while (el.offsetParent) {
+    el = el.offsetParent
+    top += el.offsetTop
+  }
+
+  return (
+    top >= window.pageYOffset &&
+    (top + height) <= (window.pageYOffset + window.innerHeight)
+  )
+}
 
 export default {
   name: 'home',
   data: function () {
     return {
+      idDocs: null,
+      activeId: null
     }
   },
   components: {
@@ -290,9 +505,67 @@ export default {
   },
   computed: {
   },
+  watch: {
+    /*
+    activeId: function (newId, oldId) {
+      if (newId !== oldId) {
+        eventBus.$emit('changeDocId', newId)
+      }
+    }
+    */
+  },
   methods: {
+    offsetAnchor () {
+      if (location.hash.length !== 0) {
+          window.scrollTo(window.scrollX, window.scrollY - 80)
+      }
+    },
+    handleScroll () {
+      // console.log('scroll')
+      let that = this
+      let currentDocElement = null
+      Array.prototype.forEach.call(this.idDocs, function (el, i) {
+        // "el" is your element
+        // console.log( el.id ); // log the ID
+        if (elementInViewport(el)) {
+          if (that.activeId !== el.id) {
+            that.activeId = el.id
+            if (!currentDocElement || (currentDocElement && currentDocElement.offsetTop > el.offsetTop)) {
+              currentDocElement = el
+              eventBus.$emit('changeDocId', that.activeId)
+            }
+          }
+          // console.log('id reached: ', el.id)
+        }
+      })
+      /*
+      this.idDocs.find(el => {
+        // const el = document.getElementById(number)
+        if (elementInViewport(el)) {
+          this.activeBlock = el.id
+          console.log('id reached: ', el)
+        }
+      })
+      */
+    }
   },
   created () {
+    /*
+      In order to make a fixed distance jump from the tag
+      Otherwise, the TAG (id=) portion is hidden by the top menu portion
+    */
+    // This will capture hash changes while on the page
+    window.addEventListener('hashchange', this.offsetAnchor)
+
+    // http://jschof.com/vue/scroll-tracking-in-vue-applications-some-gotchas/
+    document.addEventListener('scroll', this.handleScroll)
+  },
+  mounted () {
+    this.idDocs = document.querySelectorAll('[id]')
+    console.log('idDocs: ', this.idDocs)
+  },
+  destroyed () {
+    document.removeEventListener('scroll', this.handleScroll)
   }
 }
 </script>
@@ -305,5 +578,17 @@ table, th, td {
 table {
   border-spacing: 5px;
 }
+/*
+vue-markdown {
+  padding-bottom: 5px;
+  margin-bottom: 5px;
+  border-top: 1px solid grey
+}
+*/
 
+.borderLine {
+  padding-bottom: 5px;
+  margin-bottom: 5px;
+  border-bottom: 1px dotted grey
+}
 </style>

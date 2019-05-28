@@ -116,10 +116,21 @@ let consoleOutput = async (outputMessage) => {
 
 let setInput = (event) => {
     inputEvent = event;
+    
+    if ( process.env.hasOwnProperty('API_GATEWAY_NAME') ) {
+        let apiNamePart = /^\/[0-9a-zA-Z\-\_]+\//
+        event.path = event.path.replace(apiNamePart, '/')
+    }
+    
+    if (event.hasOwnProperty('sender') === false) {
+        senderId = environment.OWNER_ID
+        return
+    }
     senderId = event.sender
     if (event.sender === 'admin' || event.sender === 'system') {
         senderId = environment.OWNER_ID
     }
+    
 };
 
 module.exports = {

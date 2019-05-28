@@ -296,6 +296,34 @@ export default {
         // Force down of the Zip file
         FileSaver.saveAs(content, thingId + '-edge-setup.zip');
     });
+  },
+  userHasPhoto () {
+    try {
+      let photo = JSON.parse(store.getters.profile.picture)
+      if (photo != null) {
+        if (typeof photo === 'string') {
+          if (photo.substring(0, 4) !== 'http') {
+            return false
+          }
+        }
+        return true
+      } else {
+        return false
+      }
+    } catch (e) {
+      try {
+        let photo = store.getters.profile.picture
+        if (typeof photo === 'string') {
+            if (photo.substring(0, 4) !== 'http') {
+              return false
+            }
+            return true
+        }
+        return false
+      } catch (err) {
+        return false
+      }
+    }
   }
 }
 

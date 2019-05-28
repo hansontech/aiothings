@@ -45,7 +45,7 @@
                         type="text" 
                         v-model="inputMessage.topic"
                         required
-                        placeholder="Enter topic">
+                        placeholder="Enter topic ( e.g. console/output )">
                 </b-form-input>
               </b-form-group>
             </b-form>
@@ -60,7 +60,7 @@
                       label-for="publishTopic"
                       description="Use this to publish message to AIoThings."
                       >
-                <codemirror v-model="inputMessage.body" ref="sourceEditor" placeholder='{ "item": "value" }'>
+                <codemirror v-model="inputMessage.body" ref="sourceEditor" placeholder='Must be a JSON, e.g. { "item": "value" }'>
                 </codemirror>
               </b-form-group>
             </b-form>

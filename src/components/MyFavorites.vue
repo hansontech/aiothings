@@ -13,6 +13,13 @@
       <b-card no-body>
         <b-tabs card>
           <b-tab title="Favorite Microservices" active>
+            <div v-if="isLoading" class="mb-2">
+              <b-row>
+                <b-col align="center">
+                  <spinner  size="medium" />
+                </b-col>
+              </b-row>
+            </div>
             <div class="text-center" v-if="favoriteServices.length === 0">
               No favorites selected.
             </div>
@@ -74,11 +81,11 @@ export default {
   name: 'myfavorites',
   data: function () {
     return {
-      loading: false,
       loadedUserData: null,
       loadingUsers: {},
       select_options: {text: 'toggle'},
-      favoriteServices: {}
+      favoriteServices: {},
+      isLoading: false
     }
   },
   computed: {
@@ -112,7 +119,9 @@ export default {
   },
   methods: {
     async reloadFavoriteServices () {
+      this.isLoading = true
       await atHelper.reloadFavoriteServices()
+      this.isLoading = false
       this.favoriteServices = this.$store.getters.favoriteMservices
       if (this.favoriteServices === null) {
         this.favoriteServices = {}

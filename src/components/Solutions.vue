@@ -54,7 +54,9 @@
           </b-tab>
           -->
          <b-tab :title="'Shared Microservices ( '+ services.length + ' )'" active>
-            <spinner v-if="isLoadingServices === true" size="medium" />
+            <div v-if="isLoadingServices">
+              <spinner size="medium" />
+            </div>
             <div class="text-center" v-if="services.length === 0 && isLoadingServices === false">
               <p>No shared micoservices from others found.</p>
             </div>
@@ -185,7 +187,8 @@ export default {
       loadingUsers: {},
       select_options: {text: 'toggle'},
       favoriteServices: {},
-      favoriteActiveSelected: ''
+      favoriteActiveSelected: '',
+      isLoadingServices: false
     }
   },
   computed: {
@@ -345,7 +348,7 @@ export default {
                searchText: searchText
           }
       })
-      console.log(result)
+      // console.log(result)
       let resultJson = JSON.parse(result)
       this.$store.commit('setSharedMservices', resultJson)
       // atHelper.reloadServices()

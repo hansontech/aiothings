@@ -6,6 +6,8 @@ const awsmobile = {
     "aws_cognito_region": "ap-southeast-2",
     "aws_user_pools_id": "ap-southeast-2_2gQEl126n",
     "aws_user_pools_web_client_id": "s343f4ida7jquoo24df5qv03p",
+    "oauth": {},
+    "federationTarget": "COGNITO_IDENTITY_POOLS",
     "aws_content_delivery_bucket": "aiothings-20190217143527-hostingbucket-prod",
     "aws_content_delivery_bucket_region": "ap-southeast-2",
     "aws_content_delivery_url": "https://ddhnii0hf5ke.cloudfront.net",

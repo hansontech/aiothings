@@ -26,6 +26,7 @@ import atWhitepaper from './assets/aiothings-wp'
 import VueCodemirror from 'vue-codemirror'
 import Spinner from 'vue-simple-spinner'
 import SocialSharing from 'vue-social-sharing'
+import VueStripeCheckout from 'vue-stripe-checkout'
 import { library, dom } from '@fortawesome/fontawesome-svg-core'
 import { faCoffee, faHeart, faTrashAlt, faPhone, faEnvelope, faInfoCircle, faInfo } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
@@ -191,7 +192,7 @@ const oauth = {
   // Domain name
   domain: config.awsCognitoDomain,
   // Authorized scopes
-  scope: ['phone', 'email', 'profile', 'openid', 'aws.cognito.signin.user.admin'],
+  scope: ['profile', 'openid', 'aws.cognito.signin.user.admin'],
 
   // Callback URL
   redirectSignIn: hostUrl + '/callback',
@@ -209,8 +210,10 @@ const oauth = {
   }
 }
 
-Amplify.configure({
-  Auth: {
+Auth.configure({ oauth: oauth })
+
+// Amplify.configure({
+  // Auth: {
       // other configurations...
       /*
       identityPoolId: 'ap-southeast-2:00294c49-1629-49e7-88d7-4720566c1377',
@@ -222,15 +225,15 @@ Amplify.configure({
       // OPTIONAL - Amazon Cognito Web Client ID
       */
       // ....
-      oauth: oauth
-  },
-  PubSub: {
+      // oauth: oauth
+  // },
+  // PubSub: {
     // This was not in the examples and I wonder if I can omit it
     // uuidv4() is from https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript#answer-2117523
-    clientId: uuidv4()
-  }
-})
-
+   // clientId: uuidv4()
+  // }
+// })
+/*
 function uuidv4 () {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
     let r = Math.random() * 16 | 0
@@ -238,7 +241,7 @@ function uuidv4 () {
     return v.toString(16)
   })
 }
-
+*/
 // AWS IoT reference about protocol
 // https://docs.aws.amazon.com/iot/latest/developerguide/protocols.html
 // Important 2018/9/16
@@ -258,6 +261,8 @@ Amplify.addPluggable(new AWSIoTProvider({
 }))
 
 // Vue.component('vue-markdown', VueMarkdown)
+
+Vue.use(VueStripeCheckout, 'pk_live_zocZmh9i0DOGAcmgI7i6MwzH00JJO7x6bH') // publishable key
 
 Vue.use(BootstrapVue)
 
@@ -339,8 +344,8 @@ authLogger.onHubCapsule = async (capsule) => {
     console.log('credentials: ', credentials)
     const identityId = credentials._identityId
     await atHelper.allowLoginIdentityUseIoT(identityId)
-
-    router.push({ name: 'mythings' })
+    // console.log('jump to mythings')
+    router.replace({ name: 'myapps' })
   }
 }
 

@@ -6,17 +6,22 @@ export default {
 
   authenticate: function () {
     const config = Auth.configure()
+    console.log('config: ', config)
     let {
         domain,
         redirectSignIn,
         // redirectSignOut,
+        scope,
         responseType } = config.oauth
     const clientId = config.userPoolWebClientId
 
     var verification = generateVerification()
     store.commit('setVerification', verification)
-    var scope = 'openid%20profile'
-    // console.log('redirect: ', redirectSignIn)
+    // var scope = 'openid%20profile'
+    scope = scope.join(' ')
+    scope = encodeURI(scope)
+    console.log('authenticate: ', scope)
+    console.log('oauth: ', config.oauth)
     responseType = 'code'
     // let redirectCallback = 'https://www.aiothings.com/callback' // for test
 

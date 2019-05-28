@@ -36,7 +36,7 @@ var config = {
 aws.config.region = config.region;
 const dynamodb = new aws.DynamoDB.DocumentClient();
 const apigateway = new aws.APIGateway({apiVersion: '2015-07-09'});
-
+let lambda = new aws.Lambda();
 
 /**********************
  * Example get method *
@@ -123,12 +123,10 @@ async function deleteApi (apiName, restApiId, deploymentId) {
       basePath: apiName.toLowerCase(),
       domainName: config.apiDomainName
     }).promise()
-    /*
     await apigateway.deleteStage({
       restApiId: restApiId,
       stageName: 'prod' 
     }).promise()  // must be deleted first
-    */
     await apigateway.deleteDeployment({
       deploymentId: deploymentId,
       restApiId: restApiId
@@ -189,6 +187,8 @@ app.post('/apis', async function(req, res) {
   if (isCreateNewApi === true) {
     // create an Api Gateway structure  
     try {
+      // console.log('before updateFunction')
+      await updateFunction(inputs.handler.ServiceName, apiObject.ApiName)
       let restApiData = await apigateway.createRestApi({
         name: apiObject.ApiName,
         description: apiObject.Desc,  // Keep only the first time Desc value
@@ -238,20 +238,19 @@ app.post('/apis', async function(req, res) {
           level++
         } // for each path level of a path case
       } // for each path case 
-
+      // console.log('before deployment')
       let deploymentData = await apigateway.createDeployment({
         restApiId: restApiId,
         stageName: 'prod'
       }).promise()
+      // console.log('before createBasePathMapping')
       let deploymentId = deploymentData.id
-
       await apigateway.createBasePathMapping( {
         domainName: config.apiDomainName,
         restApiId: restApiId,
         basePath: apiObject.ApiName.toLowerCase(),
         stage: 'prod'
       }).promise()
-
       apiObject.RestApiId = restApiId
       apiObject.DeploymentId = deploymentId
     } catch (err) {
@@ -279,9 +278,38 @@ app.post('/apis', async function(req, res) {
         DeploymentId
   */
 
+  async function updateFunction(functionName, apiName) {
+    try {
+      let funcData = await lambda.getFunctionConfiguration({
+        FunctionName: functionName
+      }).promise()
+      let funcEnvs = funcData.Environment.Variables
+      if (funcEnvs.hasOwnProperty('API_GATEWAY_NAME') === false) {
+        let addPermissionPromise = lambda.addPermission({
+          Action: "lambda:InvokeFunction", 
+          FunctionName: functionName, 
+          Principal: "apigateway.amazonaws.com", 
+          StatementId: functionName + "_appgw_invoke"
+        }).promise()
+        await addPermissionPromise.catch( function (err) { 
+          console.log('updateFunction addPermission error: ', err) // an error occurred
+        })
+      }
+      funcEnvs.API_GATEWAY_NAME = apiName
+      await lambda.updateFunctionConfiguration({
+        FunctionName: functionName, /* required */
+        Environment: {
+          Variables: funcEnvs
+        }
+      }).promise()
+    } catch (err) {
+      console.log('updateFunction err: ', err)
+    }
+  }
   // createLeafPath - 
   async function createLeafPath(restApiId, resourceId, mservice) {
-      for(let methodStr of ['POST', 'GET', 'PUT', 'DELETE']){
+    try{
+      for(let methodStr of ['ANY']){ // ['POST', 'GET', 'PUT', 'DELETE']){
         await apigateway.putMethod({
           restApiId: restApiId,
           resourceId: resourceId,
@@ -289,22 +317,34 @@ app.post('/apis', async function(req, res) {
           authorizationType: apiObject.AuthorizationType,  // NONE | AWS_IAM | COGNITO_USER_POOLS
           apiKeyRequired: false
         }).promise()
+        // console.log('putIntegration')
+        let functionArn = mservice.ServiceArn.replace(':' + mservice.ServiceName + '_Latest', '')
         await apigateway.putIntegration({
           httpMethod: methodStr,
           resourceId: resourceId,
           restApiId: restApiId,
           type: 'AWS_PROXY',
-          integrationHttpMethod: methodStr,
-          uri: 'arn:aws:apigateway:' + config.region + ':lambda:path/2015-03-31/functions/' + mservice.ServiceArn + '/invocations'
+          credentials: null,
+          /*  For the Lambda integration, 
+              you can call the Lambda's addPermission action to set the resource-based permissions 
+              and then set credentials to null in the API Gateway integration request.
+              https://docs.aws.amazon.com/apigateway/latest/developerguide/integration-request-basic-setup.html
+
+              or, assign arn:aws:iam::account-id:role/iam-role-name to allow invoke lambda
+          */
+          integrationHttpMethod: 'POST',
+          uri: 'arn:aws:apigateway:' + config.region + ':lambda:path/2015-03-31/functions/' + functionArn + '/invocations'
         }).promise()
-        // arn:aws:apigateway:$REGION:lambda:path/2015-03-31/functions/arn:aws:lambda:$REGION:$ACCOUNT:function:$FUNCTION_NAME/invocation
+        // arn:aws:apigateway:$REGION:lambda:path/2015-03-31/functions/{arn:aws:lambda:$REGION:$ACCOUNT:function:$FUNCTION_NAME}/invocations
+        // console.log('putMethodResponse')
         await apigateway.putMethodResponse({
           httpMethod: methodStr,
           resourceId: resourceId,
           restApiId: restApiId,
           statusCode: '200',
           responseModels: { 'application/json' : 'Empty'}  // content type: 
-        })
+        }).promise()
+        // console.log('putIntegrationResponse')
         await apigateway.putIntegrationResponse({
           httpMethod: methodStr,
           resourceId: resourceId,
@@ -313,6 +353,9 @@ app.post('/apis', async function(req, res) {
           responseTemplates: { 'application/json' :  ''}
         }).promise()
       } // for methods
+    } catch (err) {
+      console.log('createLeafPath err: ', err)
+    }
   } // end of function createLeafPath
 });
 
@@ -356,11 +399,17 @@ app.delete('/apis', async function(req, res) {
     }).promise()
   } catch(err) {
     console.log('db get: ', err)
+    res.json({error: err});
+    return
   }
   if (dbGetData !== null && dbGetData.Item !== undefined) {
     let apiItem = dbGetData.Item
     if (apiItem.hasOwnProperty('RestApiId') && apiItem.hasOwnProperty('DeploymentId')) {
-      await deleteApi(apiObject.ApiName, apiItem.RestApiId, apiItem.DeploymentId)
+      let deleteResult = await deleteApi(apiObject.ApiName, apiItem.RestApiId, apiItem.DeploymentId)
+      if (deleteResult === false) {
+        res.json({error: 'api deletion is failed'});
+        return
+      }
     }
   }
   let params = {}

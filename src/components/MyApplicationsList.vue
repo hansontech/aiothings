@@ -19,6 +19,13 @@
           <pre id="log"></pre>
         </div>
       </b-modal>
+      <div v-if="isLoading" class="mb-2">
+        <b-row>
+          <b-col align="center">
+            <spinner  size="medium" />
+          </b-col>
+        </b-row>
+      </div>
       <div class="text-center mt-5" v-if="services.length === 0">
               No services available.
       </div>
@@ -40,6 +47,7 @@
                   <b-dropdown variant="secondary" class="mx-0" right >
                     <!-- VUE reference: https://vuejs.org/v2/guide/events.html -->
                     <b-dropdown-item @click = "showServiceDetail(index)" >Edit</b-dropdown-item>
+                    <b-dropdown-item @click = "copyService(index)" >Duplicate</b-dropdown-item>        
                     <b-dropdown-item @click.stop="deleteService(index)" >Delete</b-dropdown-item>
                   </b-dropdown>
                 </b-col>
@@ -87,7 +95,8 @@ export default {
       loading: false,
       services: {},
       testResult: '',
-      walkTreeLoading: false
+      walkTreeLoading: false,
+      isLoading: false
     }
   },
   watch: {
@@ -127,11 +136,14 @@ export default {
     async reloadServices () {
       const username = store.getters.username
       console.log('reloadServices: username: ', username)
+      this.isLoading = true
       const result = await API.get('mserviceApi', '/mservices', {
           'queryStringParameters': {
                'userId': username
           }
       })
+      // console.log('result: ', result)
+      this.isLoading = false
       this.testResult = result
       let resultJson = JSON.parse(result)
       store.commit('setMservices', resultJson)
@@ -148,6 +160,10 @@ export default {
     },
     showServiceDetail (index) {
       this.$router.push({name: 'editService', params: { serviceIndex: index, serviceSource: this.services }})
+    },
+    copyService (index) {
+      console.log('copyService to: ', this.services[index])
+      this.$router.push({name: 'newService', params: { serviceIndex: index, copiedService: this.services[index] }})
     },
     deleteService (index) {
       const username = this.$store.getters.username

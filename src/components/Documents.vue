@@ -14,14 +14,14 @@
         -->
         <!-- reference source CSS https://amsik.github.io/liquor-tree/#Guides -->
         <!-- <div style="border-right: 1px solid blue; overflow-y: scroll; position: fixed; width: 250px; top: 70px; left: 0; bottom: 0;"> -->
-        <div class='menu' style="border-right: 1px solid blue; top: 70px;" >
+        <div class="menu" style="border-right: 1px solid blue; top: 70px;" >
          
           <doc-sidebar></doc-sidebar>
         </div>
         <!-- <div style="position: fixed; overflow-y: auto; padding-left: 240px; top: 140px; right: 0; bottom: 0;"> -->
-        <div class='page'>
+        <div class="page">
           <div class = 'page-content'>
-            <router-view />
+            <router-view/>
           </div>
         </div>
     
@@ -136,11 +136,12 @@ export default {
   }
 
 .page-content {
-  padding: 0px;
-  margin: 0 auto;
+  /* padding: 0px;
+  margin: 0 auto; */
   width: 885px;
   max-width: 100%;
-  padding-bottom: 80px; }
+  padding-bottom: 80px;
+  }
 
 </style>
 

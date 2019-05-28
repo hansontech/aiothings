@@ -3,7 +3,6 @@
     <div style="min-height: 500px">
       <b-row align-v="center" align-h="center" > 
         <spinner size="large" />
-        <h2>Authenticating...</h2>
       </b-row>
     </div>
   </b-container>
@@ -11,10 +10,10 @@
 
 <script>
 
-import store from '../store'
+// import store from '../store'
 // import router from '../router'
-// import { Auth } from 'aws-amplify'
 import { Auth } from 'aws-amplify'
+// import Amplify from 'aws-amplify'
 // import { CognitoAuth } from 'amazon-cognito-auth-js'
 // import authService from '../services/auth'
 /*
@@ -68,6 +67,7 @@ export default {
       }
     })
   }, */
+
   async created () {
     // let self = this
     // const curUrl = window.location.href
@@ -115,8 +115,6 @@ export default {
     */
     var curUrl = window.location.href
     console.log('callback: ', curUrl)
-
-    Auth.configure({
       /*
       identityPoolId: 'ap-southeast-2:00294c49-1629-49e7-88d7-4720566c1377',
       // REQUIRED - Amazon Cognito Identity Pool ID
@@ -127,9 +125,13 @@ export default {
       // OPTIONAL - Amazon Cognito Web Client ID
       // ....
       */
+
+    Auth.configure({
+
       oauth: Auth.configure().oauth
       // mandatorySignIn: true
     })
+
     /*
     try {
       let authData = authService.authenticateData()
@@ -151,7 +153,7 @@ export default {
     } catch (e) {
       console.log('error from auth???')
     } */
-    store.commit('setAuthenticated', true)
+    this.$store.commit('setAuthenticated', true)
     /*
     Auth.currentAuthenticatedUser()
     .then(user => {

@@ -17,6 +17,13 @@
        <b-button :href="'/user/edit/'+index" variant="primary">Go somewhere</b-button>
        v-if="typeof thingsMap[thing.ThingId] !== 'undefined'"
        -->
+       <div v-if="isLoading" class="mb-2">
+        <b-row>
+          <b-col align="center">
+            <spinner  size="medium" />
+          </b-col>
+        </b-row>
+      </div>
        <div class="text-center mt-5" v-if="things.length === 0">
               No IoT devices available.
       </div>
@@ -82,7 +89,8 @@ export default {
       subs: [],
       thingsMap: {'x': 1},
       testFlag: false,
-      things: null
+      things: null,
+      isLoading: false
     }
   },
   computed: {
@@ -189,7 +197,9 @@ export default {
       console.log('closeCallback')
     },
     async refreshThings () {
+      this.isLoading = true
       await atHelper.reloadThings()
+      this.isLoading = false
       this.things = this.$store.getters.things
       if (this.things === null) {
         this.things = []
