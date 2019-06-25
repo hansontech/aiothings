@@ -226,6 +226,60 @@ let dbGetCertinfo = ( userId, iotcert, callback ) => {
 // Detail AWS IOT API information
 // https://docs.aws.amazon.com/iot/latest/apireference/Welcome.html
 
+// Learn how to set IoT Policy
+// https://docs.aws.amazon.com/iot/latest/developerguide/pub-sub-policy.html
+// https://aws.timwang.space/blog/?p=295
+let iotPolicyTemplate = {
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [ "greengrass:*" ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iot:UpdateThingShadow",
+        "iot:GetThingShadow",
+        "iot:DeleteThingShadow"
+      ],
+      "Resource": [
+        "arn:aws:iot:REGION_NAME:ACCOUNT_ID:thing/${iot:Connection.Thing.ThingName}"
+      ]
+    },
+      {
+          "Effect": "Allow",
+          "Action": [
+            "iot:Connect"
+          ],
+          "Resource": [
+            "arn:aws:iot:REGION_NAME:ACCOUNT_ID:client/${iot:Connection.Thing.ThingName}"
+          ]
+      },
+      {
+          "Effect": "Allow",
+          "Action": [
+            "iot:Subscribe"
+          ],
+          "Resource": [
+            "arn:aws:iot:REGION_NAME:ACCOUNT_ID:topicfilter/aiot/USER_ID/*",
+            "arn:aws:iot:REGION_NAME:ACCOUNT_ID:topicfilter/aiot/THING_ID/*"
+          ]
+      },
+      {
+          "Effect": "Allow",
+          "Action": [
+              "iot:Publish",
+              "iot:Receive"
+          ],
+          "Resource": [
+            "arn:aws:iot:REGION_NAME:ACCOUNT_ID:topic/aiot/USER_ID/*",
+            "arn:aws:iot:REGION_NAME:ACCOUNT_ID:topic/aiot/THING_ID/*"      
+          ]
+      }
+  ]
+}
 // Apply cert & Attach thing, policy
 let applyThingCert = ( userId, thingNameTag, callback ) => {
   console.log('applyCert region: ', config.region)  
@@ -236,84 +290,130 @@ let applyThingCert = ( userId, thingNameTag, callback ) => {
     setAsActive: true
   };
   // Create cert
-  iot.createKeysAndCertificate(params, function(err, certData) {
+  iot.createKeysAndCertificate(params, async function(err, certData) {
     // console.log(certData);
     if (err){
       console.log(err, err.stack); // an error occurred
       callback(err)
+      return
     } 
-    else{
+    // else{
+    try {
       // let datetime = (new Date()).getTime()
       // console.log('applyThingCert: certData: ', certData)
       //let thingId = userId + '_' + datetime
       let thingId = userId + '_' + thingNameTag
       // Create IoT Policy for above cert
-      var params = {
-        policyDocument: config.POLICY_DOCUMENT, /* required */
+      let sts = new AWS.STS()
+      let stsData = await sts.getCallerIdentity({}).promise()
+      let accountId = stsData.Account
+      iotPolicyTemplateStr = JSON.stringify(iotPolicyTemplate)
+      iotPolicyTemplateStr = iotPolicyTemplateStr.replace(/ACCOUNT_ID/g, accountId)
+      iotPolicyTemplateStr = iotPolicyTemplateStr.replace(/REGION_NAME/g, config.region)
+      iotPolicyTemplateStr = iotPolicyTemplateStr.replace(/USER_ID/g, userId)
+      iotPolicyTemplateStr = iotPolicyTemplateStr.replace(/THING_ID/g, thingId)
+      let iotPolicy = JSON.parse(iotPolicyTemplateStr)
+      console.log('iotPolicy: ', iotPolicy)
+      await iot.createPolicy({
+        policyDocument: iotPolicy, /* required */
         policyName: thingId /* required */
-      };
-      console.log('policy params: ', params)
-      iot.createPolicy(params, function(err, data) {
-        if (err) {
-          console.log(err, err.stack); // an error occurred
-          callback(err)
-        } 
-        else{
-          // Attach policy for cert
-          var params = {
-            policyName: thingId, /* required */
-            target: certData.certificateArn /* required */
-          };
-          iot.attachPolicy(params, function(err, data) {
-            if (err) {
-              console.log(err, err.stack); // an error occurred
-              callback(err)
-            }
-            else {
-              // Create thing for cert
-              var params = {
-                thingName: thingId, /* required */
-                attributePayload: {
-                  attributes: {
-                    'Application': 'AIOT',
-                    'UserId': userId                  
-                  },
-                  merge: true || false
-                }
-              };
-              iot.createThing(params, function(err, data) {
-                if (err) {
-                  console.log(err, err.stack); // an error occurred
-                  callback(err)
-                }
-                else {
-                  let certArn = certData.certificateArn
-                  let certId = certData.certificateId
-                  // Attach thing for cert
-                  var params = {
-                    principal: certArn, /* required */
-                    thingName: thingId /* required */
-                  };
-                 
-                  iot.attachThingPrincipal(params, function(err, thingData) {
-                    if (err) {
-                      console.log(err, err.stack); // an error occurred
-                      callback(err)
-                    }
-                    else {
-                      callback( null, certId, thingId, certData);
-                    }
-                  });
-                }
-              });
-            }
-          });
+      }).promise()
+      await iot.attachPolicy( {
+        policyName: thingId, /* required */
+        target: certData.certificateArn /* required */
+      }).promise()
+      await iot.createThing( {
+        thingName: thingId, /* required */
+        attributePayload: {
+          attributes: {
+            'Application': 'AIOT',
+            'UserId': userId                  
+          },
+          merge: true || false
         }
-      });
-    }                
+      }).promise()
+      let certArn = certData.certificateArn
+      let certId = certData.certificateId
+      // Attach thing for cert
+      await iot.attachThingPrincipal({
+        principal: certArn, /* required */
+        thingName: thingId /* required */
+      }).promise()
+      callback( null, certId, thingId, certData);
+ 
+    } catch (err) {
+      console.log('createKeysAndCertificate: ', err)
+      callback(err)
+    }              
   });
 }
 
+// Apply cert & Attach thing, policy
+let updateThingCert = ( userId, certId, thingId, callback ) => {
+  AWS.config.update({region: config.region});
+  var iot = new AWS.Iot();
+  // get cert
+  iot.describeCertificate({
+    certificateId: certId
+  }, async function (err, certData) {
+      if (err){
+      console.log(err, err.stack); // an error occurred
+      callback(err)
+      return
+    }
+    try {
+      let policyName = thingId
+      await iot.detachPolicy({
+        policyName: policyName,
+        target: certData.certificateDescription.certificateArn
+      }).promise().catch( function(error) {
+        console.log('detachPolicy: ', error)
+      })
+      let listPolicyData = await iot.listPolicyVersions({policyName: thingId}).promise()
+      for (let policyVersion of listPolicyData.policyVersions) {
+        if (policyVersion.isDefaultVersion) {
+        } else {
+          console.log('policyVersion: ', policyVersion)
+          await iot.deletePolicyVersion( {
+            policyName: policyName,
+            policyVersionId: policyVersion.versionId
+          }).promise().catch( function (error) {
+            console.log('deletePolicyVersion: ', error)
+          })
+        }
+      }
+      console.log('deletePolicy')
+      await iot.deletePolicy({
+        policyName: policyName /* required */
+      }).promise().catch( function(error) {
+        console.log('deletePolicy: ', error)
+      })
+      // Create IoT Policy for above cert
+      let sts = new AWS.STS()
+      let stsData = await sts.getCallerIdentity({}).promise()
+      let accountId = stsData.Account
+      iotPolicyTemplateStr = JSON.stringify(iotPolicyTemplate)
+      iotPolicyTemplateStr = iotPolicyTemplateStr.replace(/ACCOUNT_ID/g, accountId)
+      iotPolicyTemplateStr = iotPolicyTemplateStr.replace(/REGION_NAME/g, config.region)
+      iotPolicyTemplateStr = iotPolicyTemplateStr.replace(/USER_ID/g, userId)
+      iotPolicyTemplateStr = iotPolicyTemplateStr.replace(/THING_ID/g, thingId)
+      let iotPolicy = iotPolicyTemplateStr // JSON.parse(iotPolicyTemplateStr)
+      console.log('iotPolicy: ', iotPolicy)
+      await iot.createPolicy({
+        policyDocument: iotPolicy, /* required */
+        policyName: policyName /* required */
+      }).promise()
+      await iot.attachPolicy( {
+        policyName: policyName, /* required */
+        target: certData.certificateDescription.certificateArn /* required */
+      }).promise()
+      callback( null )
+    } catch (err) {
+      console.log('updateThingCert: ', err)
+      callback(err)
+    }              
+  });
+}
 let allowUserIoT = (identityId, callback ) => {
   AWS.config.update({region: config.region});
   var iot = new AWS.Iot();
@@ -563,6 +663,7 @@ module.exports = {
     dbDeleteEdge,
     getIoTRootCA,
     applyThingCert,
+    updateThingCert,
     cancelThingCert,
     getCertPem,
     allowUserIoT,

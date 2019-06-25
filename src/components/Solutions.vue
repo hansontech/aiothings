@@ -3,7 +3,7 @@
       <div class="at-bottombar">
        <b-row align-v="center" class="at-sidebar">
             <b-col align="start" class="mt-1">
-              <h4>Shared Solutions</h4>
+              <h4 v-b-popover.hover.bottom="'Use Search to query microservices'">Shared Solutions &ensp;<small><i class="fas fa-info-circle"></i></small></h4>
             </b-col>
             <b-col align="end">
               <b-button variant="info" @click="refreshSolutions()">Refresh</b-button>

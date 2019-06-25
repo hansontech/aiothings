@@ -156,14 +156,14 @@ export default {
               // const regex = new RegExp('/contact\\b', 'g');
               // or /.../;
               let thingsMatched = this.things.filter(function (thy) {
-                 console.log('match: ', thy)
+                 // console.log('match: ', thy)
                  return thy.ThingId.match(thing.ThingId)
               })
               thingsMatched[0].ipAddr = deviceIpAddr
               this.thingsMap[thing.ThingId] = deviceIpAddr
               this.$set(this.thingsMap, thing.ThingId, deviceIpAddr)
               this.$set(this.things, 0, this.things[0])
-              console.log('thingsMap: ', this.thingsMap)
+              // console.log('thingsMap: ', this.thingsMap)
               console.log('thingsMap value: ', this.thingsMap[thing.ThingId])
               this.testFlag = true
           },
@@ -226,9 +226,9 @@ export default {
             }
       }).then(response => {
         // TODO remove the thing entry from list
-        console.log('response: ', response)
+        // console.log('response: ', response)
         if (response === 'success' || response.hasOwnProperty('success')) {
-          console.log('update things local')
+          // console.log('update things local')
           this.things.splice(index, 1)
           this.$store.commit('setThings', this.things)
         }

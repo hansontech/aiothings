@@ -75,7 +75,7 @@ export default {
   },
   created () {
     // Subscribe
-    let subscribeConsoleOutputTopic = 'aiot/' + this.$store.getters.username + '/console/output'
+    let subscribeConsoleOutputTopic = 'aiot/' + this.$store.getters.username + '/+/console/output'
 
     console.log('subscribe topic: ', subscribeConsoleOutputTopic)
     this.consoleSub = PubSub.subscribe(subscribeConsoleOutputTopic).subscribe({

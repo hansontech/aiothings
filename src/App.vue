@@ -45,6 +45,9 @@
         </b-navbar-nav>
         -->
         <b-navbar-nav class="ml-auto">
+          <b-nav-item center @click="gotoShop()"><i class="fas fa-cube"></i>&ensp;Shop</b-nav-item>
+        </b-navbar-nav>
+        <b-navbar-nav class="ml-auto">
           <b-nav-item @click="gotoDocuments()"><i class="fas fa-info"></i>&ensp;Docs</b-nav-item>
           &ensp;
           <!--
@@ -279,6 +282,9 @@ export default {
     gotoDocuments () {
       console.log('gotoDocuments')
       this.$router.push('/docs/main') // {name: 'docs'})
+    },
+    gotoShop () {
+      this.$router.push('/shop') // {name: 'docs'})
     },
     gotoUserProfile () {
       console.log('gotoUserProfile')

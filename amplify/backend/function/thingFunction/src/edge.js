@@ -288,6 +288,7 @@ let getDeployStatus = async (deployId, edgeData) => {
 
 let deleteEdge = async (userId, certId, edgeData) => {
   try {
+    console.log('edgeData: ', edgeData)
     if (edgeData.ggConnector !== undefined) {
       await greengrass.deleteConnectorDefinition({
         ConnectorDefinitionId: edgeData.ggConnector.created.Id /* required */
@@ -303,7 +304,7 @@ let deleteEdge = async (userId, certId, edgeData) => {
         ResourceDefinitionId: edgeData.ggResource.created.Id /* required */
       }).promise()
     }
-    if (edgeDefinition.subscriptionDefinition !== undefined) {
+    if (edgeData.ggSubscription !== undefined) {
       await greengrass.deleteSubscriptionDefinition({
         SubscriptionDefinitionId: edgeData.ggSubscription.created.Id /* required */
       }).promise()
@@ -313,7 +314,9 @@ let deleteEdge = async (userId, certId, edgeData) => {
         CoreDefinitionId: edgeData.ggCore.created.Id /* required */
       }).promise()
     }
+    console.log('deleteGroup ---: ', edgeData.ggGroup)
     if (edgeData.ggGroup !== undefined) {
+      console.log('deleteGroup: ', edgeData.ggGroup)
       await greengrass.deleteGroup({
         GroupId: edgeData.ggGroup.created.Id /* required */
       }).promise()

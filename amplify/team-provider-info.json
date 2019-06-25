@@ -12,9 +12,10 @@
         },
         "categories": {
             "auth": {
-                "cognitoAiot": {
+                "aiotAuth": {
                     "facebookAppId": "265383824068284",
-                    "googleClientId": "168989735160-otcg9fqm5d0ip4l0gbjd8n6vg75mguf8.apps.googleusercontent.com"
+                    "googleClientId": "168989735160-otcg9fqm5d0ip4l0gbjd8n6vg75mguf8.apps.googleusercontent.com",
+                    "hostedUIProviderCreds": "[{\"ProviderName\":\"Facebook\",\"client_id\":\"265383824068284\",\"client_secret\":\"2a31c00a07ceecef3e32e16f771cb993\"},{\"ProviderName\":\"Google\",\"client_id\":\"168989735160-otcg9fqm5d0ip4l0gbjd8n6vg75mguf8.apps.googleusercontent.com\",\"client_secret\":\"Fs_G__7Va-yIEVBr8JrHsQMl\"}]"
                 }
             }
         }

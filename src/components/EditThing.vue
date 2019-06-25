@@ -6,7 +6,7 @@
              ref="modalReturnConfirmRef"
              @ok="returnDiscardChangesOk"
              @cancel="returnCancel">
-             <h5>Discard changes and return?</h5>
+             <h5>Leave and ignore the changes?</h5>
       </b-modal>
       <b-row align-v="center" style="border-bottom: 1px solid grey; padding-bottom: 5px;
   margin-bottom: 5px;">
@@ -14,10 +14,11 @@
             <h4>IoT Device : {{thingName}}</h4>
         </b-col>
         <b-col sm="auto" align="end">
-          <b-button v-if="!isShowEdit" v-b-popover.hover.bottom="'toggle to edit mode'" v-b-toggle.collapseEdit.collapseShow variant="info" @click="isChangedNotSaved = false">Edit</b-button>
-          <b-button v-if="isShowEdit" v-b-popover.hover.bottom="'toggle to display only'" v-b-toggle.collapseEdit.collapseShow variant="info">Show</b-button>
-          <b-button v-if="isChangedNotSaved" variant="info" @click="updateThing()">Update</b-button>
-          <b-button v-b-popover.hover.bottom="'To deploy, make sure the edge device is online and edge daemon is running'" variant="info" @click="deployEdge()">Edge Deploy</b-button>
+          <!-- <b-button v-if="!isShowEdit" v-b-popover.hover.bottom="'toggle to edit mode'" v-b-toggle.collapseEdit.collapseShow variant="info" @click="isChangedNotSaved = false">Edit</b-button>
+          <b-button v-if="isShowEdit" v-b-popover.hover.bottom="'toggle to display only'" v-b-toggle.collapseEdit.collapseShow variant="info">Show</b-button> -->
+          <b-button variant="info" @click="updateThing()">Update</b-button>
+          <b-button v-if="isEdgeAbleToDeploy" v-b-popover.hover.bottom="'To deploy, make sure the edge device is online and edge daemon is running'" variant="info" @click="deployEdge()">Edge Deploy</b-button>
+          <b-button v-if="isEdgeAbleToDelete" variant="info" @click="deleteEdge()">Delete Edge</b-button>
           <b-button variant="dark" @click="backHome()">Return</b-button>
         </b-col>
       </b-row>
@@ -38,38 +39,45 @@
               <h4>Description </h4>
             </b-col>
           </b-row>
+          <!-- 
           <b-row>
             <b-col>
-              <!-- elements to collapse -->
               <b-collapse visible id="collapseShow" class="mt-2" style="white-space: pre-wrap;">
                 <textarea class="w-100 h-300" style="height: 150px;" v-model="thingDesc" placeholder="Please input for description" disabled></textarea>
               </b-collapse> 
             </b-col>       
           </b-row>
+          -->
           <b-row>
             <b-col>
             <!-- <b-collapse id="collapseEdit" class="mt-2"> -->
-              <b-collapse v-model="isShowEdit" id="collapseEdit" class="mt-2" style="width:100%; height: 150px; ">
+              <!-- <b-collapse id="collapseEdit" class="mt-2" style="width:100%; height: 150px; "> -->
                 <textarea class="w-100 h-300" style="height: 150px;" v-model="thingDesc" placeholder="Please input for description"></textarea>
-              </b-collapse>
+              <!-- </b-collapse> -->
             <!-- </b-collapse> -->
             </b-col>
           </b-row>
-          <b-row>
-            <b-col sm>
-              <h4 style="display: inline;">User ID: &ensp;</h4>
+          <b-row class="mt-3">
+            <b-col sm="4">
+              <h5 style="display: inline;">User ID</h5>
+            </b-col>
+            <b-col>
               <h5 style="display: inline;"><code>{{$store.getters.username}}</code></h5>
             </b-col>
           </b-row>
-          <b-row>
-            <b-col sm>
-              <h4 style="display: inline;">Thing ID: &ensp;</h4> 
+          <b-row class="mt-2">
+            <b-col sm="4">
+              <h5 style="display: inline;">Thing ID</h5> 
+            </b-col>
+            <b-col>
               <h5 style="display: inline;"><code>{{thing.ThingId}}</code></h5>
             </b-col>
           </b-row>
-          <b-row  class="mt-3">
+          <b-row  class="mt-2">
+            <b-col sm="4">
+                <h5 style="display: inline;">Certificates & key</h5>
+            </b-col>
             <b-col>
-                <h4 style="display: inline;"> Certificates / keys: &ensp;</h4>
                 <b-button style="display: inline;" id="downloadButton" variant="info" @click="downloadCert()">Download</b-button>
             </b-col>
           </b-row>
@@ -81,24 +89,60 @@
             Edge deployment is failed
           </b-modal>
           <b-popover v-if="isDownloading === false" target="downloadButton" triggers="hover focus">
-                  <template slot="title">Download configuration files</template>
-                    <span class="text-danger">certificate.crt</span>: the certificate for AIOT to certify this device. <br />
-                    <span class="text-danger">private.key</span>: the private key the device will use it for it's identity. <br />
-                    <span class="text-danger">root-CA.crt</span>: the certificate issued by a CA (Certificate Authority) to certify AIOT. <br />
+                  <template slot="title">Download configurations</template>
+                    <b-row><b-col>They are used to build a secured connection to IoT device.</b-col></b-row>
+                    <b-row><b-col><span class="text-danger">certificate.crt</span></b-col></b-row><b-row><b-col>Certificate for AIoThings to certify this device. <br /></b-col></b-row>
+                    <b-row><b-col><span class="text-danger">private.key</span></b-col></b-row><b-row><b-col>Private key the device uses as it's identity. <br /></b-col></b-row>
+                    <b-row><b-col><span class="text-danger">root-CA.crt</span></b-col></b-row><b-row><b-col>Certificate issued by CA (Certificate Authority) used to certify AIoThings. <br /></b-col></b-row>
           </b-popover>
-          <b-row  class="mt-3">
+          <b-row class="mt-2">
             <b-col>
-              <b-card class="text-left mr-3">
-                <strong>MQTT client settings:</strong> <br />
-                <span class="text-primary">MQTT broker (server)</span>: a3vgppxo7lddg8-ats.iot.ap-southeast-2.amazonaws.com (if 'iot.aiothings.com' not work)<br />
-                <span class="text-primary">Certificates and keys</span>: set to the files downloaded <br />
-                <span class="text-primary">Username/password</span>: please leave it blank <br />
-                <span class="text-primary">Client Id</span>: set as Thing ID <br />
-                <span class="text-primary">QoS</span>: set to 1 or higher <br />
-                <span class="text-primary">MQTT port</span>: 8883 <br />
-                <strong>MQTT message usage:</strong> <br />
-                <span class="text-primary">MQTT topic format</span>: 'aiot/{User ID}/{your topic}'<br />
-                <span class="text-primary">MQTT payload format</span>: must comply to JSON<br />
+              <b-card>
+                <b-row>
+                  <b-col><strong>MQTT client settings to connect to AIoThings</strong> <br /></b-col>
+                </b-row>
+                <b-row>
+                  <b-col sm="3"><span class="text-primary">MQTT broker (server)</span></b-col>
+                  <b-col>
+                    <b-row>
+                      <b-col><code>b-a3vgppxo7lddg8-ats.iot.ap-southeast-2.amazonaws.com</code></b-col>
+                    </b-row>
+                    <b-row>
+                      <b-col>Or, <code><em>iot.aiothings.com</em></code><br/></b-col>
+                    </b-row>
+                  </b-col>
+                </b-row>
+                <b-row>
+                  <b-col sm="3"> <span class="text-primary">Certificates and keys</span></b-col> 
+                  <b-col>Set to the files <em>downloaded</em> from the above button<br /> </b-col>
+                </b-row>
+                <b-row>
+                  <b-col sm="3"> <span class="text-primary">Username/password</span></b-col> 
+                  <b-col>Leave it blank <br /> </b-col>
+                </b-row>
+                <b-row>
+                  <b-col sm="3"> <span class="text-primary">Client Id</span></b-col> 
+                  <b-col>Set to <code>{Thing ID}</code> showing above <br /> </b-col>
+                </b-row>
+                <b-row>
+                  <b-col sm="3"> <span class="text-primary">QoS</span></b-col> 
+                  <b-col>Set to <code>1 or higher</code> <br /> </b-col>
+                </b-row>
+                <b-row>
+                  <b-col sm="3"> <span class="text-primary">MQTT port</span></b-col>
+                  <b-col><code>8883</code><br /> </b-col>
+                </b-row>
+                <b-row class="mt-3">
+                  <b-col> <strong>MQTT messages</strong> <br /> </b-col>
+                </b-row>
+                <b-row>
+                  <b-col sm="3"> <span class="text-primary">MQTT topic format</span></b-col> 
+                  <b-col>Set to <code>'aiot/{User ID}/{Thing ID}/{your topic}'</code><br /> </b-col>
+                </b-row>
+                <b-row>
+                  <b-col sm="3"> <span class="text-primary">MQTT payload format</span></b-col> 
+                  <b-col>Must comply to JSON<br /> </b-col>
+                </b-row>
               </b-card>
             </b-col>
           </b-row>
@@ -806,12 +850,12 @@ export default {
   data: function () {
     return {
       thing: null,
-      isChangedNotSaved: null,
+      isChangedNotSaved: false,
       isDownloading: false,
       isEdgeUpdating: false,
       isDeploying: false,
-      thingDesc: '',
-      thingName: '',
+      thingDesc: null,
+      thingName: null,
       isShowEdit: false,
       testList: {},
       cboxColor: 'blue',
@@ -1127,6 +1171,21 @@ export default {
       } else {
         return null
       }
+    },
+    isEdgeAbleToDelete () {
+      if (this.thing.hasOwnProperty('EdgeData')) {
+        let edgeData = this.thing.EdgeData
+        if (edgeData.ggFunction === undefined && edgeData.ggResource === undefined) {
+          return true
+        }
+      }
+      return false
+    },
+    isEdgeAbleToDeploy () {
+      if (this.thing.hasOwnProperty('EdgeData') && this.isEdgeAbleToDelete === false) {
+        return true
+      }
+      return false
     }
   },
   async created () {
@@ -1150,9 +1209,14 @@ export default {
             'edgeData': JSON.stringify(this.thing.EdgeData)
           }
         })
-        // this.thing.EdgeDefinition = definitionData.edgeDefinition
-        this.$set(this.thing, 'EdgeDefinition', definitionData.edgeDefinition)
-        console.log('result: ', definitionData.edgeDefinition)
+        // console.log('definitionData: ', definitionData)
+        // console.log('result: ', definitionData.edgeDefinition)
+        if (definitionData.edgeDefinition === null) {
+          // this.$delete(this.thing, 'EdgeData')
+          this.$delete(this.thing, 'EdgeDefinition')
+        } else {
+          this.$set(this.thing, 'EdgeDefinition', definitionData.edgeDefinition)
+        }
       } catch (err) {
         console.log('def error: ', err)
       }
@@ -1174,15 +1238,17 @@ export default {
     }
   },
   watch: {
-    /*
+    /* right way to force rendering (refresh)
+      1. watch the data variable
+      2. use this.$set or this.$delete to give chance to VUE to watch
+      3. put $forceUpdate()
+    */
     thing: {
         handler: function () {
-          console.log('thing watch::')
           this.$forceUpdate()
         },
         deep: true
     },
-    */
     cboxColor (val) {
       this.$el.style.setProperty('--color', val)
     },
@@ -1203,16 +1269,20 @@ export default {
       }
     },
     thingDesc: function (newDesc, oldDesc) {
-      if (newDesc !== oldDesc && this.isChangedNotSaved !== null) {
+      console.log('thingDesc changed: ', oldDesc)
+      if (newDesc !== oldDesc && this.isChangedNotSaved !== null && oldDesc !== null) {
+        console.log('thingDesc changed now')
         this.isChangedNotSaved = true
       }
     },
-    thingName: function (newDesc, oldDesc) {
-      if (newDesc !== oldDesc && this.isChangedNotSaved !== null) {
+    thingName: function (newName, oldName) {
+      console.log('thingName changed: ', oldName)
+      if (newName !== oldName && this.isChangedNotSaved !== null && oldName !== null) {
+        console.log('thingName changed now')
         this.isChangedNotSaved = true
       }
     }
-  },
+   },
   methods: {
     mlResourceModelFileName (edgeResource) {
       let uri = edgeResource.ResourceDataContainer.S3MachineLearningModelResourceData.S3Uri
@@ -1359,23 +1429,21 @@ export default {
       this.uploadEdge()
     },
     async deleteEdge () {
-      if (this.thing.hasOwnProperty('EdgeDeiniition') === false) {
-        return
-      }
       try {
         await API.del('thingApi', '/edge', {
             'queryStringParameters': {
               userId: this.thing.UserId,
               certId: this.thing.CertId,
               thingId: this.thing.ThingId,
-              edgeDefinition: this.thing.EdgeDefinition
+              edgeData: JSON.stringify(this.thing.EdgeData)
             }
         })
-        delete this.thing.EdgeDefinition
-        delete this.thing.EdgeData
+        this.$delete(this.thing, 'EdgeDefinition')
+        this.$delete(this.thing, 'EdgeData')
       } catch (err) {
         console.log(err)
       }
+      this.$forceUpdate()
     },
     confirmAddEdgeService (service) {
       console.log('service: ', service)
@@ -1421,8 +1489,8 @@ export default {
         this.isEdgeUpdating = true
         const result = await API.post('thingApi', '/edge', { body })
         console.log('uploadEdge result: ', result)
-        this.thing.EdgeDefinition = result.edgeDefinition
-        this.thing.EdgeData = result.edgeData
+        this.$set(this.thing, 'EdgeDefinition', result.edgeDefinition)
+        this.$set(this.thing, 'EdgeData', result.edgeData)
         // update to current cached things array
         let storedThings = this.$store.getters.things
         storedThings[this.thingIndex] = this.thing
@@ -1714,19 +1782,21 @@ export default {
       }
     },
     async updateThing () {
-      if (this.isChangedNotSaved) {
+      // if (this.isChangedNotSaved) {
         this.thing.ThingDesc = this.thingDesc
         this.thing.ThingName = this.thingName
+        // console.log('Thing: ', this.thing)
         const userId = this.$store.getters.username
         const certId = this.thing.CertId
+        const thingId = this.thing.ThingId
         const name = this.thing.ThingName
         const desc = this.thing.ThingDesc
-        const body = { userId, certId, name, desc }
+        const body = { userId, certId, thingId, name, desc }
         const result = await API.post('thingApi', '/things', { body })
         console.log('updateThing: result: ', result)
         this.$store.dispatch('replaceThing', this.thing)
         this.isChangedNotSaved = false
-      }
+      // }
     },
     async downloadEdgeCoreSetup () {
       this.isDownloading = true
@@ -1773,9 +1843,8 @@ export default {
       this.$refs.modalReturnConfirmRef.hide()
     },
     backHome () {
-      console.log('quit')
+      console.log('quit: ', this.isChangedNotSaved)
       if (this.isChangedNotSaved === true) {
-        console.log('real quit')
         this.$refs.modalReturnConfirmRef.show()
       } else {
         this.$router.go(-1)

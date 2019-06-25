@@ -105,7 +105,7 @@
             <textarea class="at-border w-100 h-100" v-model="mservice.ServiceCode" placeholder="Service codes"></textarea>
           </div>
           -->
-          <div class="mt-2">
+          <div class="mt-4">
             <b-form-group id="fieldsetHorizontal"
                 horizontal
                 :label-cols="4"
@@ -116,13 +116,24 @@
                 label-for="inputHorizontal">
               <b-form-input v-model="mservice.InputMessageTopic" placeholder="Input topic" id="inputHorizontal"></b-form-input>
             </b-form-group>
+           <b-form-group id="fieldsetHorizontal"
+                horizontal
+                :label-cols="4"
+                breakpoint="md"
+                label-size="lg"
+                label-class="font-weight-bold"
+                label="Input microservice"
+                description="Optional, limit the input message only from this microservice"
+                label-for="inputHorizontal">
+             <b-form-input v-model="inputMicroservice" placeholder="Input message microservice name"></b-form-input>
+            </b-form-group>
+
              <b-form-group id="fieldsetHorizontal"
                 horizontal
                 :label-cols="4"
                 label-size="lg"
                 label-class="font-weight-bold"
                 breakpoint="md"
-                description="Input and Output message topics."
                 label="Output message topic:"
                 label-for="inputHorizontal">
               <b-form-input v-model="mservice.OutputMessageTopic" placeholder="Output topic" ></b-form-input>
@@ -160,10 +171,12 @@ export default {
         ServiceName: '',
         IsShared: 'false',
         InputMessageTopic: 'device/data',
+        InputMicroservice: '+',
         OutputMessageTopic: 'device/command',
         ServiceCode: '',
         ServiceRuntime: 'nodejs8.10'
       },
+      inputMicroservice: '',
       showDescCannotEmptyAlert: false,
       showInvalidInputsAlert: false,
       showServiceNameIsUsedAlert: false,
@@ -283,6 +296,11 @@ export default {
       if (isUsed) {
         this.showServiceNameIsUsedAlert = true
         return
+      }
+      if (this.inputMicroservice === '' || this.inputMicroservice === ' ') {
+        this.mservice.InputMicroservice = '+'
+      } else {
+        this.mservice.InputMicroservice = this.inputMicroservice
       }
       if (this.mservice.UserId !== null) {
         this.isCreating = true

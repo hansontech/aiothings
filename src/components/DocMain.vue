@@ -3,58 +3,91 @@
   <div>
  <vue-markdown id="DocIntroduction">
 ### Introduction
-AIoThings has the features to help user to build cloud and IoT applications rapidly, without the need of learning curve that often prevents people from continuing their design works.
+AIoThings has the features to build cloud and IoT applications rapidly, without the need for comprehensive cloud programming knowledge - that often prevent people from continuing their core design works.
+
+
 These features include:
 </vue-markdown> 
             <ul>
               <li>Connect IoT devices securely, and collect data</li>
               <li>Create REST APIs, and interface with other cloud services, 
-              <li>Design microservices to process IoT data, do analytic works</li> 
+              <li>Design cloud services to process IoT data, do analytic works</li> 
               <li>Interact with popular mobile/home apps</li>
             </ul>
 <vue-markdown>
   ***We also provide professional services for your engineering projects.***
-  ***Please contact us by service@hanson-tech.com***
+  ***Please contact us at service@hanson-tech.com***
 </vue-markdown> 
 <vue-markdown id="DocGetStarted" class="mt-4"> 
 ### Get Started
-If you did not login yet, it is the time to create an account and login to our   website. 
 
-You can use Facebook or Google - federated identities to login conveniently.
+First of all, users need to sign in to use the services.
 
-For an IoT application, normally it is required to connect to a hardware device from cloud. In this case, you need to decide what kind of hardware enablers you decide to use or are in use alreay.
-For example, the IoT device can be actually an ordinary Windows computer, or an embedded system running Linux, or even a smaller system such as ESP8266/ESP32 over NB-IOT network.
+Next, for IoT applications, [**Thing Objects**](#DocThingObject) should be created as the interface for IoT devices.
+Each Thing Object has its unique security credentials that will be used by IoT devices to build secured connections to the cloud.
 
-However, AIoThings also can be used to develop cloud applications without the need of IoT connectivity. 
+Ideally, any type of IoT device that can support X.509 and TLS 1.2 is capable to connect to AIoThings Cloud. 
+They include Windows/Linux computers or embedded single board systems, such as [Raspberry Pi](#DocPi) and [ESP32/ESP8266](#DocESP8266).
 
-Microservice is the basic element of processing data, and a group of microservices working together through message flows will work as an application.
+MQTT protocol is used to communicate between a device and a cloud service, and also to interface among cloud services.
+In this way, an event-driven application can be achieved through publishing and subscribing messages.
 
-Means, you need to design the microservices and their input/output message flows.
+The [**Microservice**](#DocMicroservice) is the basic building block of data processing inside the cloud.
+Each microservice defines a pair of input and output message topics, a description, and software codes written in JavaScript or Python.
+A group of microservices works together through their input and output messages.
+We provide a set of [Microservice APIs](#DocMicroserviceApi) for the programming. (In addition, AWS SDKs can be called to utilize Amazon AWS resources inside Microservices) 
 
-By taking the advantage of AIoThings sharing features, you can reuse / copy other users' microservices, or share yours to others too.
 
+To an extension, AIoThings also is used to develop a cloud application that doesn't include IoT devices.
+In this case, developers only need to use services such as Microservices, REST APIs and App Connectors to build an application, without Thing Object's involvements.
+
+Microservices and their messages can be configured visible to other users. Through this setting, sharing and reuse are accomplished among multiple developers.
+Developers search and reuse or even duplicate other users' microservices to accelerate their development works. Fast prototyping and DevOps are the benefits offered from this too. 
+
+Web API is a useful tool to connect Internet services together. RESTful API as an example, it uses HTTP requests to GET, PUT, POST and DELETE data.
+Our [REST API](#DocApi) function is an easy-to-use version of RESTful API editor.
+The REST API plays as a gateway to define the API address in a format of `api.aiothings.com/{api name}/{path}`, and to pass external HTTP requests to the assigned Microservices. 
+Users need to authenticate themselves from the external service first, and authorize this service to use the API.
+
+We are also continuously providing a series of pre-defined REST APIs for developers to use them connecting to some popular Internet services, such as IFTTT, without the actual needs of separate implementations by developers. 
+
+[App Connector](#DocAppConnector) is based on these REST API, and one step further, it defines messages and Microservices that developers can work with them to send and receive data directly to/from popular Internet services (for example, Alexa, Facebook Messenger, or LINE) from AIoThings internally without interfacing through Web APIs.
 
 </vue-markdown>  
+<b-img style="padding:20px;" src="/static/aiot-block-diagram.png" fluid align=center />
+
+&nbsp;
+&nbsp;
+&nbsp;
 
 <vue-markdown id="DocThingObject">
 
-### Thing Objects
+### Thing Object
 
-A Thing Object is a counterpart object living in AIoThing cloud to map to a physical IoT device.
+A Thing Object is required by AIoThing cloud to connect to a physical IoT device.
 
-It can be created, configured and removed. Once a thing is created, it has the unique certificate that is installed to the physical device to build a secured communication channel.
+It can be created, configured and removed through AIoThings console. 
+It includes certificate data that will be copied to the physical device and be used to build a secured communication channel (MQTT and TLS 1.2).
 
-For edge devices running AWS Greengrass Core, we can deploy a microservice running on this edge device remotely. For example, we can deploy machine learning inference functions to the specific thing. 
+For [edge devices](#DocThingEnabler) support AWS Greengrass Core, users can deploy a microservice from the cloud to this device and execute it remotely. 
+For example, we can deploy machine learning inference functions (a microservice) to run on the IoT device that is using this Thing Object. 
 
 </vue-markdown> 
 
 <vue-markdown id="DocThingEnabler">
 
-### Thing Enablers
+### Thing Enabler
 
-Thing enablers are the selected hardware platforms that are recommeneded to use to build your own IoT application.
+Thing enablers are the selected hardware platforms that are used to connect to AIoThings cloud. 
+It plays the role of an IoT gateway to communicate with the cloud for IoT data and messages.
+A Thing Enabler device needs to support MQTT and TLS 1.2 - the minimum requirements to build a secured connection channel to AIoThings.
+In addition, it may support edge computing of machine learning through AWS IoT Greengrass Core software. 
+Or, it may use Node-RED as the rapid programming tool to develop IoT application.
 
-For example, you can use Raspberry Pi as a reference design to connect the Modbus sensors, and also to connect AIoThings cloud.
+Raspberry Pi is a good example of the enablers. Developers can design Node-RED flows running on Raspberry Pi to collect data from Modbus connected sensors and send them to cloud.
+
+[Shop](/shop#ShopIoTGateway) is available for users as a one-stop shop to purchase the hardware enablers with AIoThings services together.
+
 </vue-markdown> 
 
 <vue-markdown id="DocPi">
@@ -63,11 +96,11 @@ For example, you can use Raspberry Pi as a reference design to connect the Modbu
 Raspberry Pi is a small and affordable computer that you can use to start programming for your edge computing needs.
 
 Different to ESP32 or ESP8266 series single board solutions, Pi is a complete computer system running Linux operating system.
-This makes it an ideal platorm for sophisticated applications, such as machine learning with edge computing. 
+This makes it an ideal platform for sophisticated applications, such as machine learning with edge computing. 
 
 There are two ways to connect AIoThings from Raspberry Pi, 1) go through Node-RED, or 2) go through AWS IoT SDK.
 
-For IoT applications without needs of advanced edge computing, such as machine learning through AWS IoT Greengrass service, we recommend Node-RED.
+For IoT applications that don't need advanced edge computing features such as machine learning through AWS IoT Greengrass service, we recommend Node-RED.
 
 As Node-RED developer community has plenty of examples and resources telling how to develop an IoT application, it can significantly reduce the learning curves from prototyping to production of IoT applications.
 
@@ -78,32 +111,104 @@ For more information about Raspberry Pi, please check this [official site](https
 ##### Node-RED
 
 Node-RED is a flow-based programming environment for the Internet of Things.
+</vue-markdown>
 
-It provides a browser-based editor that makes it easy to wire together flows using the wide range of nodes in the palette that can be deployed to its runtime.
+<b-img style="padding:20px;" src="/static/nodered-screen.png" fluid align=center />
+&nbsp;
+&nbsp;
 
-For more information about Node-RED, please check this [site](https://nodered.org/).
+<vue-markdown>
 
-In order to connect AIoThings cloud from Node-RED running IoT device, we provide an example Node-RED flow called 'AIoThings Connector'<div class=""></div>
+It provides a browser-based editor that makes it easy to connect multiple action blocks (known as nodes) together. Events from source nodes trigger the successive nodes connected to them and pass outputs. 
+The nodes are supporting wide range of functions from the developer community, that makes the development much easier and faster than traditional approach.
 
+(For more information about Node-RED, please check this [site](https://nodered.org/).)
+
+NQTT nodes are required for IoT devices running Node-RED to connect to AIoThings. 
+
+Node-RED nodes can send or receive data to/from AIoThings microservices through MQTT messages. The only difference between MQTT message topics and input/output message topics of microservices is that MQTT message topics need to add a header: **aiot/{User ID}/{Microservice Name}/** before the body in order to be compatible to Microservice's format of message topics.
+ 
+ 
+</vue-markdown>
+          <b-row class="mt-1">
+            <b-col>
+              <b-card>
+                <b-row>
+                  <b-col><strong>MQTT client settings to connect to AIoThings</strong> <br /></b-col>
+                </b-row>
+                <b-row>
+                  <b-col sm="3"><span class="text-primary">MQTT broker (server)</span></b-col>
+                  <b-col>
+                    <b-row>
+                      <b-col><code>b-a3vgppxo7lddg8-ats.iot.ap-southeast-2.amazonaws.com</code></b-col>
+                    </b-row>
+                    <b-row>
+                      <b-col>Or, <code><em>iot.aiothings.com</em></code><br/></b-col>
+                    </b-row>
+                  </b-col>
+                </b-row>
+                <b-row>
+                  <b-col sm="3"> <span class="text-primary">Certificates and keys</span></b-col> 
+                  <b-col>Set to the files <em>downloaded</em> from the above button<br /> </b-col>
+                </b-row>
+                <b-row>
+                  <b-col sm="3"> <span class="text-primary">Username/password</span></b-col> 
+                  <b-col>Leave it blank <br /> </b-col>
+                </b-row>
+                <b-row>
+                  <b-col sm="3"> <span class="text-primary">Client Id</span></b-col> 
+                  <b-col>Set to <code>{Thing ID}</code> showing above <br /> </b-col>
+                </b-row>
+                <b-row>
+                  <b-col sm="3"> <span class="text-primary">QoS</span></b-col> 
+                  <b-col>Set to <code>1 or higher</code> <br /> </b-col>
+                </b-row>
+                <b-row>
+                  <b-col sm="3"> <span class="text-primary">MQTT port</span></b-col>
+                  <b-col><code>8883</code><br /> </b-col>
+                </b-row>
+                <b-row class="mt-3">
+                  <b-col> <strong>MQTT messages</strong> <br /> </b-col>
+                </b-row>
+                <b-row>
+                  <b-col sm="3"> <span class="text-primary">MQTT topic format</span></b-col> 
+                  <b-col>Set to <code>'aiot/{User ID}/{Thing ID}/{your topic}'</code><br /> </b-col>
+                </b-row>
+                <b-row>
+                  <b-col sm="3"> <span class="text-primary">MQTT payload format</span></b-col> 
+                  <b-col>Must comply to JSON<br /> </b-col>
+                </b-row>
+              </b-card>
+            </b-col>
+          </b-row>
+<vue-markdown class="mt-2">
+
+An example Node-RED flow called **AIoThings Connector** is available at Node-RED flow library. 
+Once it is set and deployed properly on an IoT device, a button will appear on the AIoThings Things window, and that button can be used to open the Node-RED editor too.
+
+***Steps:***
 1. Please move to [Shared Solutions], and select [Node-RED Flows] tab. Or directly visit [here](https://flows.nodered.org/?term=aiothings&num_pages=1). Enter 'AIoThings' from the --Search Library-- field. 
-2. Select 'AIoThings Connector' found from search, and import this flow to the Node-RED Editor of your Raspberry Pi.
+2. Select **AIoThings Connector** found from search, and import this flow to the Node-RED Editor of your Raspberry Pi.
 3. Create a Thing from AIoThings
 4. Apply Thing Object Certificates and Keys to MQTT node settings of Node-RED. You can change them from 'AIoT Alive Request' node.
 
+
+For security reason, the MQTT topics must include the preceding header **aiot/{User ID}** as part of the topic. Otherwise, they won't be able to publish or subscribe.
 
 </vue-markdown> 
 <vue-markdown id="DocESP8266" class="mt-5">
 ### ESP32 / ESP8266
 
-ESP8266 is a Wi-Fi SoC that integrates Tensilica L106 32-bit processor, and SRAM / ROM too.
+ESP8266 is a **Wi-Fi SoC** that integrates Tensilica L106 32-bit processor and SRAM / ROM together.
 
-In many cases, it is also used to mention many Wi-Fi modules based on this SoC, such as ESP-12F, ESP-WROOM-S2, ESP8266MOD, and the modules also integrate SPI Flash memory.
+The name is also widely used to describe the **Wi-Fi modules** based on this SoC, such as ESP-12F, ESP-WROOM-S2, ESP8266MOD. 
+These modules also have integrated extra SPI Flash memories, where part of these space can be used to store application codes and data later by flashing.
 
-ESP32 is seen as the upgraded version of ESP8266, that integrates Wi-Fi and Bluetooth functionalities, dual (or single) Telsilica LX6 cores, and SRAM as well.
+ESP32 is the upgrade version of ESP8266 that integrates Wi-Fi and Bluetooth both, dual (or single) Tensilica LX6 cores and larger SRAM.
 
-In addition to the faster processing speed, ESP32 has SRAM significantly larger than ESP8266, makes it suitable to more broader IoT applications. Although it comes with higher costs than its previous generation - ESP8266.
+In addition to the faster processing speed, ESP32 has SRAM the size is significantly larger than ESP8266, makes it suitable for broader IoT applications. Although it comes with the costs higher than ESP8266.
 
-Following table shows the differences at a glace between these two processors and the modules based on them.
+Following table shows the differences at a glace between these two SoC and the modules based on them.
 </vue-markdown>
 <div>
   <table style="width:100%">
@@ -131,34 +236,32 @@ Following table shows the differences at a glace between these two processors an
 </div>
 <vue-markdown class="mt-2">
 
-[Espressif](https://www.espressif.com/en/products/hardware) is the place for more information about these hardware solutions.
+[Espressif](https://www.espressif.com/en/products/hardware) is the place for the latest information about these hardware platforms.
 
 
 ##### NodeMCU and NodeMCU-32S
 
-NodeMCU in its hardware form comes with ESP8266 which is based on the ESP-12 module, button inputs, LED outputs, and USB-to-Serial interface.
+NodeMCU (or NodeMCU-32S for ESP32) is the general name for the products that integrate button inputs, LED outputs, USB-to-Serial interface to ESP8266 modules together.
 
-This USB-to-Serial interface provides a convenient way to connect with development tools, running on host computers, to download firmware images.
-
-NodeMCU-32S is the counterpart product comes with the ESP32 based module.
+This USB-to-Serial interface provides a convenient way to connect ESP8266 module from its development tools running on host computers, and to download application images to it.
+The USB interface also naturally provide the power required by this system.
 
 </vue-markdown> 
 <vue-markdown id="DocMongooseOs" class="mt-5">
 ##### Mongoose OS
 
-[Mongoose OS](https://mongoose-os.com/) is the recommnended OS and development environement we are using on ESP boards to connect to AIoThings. 
+[Mongoose OS](https://mongoose-os.com/) is the recommnended OS (and development environement too) using on ESP8266 or ESP32 boards to connect to AIoThings. 
 
 Mongoose OS has reference designs to build secured connections to major cloud operators, including AWS.
 
 [Tutorial to connect to Cloud](https://mongoose-os.com/docs/mongoose-os/cloud/aws.md) is prepared for a step-by-step guidance to connect a ESP board to AWS cloud.
-
-We will have the complete description about how to access ESP board resources from/to AIoThings microservices in following chapters as well.
+However, we will also show the steps here to explain how to access ESP board resources from AIoThings microservices using next chapters.
 
 ##### ESP32 + AIoThings
 
-1. Create a Thing from AIoThings
-2. Download Certificate and Keys 
-3. Create Mongoose OS app project. We develop applications in Javascript.
+1. Create a Thing Object from AIoThings
+2. Download Certificate and Keys created from Thing Object to the computer Mongoose tool is installed 
+3. Create Mongoose OS app project from the Mongoose tool. And start develop applications in Javascript.
 4. Add following lines to mos.yml file: (***Please note that device.id or filename cannot be longer than 32 characters.*** )
 ``` bash
 config_schema:
@@ -177,7 +280,7 @@ libs:
   - origin: https://github.com/mongoose-os-libs/aws
 ```
 5. aiot-root-CA.crt downloaded from AIoThings is not required here. This CA file is for Server Certificate purpose. It allows your devices to verify that they're communicating with AIoThings and not another server impersonating. As the CA certificates (used to sign for AWS IoT server certificates) are already included inside the [ca-bundle](https://github.com/mongoose-os-libs/ca-bundle) of Mongoose packages, just leave the ca_cert field with 'ca.pem'.
-6. Use the format of MQTT publish message topic as 'aiot/{User ID}/{topic}' to send and receive MQTT message:
+6. Use the format of MQTT publish message topic as 'aiot/{User ID}/{Microservice name or Thing ID or +}/{topic}' to send and receive MQTT message:
 ``` javascript
     MQTT.pub(topic, message, 0 /* QoS */);
 ```
@@ -185,7 +288,7 @@ libs:
 
 ##### ESP8266 + AIoThings
 
-Most of the previous section ***ESP32 + AIoThings*** are still applicable to ESP8266 case, just a difference that we cannot use JavaScript anymore.
+Most contents of the previous section ***ESP32 + AIoThings*** are still applicable to this ESP8266 case, just a difference that we cannot use JavaScript anymore.
 
 ESP8266 has significantly smaller SRAM than ESP32, it makes the tutorials being used by Mongoose to connect to AWS become too big for ESP8266 to run. 
 
@@ -225,7 +328,7 @@ Also, check the example source from [here](https://github.com/hansontech/esp8266
 
 Again, ***please note that device.id or filename cannot be longer than 32 characters.***
 
-The article [AWS IoT on Mongoose OS (Part 1 & 2)](https://aws.amazon.com/blogs/apn/aws-iot-on-mongoose-os-part-1) from AWS Partner Network is still quite useful, especially for the C example parts. 
+The article [AWS IoT on Mongoose OS (Part 1 & 2)](https://aws.amazon.com/blogs/apn/aws-iot-on-mongoose-os-part-1) from AWS Partner Network is still available, especially for the C example parts. 
 
 
 </vue-markdown> 
@@ -233,76 +336,311 @@ The article [AWS IoT on Mongoose OS (Part 1 & 2)](https://aws.amazon.com/blogs/a
 <vue-markdown id="DocMicroservice">
 ### Microservice
 
-Microservice plays the most important part of AIoThings functions. It is constructed by a set of functions which has a single entry point, and input/output message topics.
+Microservice plays the most important role in AIoThings. It makes this cloud configurable through programming.
 
-When a new microservice is created, it will subscribe the input message topic it has. 
-A new message with this input message topic will trigger this microservice to execute (by allocating runtime resources), then it will release resources and goes to sleep after finishing its tasks.
-During the execution of the functions, a microservice also is able to publish one or more messages with its output message topic.
+Microservices deliver functionality as granular building blocks, allowing developers to quickly build, test, deploy
+Microservices are also great enablers for continuous delivery, allowing frequent releases for users while keeping
+the rest of the system available and stable.
+
+
+A microservice includes a code block and input/output message topics.
+
+The code block looks like: 
+```Javascript
+const aiot = require('aiothings');
+
+// process.env.INPUT_MESSAGE_TOPIC
+// process.env.OUTPUT_MESSAGE_TOPIC
+// event.sender
+
+exports.handler = async (event, context) => {
+    aiot.setInput(event);
+    // Add your code here
+    await aiot.consoleOutput('console display:' + process.env.MSERVICE_NAME); // display from console
+	  await aiot.messagePublish({data: 'payload'}); // must be a JSON
+};
+```
+By importing aiothings module to the code block, developers can use [Microservices APIs](#DocMicroserviceApi) to access data storage, message queues and database globally.
+
+Message queue as an example, it provides an ordered queue storage between two or more microservices. A use case is that, IoT data sent from devices are put to a message queue first, and mobile app will retrive them later when it becomes active.
+
+When a new microservice is created, it will automatically subscribe to its input message topic. 
 
 </vue-markdown> 
 
-<vue-markdown id="DocApi">
+<vue-markdown id="DocMicroserviceShared">
+
+##### Private and public (shared) microservices
+
+
+A private microservice can only be triggered by a message from the owner of the microservic, OR, from the system ('admin').
+On the other hand, shared (public) microservices can also receive input messages from any other user.
+In either case, by default, microservices use the sender of the input messages as the sender of output messages.
+Optionally, a microservice is able to set the sender of the output message to its owner instead of the input message sender, by setting the API flag.
+If the input message is from the system, then, the microservice will attach it's owner user as the sender of its output message.
+
+Again, all users can see and have access to the shared microservices. Conversely, private microservices are only available to their owners.
+
+**Shared** option can be set from the edit page of microservices.
+Then, other users find shared microservices by querying them from [Shared Solution](#DocSharedSolution).
+
+</vue-markdown> 
+
+<vue-markdown id="DocMicroserviceTopic">
+
+##### Message topic
+
+Imput and output messages follow MQTT standard. 
+The message topic is an UTF-8 string. It consists of one or more topic levels. Each topic level is separated by a forward slash ( / ).
+
+If a microservice doesn't have input or output messages, for example REST API handlers, **'null'** should be assigned to them, where 'null' is reserved by the system for this purpose. 
+
+Here are some examples of message topics:
+```Topics
+myhome/groundfloor/livingroom/temperature
+USA/California/San Francisco/Silicon Valley
+5ff4a2ce-e485-40f4-826c-b1a5d81be9b6/status
+Germany/Bavaria/car/2382340923453/latitude
+```
+
+###### Wildcards
+
+Input message topics can include wildcards to subscribe to multiple topics simultaneously. 
+A wildcard can only be used for input message topics, not to output message topics. 
+There are two different kinds of wildcards: Single Level: + and Multi Level: #.
+For example,
+```wildcards
+myhome/groundfloor/+/temperature
+myhome/groundfloor/#
+```
+
+When a new output message with this input message topic is published, this event will trigger the microservices (with the input message topic) to execute (by allocating runtime resources) and goes to sleep after finishing their tasks.
+
+During the execution of the code block, the microservice publishes output messages with its output message topic - [messagePublish](#DocNodejsMessagePublish).
+
+</vue-markdown> 
+
+<vue-markdown id="DocMessageTopicTree">
+#### Message Topic Tree
+
+The button located in the microservice list window is a utility for displaying multi-level message topic structure. With this display, users get a summary of their message flows, as well as the relationship between message topics and microservices.
+
+```TopicTree
+├ test/input
+│ └ [testPython] test/output
+├ device/data
+│ ├ [sampleApiHandler] device/command
+│ └ [ggHelloWorld] device/command
+├ ifttt/input/create_new_thing1
+│ └ [iftttCreateNewThingHandler] ifttt/output/new_thing_created
+│   └ ifttt/output/#
+│     └ [iftttSenderService] null
+├ ifttt/demo1/setup
+│ └ [iftttDemoSetup] ifttt/setup
+│   └ [iftttServiceSetup] null
+├ ifttt/input/create_new_thing
+│ └ [simuOnlinePayment] userid_1536893927497/paid
+└ timer/minute
+  └ [minuteUpdater] ifttt/output/new_thing_created
+    └ ifttt/output/#
+      └ [iftttSenderService] null
+```
+
+The last few lines of the example tree show that the input message with topic ***timer/minutes*** triggers the microservice ***minuteUpdater***, and the microservice will publish the output message using the topic ***ifttt/output/new_thing_created***. Subsequently, the microservice ***iftttSenderService*** is triggered by its input message topic ***ifttt/output/#*** to capture the previously published ***ifttt/output/new_thing_created*** message.
+
+As you can from this example, this function takes into account the wildcard pattern of the input message topic when generating tree charts.
+
+```EmptyLines
+
+
+```
+</vue-markdown>
+
+<vue-markdown id="DocApi" class="mt-3">
 ### REST API
 
 A RESTful API is an application program interface (API) that uses HTTP requests to GET, PUT, POST and DELETE data.
-The REST used by browsers can be thought of as the language of the internet. These APIs are emerging to expose web services, allow users to connect and interact with other cloud services.
+These APIs make it possible to let AIoThings services to interact with other Internet services.
 
-A REST API is defined by the following elements:
-1. API Name
-2. Description to describe what this API is for, and how to use it. It may include HTTP methods and their query parameters, and the expected responses.
-3. Path: The paths allowed to pass to th backend handler (a microservice).
-4. Handler: The backend handler to actually handler this API request. Handlers are actually microservices capable processing HTTP requests.
-5. Authorization: The authorization information is obtained from user's login. An APU can be set to require this autorization check from cloud before passing the request to the following handler, or no authorization check is required.
+AIoThings provide REST API editor and gateway for developers to create their own REST APIs, with the form of: `https://api.aiothings.com/{api name}/{path}'<div class=""></div>
 
+A REST API is defined to include following parts:
+1. **API Name**: Name of the API
+2. **Description**: to describe what this API stands for and how to use it. It may include the HTTP methods in support, their query parameters, and also the expected responses.
+3. **Path**: The list of paths supported. For REST API requests with supported paths, the gateway will pass the request to the REST API's predefined backend handler (a microservice).
+4. **Handler**: The backend handler that handles this API request. Handlers are actually microservices capable to process HTTP requests.
+5. **Authorization**: The authorization option for this REST API. If set to Auth, the API requires the autorization check from the gateway before passing the request to the handler, or NONE for no authorization check is required. The authorization data is obtained through user's login process, and is used to sign the HTTP requests. 
+ 
 A REST API can be accessed through the URL address with the form of 
 ```URL
   https://api.aiothings.com/{API name}/path
 ```
 
-
+AIoThings defines a set of REST API available for users to access, for exameple [IoT Data](#DocIotDataRestApi).
 </vue-markdown> 
 <vue-markdown id="DocAppConnector">
 ### App Connectors
 
-App Connectors are the interfaces prepared from AIoThings to popular application connectivity platforms, to help AIoThings services fast connect to external 3rd party services and mobile/home apps.
-IFTTT and Zapier are the two services AIoThings is utilizing. 
+App Connectors are the interfaces AIoThings has prepared for developers to connect to external 3rd party services and mobile/home applications easily.
+It utilizes popular application connectivity platforms (IFTTT and Zapier) for this purpose.
 
-An App Connector defines couple of message topics and data allow developers create / send / receive data to external services, such as Amazon Alexa, Facebook Messenger, Google Assistant. 
-Additionally, it also provide guidelines to help developers create their own App Connector, using REST API and other AIoThings functions.
+An App Connector defines a couple of message types that allow developers create / send / receive data to the target external services, such as Amazon Alexa, Facebook Messenger and Google Assistant. 
+It is also possible for a developer to create his/her own App Connector, using the REST API and other AIoThings functions.
 
 
 </vue-markdown> <vue-markdown id="DocSharedSolution">
 ### Shared Solutions
 
-Shared Solution shows the microservices shared by other users.
-Users can search for specific message topics and microservices and use them.
-It also provide interfaces to other resources such as Node-RED Node and Flow libraries. 
+The Shared Solution Window shows microservices that are shared by other users.
+Users can query the message topics and microservices they are interested in and use them.
+
+There are two ways for developers to leverage other user's sharing resources:
+1. Send or receive messages to/from the shared resources using their input/output message topics. As the caller's user ID is automatically attached to these messages, the microservices can handle them separately and send back to callers.
+2. Duplicate the shared microservices and run them separately in user's own space.
+
+The window also show other type of shared resources such as Node-RED Node and Flow libraries. 
 
 </vue-markdown> 
 
 <vue-markdown id="DocConsole">
 ### Console
 
-The console window is normally used for debug and test purposes.
+The Console Window is used for debug and test purposes. 
 
-Any messages with its topic format of +/{user id}/console/output will be displayed on this window.
+Developers can use it to:
+1. Embed console-output codes inside microservice code blocks to output debug messages to this console window.
+2. Send an input message (topic and payload) as a trigger.
 
-User can use consoleOutput API to output debug messages during the execution of microservices. In this case, {user id} will be automatically added ahead of the 'console/output' topic.
+Any messages with the topic format of +/{user id}/console/output will be displayed on this window.
+
+User can use [consoleOutput](#DocNodejsConsoleOutput) API to output debug messages during the execution of microservices. In this case, {user id} will be automatically added ahead of the 'console/output' topic.
 
 
 </vue-markdown> 
+<vue-markdown id="DocIotData">
 
+### IoT Data Access
+
+Typical IoT data is in the form of { Device ID, Timestamp, Data }. This means that the device creates and sends data at a specific time.
+User's data access is available by sending messages with the message topic ***aiot_iotdata/query***.
+The system will reply the query result as separate messages with the topic of ***aiot_iotdata/response*** from its microservice ***aiotIotDataQuery***.
+
+It is the user's responssibility to specify Device ID (or Thing ID) and Time Period (start and end) in the query request.
+```QueryRequest
+await aiot.messagePublish('aiot_iotdata/query', {
+    ThingId:    'XYZ'，  // required
+    StartTime:  12345678，
+    EndTime:    12456789
+})
+```
+
+If StartTime and EndTime are not specified, then the system will do the query from the latest tuple.
+
+If the query has only StartTime specified, it will bring as much as possible the data allowed for a query from the start time.
+
+If the query has only EndTime specified, it will bring as much as possible the data allowed for a query until the end time.
+
+The query response is in the form of
+```QueryResponse
+{
+  ThingID: 'XYZ',
+  DataList: [
+    {
+      TimeStamp: 12345678
+      Data: { ... }
+    },
+    ...
+  },
+  ContinueTime: 12567890 // Optional
+}
+```
+The ContinueTime field only appears if there is more data left in the last query.
+
+The ContinueTime field can be used as the StartTime (or EndTime) for conesecutive query requests. It is the responsibility of the user to send a new request to obtain the successive query result.
+
+#### Write to IoT Database
+
+IoT device sends it's data to cloud through MQTT messages. The MQTT topic should be
+```
+    aiot/{User ID}/{Thing ID}/aiot_iotdata/put
+```
+and the payload is included as a JSON with "data" as the key.
+```
+    {
+      "data": {
+        "ThingId": "XYZ",
+        "DataList": [
+          {
+            "TimeStamp": 1560406698331,
+            "Data": {
+              "light": "off"
+            }
+          }
+        ]
+      }
+    }
+```
+The system will attach a time stamp and save them together with data to the IoT database.
+
+</vue-markdown> 
+<vue-markdown id="DocIotDataRestApi">
+
+#### REST API Query for IoT data
+
+User's IoT data is accessible from the system provided REST API 
+```
+  https://api.aiothings.com/iotdata
+```
+
+This API reqires the authroization. Users need to sign in to use this REST API.
+It supports HTTP GET method with the query strings equivalent to the message topic ***aiot_iotdata/query*** we introduced earlier.
+```QueryRequest
+  {
+    ThingId:    'XYZ',  // required
+    StartTime:  12345678,
+    EndTime:    12456789
+  }
+```
+
+For example,
+```
+  https://api.aiothings.com/iotdata/query?ThingId=XYZ&StartTime=12345678&EndTime=12456789
+
+```
+
+Then, the API replies the query result synchronously with it's response.
+```
+  { 
+    "DataList":[
+      { 
+        "TimeStamp": 1560406698331,
+        "Data": { "pump": "on", "light": "off" }
+      }
+    ]
+  }
+```
+
+```
+
+
+```
+</vue-markdown> 
 <vue-markdown id="DocMicroserviceApi">
 ### Microservice APIs
 
 The set of APIs are used inside Microservices to achieve the functions required to implement applications, including to publish messages, to put/get from storage, and to save/retrieve from message queues.
 
-A microservice can use APIs from AWS SDK to realize application logics, as long as the user has the required permissions. In fact, the listed Microservice APIs here are also implemented by AWS SDKs.
+Microservices also can use APIs from AWS SDK to realize application logics, as long as the user obtained the required resource permissions. 
+In fact, the Microservice APIs here are also implemented by APIs from AWS SDK.
 
 </vue-markdown>
 
 <vue-markdown id="DocMicroserviceApiNodejs">
-### Node.js
+```
+
+
+```
+### Node.js functions 
 
 
 &nbsp;
@@ -357,7 +695,7 @@ await aiot.messageQueueSend( 'QueueOne', {data: { on: true}} );
 ```JavaScript
 messageQueueGet( queueName ) => Promise
 ```
-To retrive a message from a message queue.
+To retrieve a message from a message queue.
 
 * queueName -- (String)
   * Name of the message queue.
@@ -429,30 +767,18 @@ await aiot.consoleOutput('this is a debug message');
 ```
 </vue-markdown> 
 
-<vue-markdown id="DocNodejsDatabase">
-### User Database access
-
-Typical IoT data has a form of {Device, Timestamp, Data}. Means, a device creates and sends the data at a specific time.
-A database table is available for users to save and access these IoT data - 'atUserDataTable'.
-Differnt to the storage objects, this database table is capable to query data efficiently by time periods.
-
-Users use the APIs defined at AWS SDK to access this database table, instead of providing a separate set of new APIs.
-The reason for this is that, we always provide a simplicity by creating a new API in addition to AWS SDK, if possible. However, the functionality of database access has its complexity in nature, cannot simplify them through new API creations.
-Alternatively, we decide to provide a series of examples using AWS SDK to help users' learning.
-
+<!--
+<vue-markdown id="DocExamplesClawMachine">
 
 ### Examples
 
 
-</vue-markdown>
-
-<vue-markdown id="DocExamplesClawMachine">
 #### Example Cloud to Claw Machine
 
 
 
 ##### Background
-Claw Machines have become popular in Taiwan in last couple of years. They are operated as unmanned stores. A new round of play starts when the user inserts coins to the machine.
+Claw Machines have become popular in Taiwan in the last couple of years. They are operated as unmanned stores. A new round of play starts when the user inserts coins to the machine.
 A store is normally shared by multiple leaseholders, each leaseholder takes their own efforts to attract customers, and maximize profits.
 
 For this exercise, we upgrade the claw machine to accept online payments and NFC based contactless payment (For example, EasyCard in Taiwan) as well.
@@ -468,6 +794,7 @@ For this exercise, we upgrade the claw machine to accept online payments and NFC
 
 
       </vue-markdown>  
+-->
     </div>
   </b-container>
 </template>

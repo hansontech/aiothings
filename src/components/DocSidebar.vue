@@ -48,11 +48,22 @@ export default {
                 }
                ]
             },
-            { 'text': 'Microservices', data: { 'link': 'DocMicroservice' } },
+            { 'text': 'Microservices',
+              data: { 'link': 'DocMicroservice' },
+              state: { expanded: true },
+              children: [
+                { 'text': 'Private & shared', data: { 'link': 'DocMicroserviceShared' } },
+                { 'text': 'Message topic', data: { 'link': 'DocMicroserviceTopic' } },
+                { 'text': 'Tree of topics', data: { 'link': 'DocMessageTopicTree' } }
+              ]
+            },
             { 'text': 'REST APIs', data: { 'link': 'DocApi' } },
             { 'text': 'App Connectors', data: { 'link': 'DocAppConnector' } },
             { 'text': 'Shared Solutions', data: { 'link': 'DocSharedSolution' } },
-            { 'text': 'Console', data: { 'link': 'DocConsole' } }
+            { 'text': 'Console', data: { 'link': 'DocConsole' } },
+            { 'text': 'IoT Data Access',
+                  data: { 'link': 'DocIotData' }
+            }
           ]
         },
         { 'text': 'Microservice APIs',
@@ -79,14 +90,12 @@ export default {
                 },
                 { 'text': 'consoleOutput',
                   data: { 'link': 'DocNodejsConsoleOutput' }
-                },
-                { 'text': 'Database access',
-                  data: { 'link': 'DocNodejsDatabase' }
                 }
               ]
             }
            ]
-        },
+        }
+        /*,
         { 'text': 'Examples',
           state: { expanded: true },
           'children': [
@@ -94,7 +103,7 @@ export default {
             // ,
             // { 'text': 'Online Order to POS' }
           ]
-        }
+        } */
       ]
     }
   },

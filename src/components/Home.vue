@@ -37,87 +37,92 @@
       <b-row class="at-home" align-h="center">
         <b-col> 
           <h3> How it works </h3>
-          <h5 class="mt-4"> For Cloud / IoT application developers </h5>
+          <h5 class="mt-4"> Cloud / IoT application developers </h5>
             <p>
-              We provide rapid development services from hardware, software to cloud, use AIoThings tools as our competitive advantage.
+              Easy-to-use features to build apps combining hardware, software and cloud.
             </p>
-          <h5> For IoT hardware manufacturers </h5>
+          <h5> IoT hardware manufacturers </h5>
              <p>
-              We develop / integrate / operate cloud services to link with their IoT devices. Only subscription and royalty fees as our pricing models.
+              Cloud services connecting devices and supporting popular platforms. End users subscribe to access their IoT data.
             </p>
-          <h5> For AI solution providers </h5>
+          <h5> AI solution providers </h5>
              <p>
-              We partner with data analytic solution providers. Create interfaces (APIs) and streamlined commercial models for our clients to utilize them easily.
+              API interface and simplified subscription model to end developers.
             </p>
-          <h5> Rest of the world </h5>
+          <h5> DIY users </h5>
             <p> 
-              The web site is a free space for IoT and cloud applications. 
-              Users can create their own microservices to connect to their IoT devices or to share with other users. 
+              IoT and Cloud playground for engineers, students and educators. 
             </p>
         </b-col>
         <b-col md="6" align-self="center"> 
             <b-img src="/static/aiot-block-diagram.png" fluid align=center />
         </b-col>
       </b-row>
-      <b-row class="at-home" align-h="center">
-        <b-col sm > 
-          <h3>Web integrated development</h3>
+      <b-row class="at-home" align-h="center" align-v="center">
+        <b-col md="6" align-self="center"> 
+            <b-img src="/static/microservice-diagram.png" fluid align=center />
+        </b-col>
+        <b-col align-v="center"> 
+          <h3> Microservice and cloud store</h3>
+          <ul class="mt-4" style="magin-left:0px">
+            <li>Microservice as granular building block optimizing to tasks.</li>
+            <li>Flow based programming through messages in-and-out microservices.</li>
+            <li>Subscribe message topics to use other user's cloud services.</li>
+            <li>Share and trade cloud resurces through Cloud Store.</li>
+          </ul>
         </b-col>
       </b-row>
-      <b-row class="at-home" align-h="center">
+      <b-row class="at-home" align-h="center" align-v="center">
         <b-col md > 
-          <p>
-              AIoThings provides the web interface easy to
+          <h3>Web integrated development</h3>
+          <p class="mt-4">
+              AIoThings offers one-stop web interface to
               <ul>
                 <li>Build secured IoT device network. </li>
-                <li>Create/Share/Reuse microservices they each optimized to a specific task. </li>
-                <li>Workflow design to connect devices and microservices together.</li> 
+                <li>Create/Share/Reuse microservices optimizing to tasks. </li>
+                <li>Design workflows for devices and microservices.</li>
+                <li>Edge computing through AWS Greengrass or Node-RED.</li> 
               </ul> 
           </p>    
-          <p>
-              Node-RED running on edge devices, part of AIoThings design tools for rapid development purpose.
-          </p><p>
-              JavaScript and Python codes of microservices, extendable to other AWS services. 
-          </p><p>
-              MQTT message publish/subscription model, to communicate among devices and microservices. 
-          </p>
         </b-col>
         <b-col md align-self="center"> 
           <!-- width=450 height=338 src="../assets/aiot-block.png" --> 
           <b-img src="/static/aiot-ui-concept.png" fluid align=center />
         </b-col>
       </b-row>
-      <b-row class="at-home" align-h="center">
+      <b-row class="at-home" align-h="center" align-v="center">
         <b-col md="5" align-self="center" class="p-8"> 
           <b-img src="/static/aws-services-logos.png" fluid align=center />
         </b-col>
         <b-col md="7" > 
-          <h3>  Built on AWS </h3>  
-          <p> 
-            AIoThings service is built upon Amazon Web Services, takes full advantages of AWS cloud computing platforms from security, scalability, AI, and IoT establishments. 
-            Makes it ideal for large-scale projects.            
-          </p><p>
-            AWS has more than 100 services spanning >20 geographical regions.
+          <h3> Built on Amazon AWS </h3>  
+          <p>
+            <ul>
+              <li>Leveraging full advantage of world largest public cloud.</li>
+              <li>More than 100 services spanning >20 geographical regions.</li>
+              <li>Best class security, scalability, AI and IoT resources.</li> 
+              <li>Ideal choice for scaling to large projects.</li> 
+            </ul>           
           </p>
         </b-col>
       </b-row>
-      <b-row class="at-home">
+      <b-row class="at-home" align-v="center">
         <b-col md="7">
           <h3> Social development</h3> 
-          <p>             
-              We encourage people share their microservices to others. 
-              Each microservice has own input message topic and output message topics, also a description to explain how to use them.
-              Developers search for shared microservices, reuse them if possible. 
-          </p><p>
-              Many applications and data sources share similar patterns.
-              Rapid development can be realized through incremental design and existing assets, for example, machine learning inference functions. 
-           </p>
+          <p> 
+            <ul>            
+              <li>We encourage people share their microservices to others.</li>
+              <li>Microservice defines input and output message topic pair and description.</li>
+              <li>Users find shared services by querying keywords and use them.</li>
+              <li>Rapid development through incremental design.</li>
+            </ul>
+          </p>
         </b-col>
         <b-col md="5" align-self="center"> 
           <b-img style="padding:35px;" src="/static/aiot-social-develop.png" fluid align=center />
         </b-col>
       </b-row>
-      <b-row class="at-home">
+      <b-row class="at-home" align-v="center">
         <b-col md="5" align-self="center"> 
           <b-img style="padding:35px;" src="/static/sharing-economy.jpg" fluid align=center />
         </b-col>
@@ -128,63 +133,63 @@
           [The service is FREE and feedback is always welcome.]
           </em>
           -->
-          <p class="mt-3">
-          We encourage an ecosystem of shared services. 
-          </p><p>
-          The service offers pay-as-you-go pricing for enterprise members and free-tier membership for concept-proving users.
-          </p><p>  
-          At the same time, we also look for reward programs for service and solution providers sharing their assets to others.
+          <p class="mt-4">
+            <ul>
+              <li>Encourage ecosystem of shared services.</li>
+              <li>Offer pay-as-you-go pricing through flow based design.</li>
+              <li>Reward developers sharing their services.</li>
+            </ul>
           </p>
         </b-col>
       </b-row>
-       <b-row class="at-home">
+       <b-row class="at-home" align-v="center">
         <b-col md="6" lg="6">
-          <h3>Connecting external services</h3>
+          <h3>Connecting services</h3>
           <p class="mt-5">
-          Connectors interface to external digital platforms. 
+          App Connectors accelerate connect to external digital platforms. 
           </p><P>
-          Unified API connects to IFTTT  for unlimited IFTTT services, without needs of extra API setups.
+          Unified API to IFTTT for unlimited IFTTT applets.
           </p><p>  
-          Amazon Alexa define Skills that need AWS Lambdas to run their Skill codes.
-          </p><p> 
-          AIoThings microservice itself is an AWS Lambda function, hence seamlessly supports Alexa.
+          Microservice seamleass support to Amazon Alexa.
           </p>
         </b-col>
         <b-col md="6" lg="6" align-self="center"> 
           <b-img style="padding:30px;" src="/static/connecting-services.png" fluid align=center />
         </b-col>
       </b-row>
+      <!--
       <b-row class="at-home" align-h="center">
         <b-col sm md="9" lg="7" align-self="center"> 
           <b-img src="/static/aiot-block.png" fluid align=center />
         </b-col>
       </b-row>
+      -->
       <b-row class="at-home" align-v="center">
         <b-col md="5" align-self="center"> 
           <b-img style="padding:30px;" src="/static/aiot-workflow.png" fluid align=center />
         </b-col>
         <b-col>
-          <h3>Example development flow</h3> 
+          <h3>Your first project starts from..</h3> 
           <div class="mt-3">
-          <ul> 
+          <ol> 
           <li>                     
-          Select enabler hardware. Configure IoT platform software.
+          Select <a href="/docs/main#DocThingEnabler">enabler hardware</a>. Configure IoT platform software.
           </li><li>
-          Create IoT objects and security credentials to connect to IoT devices. 
+          Create <a href="/docs/main#DocThingObject">thing objects</a> and security credentials to connect to IoT devices. 
           </li><li>
-          Design microservices, or search and reuse from shared assets. 
+          Design <a href="/docs/main#DocMicroservice">microservices</a>, or search and reuse from shared assets. 
           </li><li>
-          Deploy microservices and Node-RED flows to edge devices. 
+          Deploy microservices and <a href="/docs/main#DocNodeRed">Node-RED</a> flows to edge devices. 
           </li><li>
-          Design Workflow, MQTT message topics for microservices. 
+          Design workflow, <a href="/docs/main#DocMicroserviceTopic">input and output message</a> of microservices. 
           </li><li>
-          Create REST APIs to export services externally. 
+          Create <a href="/docs/main#DocApi">REST APIs</a> to provide services externally. 
           </li><li>
           Connect to other external mobile / home applications.
           </li><li>
-          Add or reuse data analytic functions, including ML inferences.
+          Add or reuse data analytic and AI algorithms.
           </li>
-          </ul>
+          </ol>
           </div>
         </b-col>
       </b-row>

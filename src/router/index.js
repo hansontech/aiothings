@@ -24,6 +24,7 @@ import Login from '@/components/Login'
 import Documents from '@/components/Documents'
 // import DocIntroduction from '@/components/DocIntroduction'
 import DocMain from '@/components/DocMain'
+import Shop from '@/components/Shop'
 import AboutUs from '@/components/AboutUs'
 // import Default from '@/components/Default'
 import MyThingsList from '@/components/MyThingsList'
@@ -67,6 +68,15 @@ const router = new VueRouter({
       component: Home,
       meta: {
         title: 'AIoT: Home',
+        auth: false
+      }
+    },
+    {
+      path: '/shop',
+      name: 'shop',
+      component: Shop,
+      meta: {
+        title: 'AIoT: Shop',
         auth: false
       }
     },

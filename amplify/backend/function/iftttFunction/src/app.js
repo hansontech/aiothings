@@ -387,7 +387,7 @@ let messagePublish = async (req, userId) => {
   let dataString = JSON.stringify(messageData);
   let iotdata = new AWS.IotData({endpoint: config.awsIotEndpoint});
   let params = {
-      topic: 'aiot/' + userId + '/ifttt/input/' + actionName,
+      topic: 'aiot/' + userId + '/iftttFunction/ifttt/input/' + actionName,
       payload: dataString,  //  for example: {\"thing_status\":\"line\"}
       qos: 0
       };

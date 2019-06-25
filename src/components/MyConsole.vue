@@ -119,7 +119,7 @@ export default {
      this.consoleOutputs = this.$store.getters.consoleOutputs
      console.log('console outputs: ', this.consoleOutputs)
 
-     let subscribeConsoleOutputTopic = 'aiot/' + this.$store.getters.username + '/console/output'
+     let subscribeConsoleOutputTopic = 'aiot/' + this.$store.getters.username + '/+/console/output'
      console.log('subscribe topic: ', subscribeConsoleOutputTopic)
      this.consoleSub = PubSub.subscribe(subscribeConsoleOutputTopic).subscribe({
           next: data => {
@@ -171,7 +171,7 @@ export default {
           this.$refs.missJsonModal.show()
           return
         }
-        let topic = 'aiot/' + this.$store.getters.username + '/' + this.inputMessage.topic
+        let topic = 'aiot/' + this.$store.getters.username + '/console/' + this.inputMessage.topic
         await PubSub.publish(topic, bodyJson)
         console.log('message sent: ', topic)
       }

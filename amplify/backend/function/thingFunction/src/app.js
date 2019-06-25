@@ -100,7 +100,7 @@ app.post('/things', function(req, res) {
   console.log('userId: ', req.body.userId)
 
   if (req.body.certId !== undefined) {
-    thing.updateThing(req.body.userId, req.body.certId, req.body.name, req.body.desc, req.apiGateway.context, function(err,result) {
+    thing.updateThing(req.body.userId, req.body.certId, req.body.name, req.body.thingId, req.body.desc, req.apiGateway.context, function(err,result) {
       res.json(result)
     })
   }else {
@@ -196,7 +196,7 @@ app.delete('/edge', async function(req, res) {
   let query = event.queryStringParameters
   try{
       if (query.edgeData !== undefined) {
-        await edge.deleteEdge(query.userId, query.certId, query.edgeData)
+        await edge.deleteEdge(query.userId, query.certId, JSON.parse(query.edgeData))
       }
       res.json({success: 0})
   } catch (err) {

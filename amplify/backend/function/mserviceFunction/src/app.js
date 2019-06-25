@@ -47,7 +47,9 @@ var config = {
     mserviceS3bucketName: "aiot-bucket" + '-' + process.env.ENV,
     mserviceRole: "arn:aws:iam::414327512415:role/aiot-mservice-role-default",
     awsIotEndpoint: "a3vgppxo7lddg8-ats.iot.ap-southeast-2.amazonaws.com",
-    awsUserPoolId: "ap-southeast-2_2gQEl126n"
+    awsUserPoolId: "ap-southeast-2_2gQEl126n",
+    adminUsers: ["Facebook_10212683421500597"],
+    userDataTable: 'atUserDataTable'
 };
 
 aws.config.region = config.region;
@@ -94,9 +96,10 @@ app.get('/mservices', function(req, res) {
             } else {
               scanParams.FilterExpression += " OR ";
             }
-            let searchWord = searchWordList[searchWordIndex];
+            let searchWord = searchWordList[searchWordIndex].toLowerCase();
             let attributeValue = ":searchWord" + searchWordIndex;
-            scanParams.FilterExpression += "contains(ServiceDesc, " + attributeValue + ")"
+            scanParams.FilterExpression += "contains(QueryString, " + attributeValue + ")"
+              // "contains(ServiceDesc, " + attributeValue + ") OR contains(ServiceName, " + attributeValue + ") "
             scanParams.ExpressionAttributeValues[attributeValue] = searchWord
             // contains is case sensitive
           }
@@ -473,6 +476,7 @@ app.post('/mservices', function(req, res) {
       if (err) console.log('Bucket error: ', err);
       else{
         let msAttributes = inputs
+        msAttributes.QueryString = inputs.ServiceName.toLowerCase() + ' ' + inputs.ServiceDesc.toLowerCase() + ' ' + inputs.InputMessageTopic.toLowerCase() + ' ' + inputs.OutputMessageTopic.toLowerCase()
         msAttributes.ServiceCode = sourceFile;
         console.log('msAttributes: ', msAttributes);
         let putItemParams = {
@@ -481,7 +485,7 @@ app.post('/mservices', function(req, res) {
         }
         dynamodb.put(putItemParams, (err, data) => {
           if(err) {
-            console.log('DynamoDB: ', err)
+            console.log('DynamoDB error: ', err)
           } else{
             console.log('db success')
           }
@@ -531,6 +535,28 @@ app.post('/mservices', function(req, res) {
       } else if (fRuntime === 'python') {
         fRuntime = 'python3.7'
       }
+        let isAdminUser = 'false'
+        for (let superuser of config.adminUsers) {
+          if (superuser === inputs.UserId) {
+            isAdminUser = 'true'
+            break
+          }
+        }
+        let funcEnvs = {
+          'INPUT_MESSAGE_TOPIC': inputs.InputMessageTopic,
+          'OUTPUT_MESSAGE_TOPIC': inputs.OutputMessageTopic,
+          'USER_POOL_ID': config.awsUserPoolId,
+          'IOT_ENDPOINT': config.awsIotEndpoint,
+          'MSERVICE_NAME': inputs.ServiceName,
+          'S3_BUCKET': config.mserviceS3bucketName,
+          'OWNER_ID': inputs.UserId,
+          'REGION': config.region,
+          'IS_SHARED': inputs.IsShared,
+          'USER_DATA_TABLE': config.userDataTable
+        }
+        if (isAdminUser === 'true') {
+          funcEnvs.SYSTEM_MSERVICE = isAdminUser
+        }
         var params = {
           Code: {
             S3Bucket: bucketName,
@@ -538,19 +564,10 @@ app.post('/mservices', function(req, res) {
           },
           Description: inputs.ServiceDesc,
           Environment: {
-            Variables: {
-              'INPUT_MESSAGE_TOPIC': inputs.InputMessageTopic,
-              'OUTPUT_MESSAGE_TOPIC': inputs.OutputMessageTopic,
-              'USER_POOL_ID': config.awsUserPoolId,
-              'IOT_ENDPOINT': config.awsIotEndpoint,
-              'MSERVICE_NAME': inputs.ServiceName,
-              'S3_BUCKET': config.mserviceS3bucketName,
-              'OWNER_ID': inputs.UserId,
-              'REGION': config.region
-            }
+            Variables: funcEnvs
           },
           FunctionName: functionName,
-          Handler: ((inputs.ServiceRuntime.search(/nodejs/i) !== -1)  ? "index.handler" : "main.handler"),
+          Handler: ((inputs.ServiceRuntime.search(/nodejs/i) !== -1)  ? "mservice_main.handler" : "mservice_main.handler"),
           Role: config.mserviceRole,
           Runtime: fRuntime
         };
@@ -588,79 +605,77 @@ app.post('/mservices', function(req, res) {
           S3Bucket: bucketName,
           S3Key: 'public/' + zipFile
         };
-        lambda.updateFunctionCode(params, function(err, data) {
+        lambda.updateFunctionCode(params, async function(err, data) {
           if (err) console.error(err);
           else{
-            let handlerName = 'index.handler' 
-            console.log('updateFunction continue')
+            let handlerName = 'mservice_main.handler' 
+            // console.log('updateFunction continue')
             if (inputs.ServiceRuntime.includes('nodejs') === false) {
-              handlerName = 'main.handler'
+              handlerName = 'mservice_main.handler'
             }
-            console.log('updateFunction handlerName: ', handlerName)
-            console.log('updateFunction runtime: ', inputs.ServiceRuntime)
+            // console.log('updateFunction handlerName: ', handlerName)
+            // console.log('updateFunction runtime: ', inputs.ServiceRuntime)
             let fRuntime = inputs.ServiceRuntime
             if (fRuntime === 'nodejs') {
               fRuntime = 'nodejs8.10'
             } else if (fRuntime === 'python') {
               fRuntime = 'python3.7'
             }
-            console.log('fRuntime ', fRuntime)
-            console.log('inputs ', inputs)
-            let updateFunctionConfigParams = {
-              FunctionName: functionName, /* required */
-              Description: inputs.ServiceDesc,
-              Environment: {
-                Variables: {
-                  'INPUT_MESSAGE_TOPIC': inputs.InputMessageTopic,
-                  'OUTPUT_MESSAGE_TOPIC': inputs.OutputMessageTopic,
-                  'USER_POOL_ID': config.awsUserPoolId,
-                  'IOT_ENDPOINT': config.awsIotEndpoint,
-                  'MSERVICE_NAME': inputs.ServiceName,
-                  'S3_BUCKET': config.mserviceS3bucketName,
-                  'OWNER_ID': inputs.UserId,
-                  'REGION': config.region
+            // console.log('fRuntime ', fRuntime)
+            // console.log('inputs ', inputs)
+            try {
+              let funcData = await lambda.getFunctionConfiguration({
+                FunctionName: functionName
+              }).promise()
+              let funcEnvs = funcData.Environment.Variables
+              funcEnvs.INPUT_MESSAGE_TOPIC = inputs.InputMessageTopic
+              funcEnvs.OUTPUT_MESSAGE_TOPIC = inputs.OutputMessageTopic
+              funcEnvs.OWNER_ID = inputs.UserId
+              funcEnvs.IS_SHARED = inputs.IsShared
+              funcEnvs.USER_DATA_TABLE = config.userDataTable
+              let isAdminUser = 'false'
+              for (let superuser of config.adminUsers) {
+                if (superuser === inputs.UserId) {
+                  isAdminUser = 'true'
+                  break
                 }
-              },
-              Handler: handlerName,
-              Runtime: fRuntime
-            };
-            console.log('start configuration: ', updateFunctionConfigParams)
-            lambda.updateFunctionConfiguration(updateFunctionConfigParams, function(err, data) {
-              if (err) console.log(err, err.stack); // an error occurred
-              else {
-                console.log('Function ' + functionName + ' has been updated.');
-                lambda.publishVersion({
-                  FunctionName: functionName /* required */
-                }, function(err, publishVersionData) {
-                  if (err) console.log(err, err.stack); // an error occurred
-                  else {
-                    lambda.updateAlias({ 
-                      FunctionName: functionName, /* required */
-                      FunctionVersion: publishVersionData.Version, /* required */
-                      Name: functionName + '_Latest', /* required */
-                    }, function(err, data) {
-                      if (err) {
-                        console.log(err, err.stack); // an error occurred
-                        lambda.createAlias({
-                          FunctionName: functionName, /* required */
-                          FunctionVersion: publishVersionData.Version, /* required */
-                          Name: functionName + '_Latest', /* required */
-                        }, function(err, data) {
-                          if (err) {
-                            console.log(err, err.stack); // an error occurred
-                          } else {
-                            gulp.task('create-iot-rule')();
-                          }
-                        })
-                      } else {
-                        gulp.task('create-iot-rule')();
-                      }   
-                    }) 
-                  }
-                })
               }
-            });
-          }
+              if (isAdminUser === 'true') {
+                funcEnvs.SYSTEM_MSERVICE = isAdminUser
+              } else if (funcEnvs.hasOwnProperty('SYSTEM_MSERVICE')) {
+                delete funcEnvs.SYSTEM_MSERVICE
+              }
+              await lambda.updateFunctionConfiguration( {
+                FunctionName: functionName, /* required */
+                Description: inputs.ServiceDesc,
+                Environment: {
+                  Variables: funcEnvs
+                },
+                Handler: handlerName,
+                Runtime: fRuntime
+              }).promise()
+              let publishVersionData = await lambda.publishVersion({
+                FunctionName: functionName /* required */
+              }).promise()
+              let aliasName = functionName + '_Latest'
+              let updateAliasPromise = lambda.updateAlias({ 
+                FunctionName: functionName, /* required */
+                FunctionVersion: publishVersionData.Version, /* required */
+                Name: aliasName /* required */
+              }).promise()
+              await updateAliasPromise.catch( async function (err) { 
+                console.log('updateFunction addPermission error: ', err) // an error occurred
+                await lambda.createAlias({
+                  FunctionName: functionName, /* required */
+                  FunctionVersion: publishVersionData.Version, /* required */
+                  Name: aliasName /* required */
+                }).promise()
+              })
+              gulp.task('create-iot-rule')();
+            } catch (err) {
+              console.log('updateFunction error: ', err)
+            }
+          } // end else
         });
     }
     return true
@@ -720,6 +735,33 @@ app.post('/mservices', function(req, res) {
           };
           console.log('getTopicRule: ', iotTopicRuleName, ': ', theFunctionArn);
           iot.getTopicRule(params, function(err, data) {
+            /* For public shared case
+              No need to any any WHERE clouse
+            */
+            /* For private case
+               either sent from user himself or sent from (the microservice owner and the microservice is shared)
+              'WHERE mserviceOwnerId = ' + inputs.UserId +
+              ' OR mserviceOwnerId = topic(2)'
+            */
+            let whereClouse = ''
+            let allowedTopicHeader =  ''
+
+            if (inputs.IsShared === 'true') { // public shared
+              // allow triggered by all microservices
+              allowedTopicHeader = 'aiot/+/' // 'aiot/' + inputs.UserId + '/'
+            } else {  // private
+              // only allow triggered by input messages sent from 
+              // 1. the user himself
+              // 2. or the users own the shared microservices
+              // 3. from system user 'admin' or 'system'
+              allowedTopicHeader =  'aiot/+/'
+              whereClouse = 'WHERE topic(2) = \'system\' OR topic(2) = \'admin\' OR topic(2) = \'' + inputs.UserId + '\' OR mserviceOwnerId = topic(2)'
+            }
+            if (inputs.hasOwnProperty('InputMicroservice') && inputs.InputMicroservice !== '') {
+              allowedTopicHeader =  allowedTopicHeader + inputs.InputMicroservice + '/' 
+            } else {
+              allowedTopicHeader =  allowedTopicHeader + '+/' 
+            }
             let iotTopicRuleParams = {
               ruleName: iotTopicRuleName, /* required */
               topicRulePayload: { /* required */
@@ -730,13 +772,18 @@ app.post('/mservices', function(req, res) {
                     }
                   }
                 ],
-                sql: "SELECT topic() as topic, topic(2) AS sender, * from '" + "aiot/+/" + inputs.InputMessageTopic + "'", /* required */
+                sql: "SELECT topic() AS topic, topic(2) AS sender, topic(3) AS fromWhere * FROM '" + allowedTopicHeader + inputs.InputMessageTopic + "'" + whereClouse, /* required */
                 // , topic() AS MessageTopic
                 ruleDisabled: false,
                 awsIotSqlVersion: '2016-03-23'
               }
             };
             if (err){
+              if (inputs.InputMessageTopic === 'null') {
+                // bypass creating iot topic rule,
+                gulp.task('version-update-return')()
+                return                  
+              }
               console.log('createTopicRule: ', iotTopicRuleParams);
               iot.createTopicRule(iotTopicRuleParams, function(err, data) {
                 if (err) console.log(err); // an error occurred
@@ -746,6 +793,19 @@ app.post('/mservices', function(req, res) {
               });  
             }
             else{
+              if (inputs.InputMessageTopic === 'null') {
+                iot.deleteTopicRule({
+                  ruleName: iotTopicRuleName, /* required */
+                }, function(err, data) {
+                  if (err){
+                    console.log('deleteTopicRule error: ', err);
+                  }else{
+                    gulp.task('version-update-return')();     
+                   }
+                }); // end deleteTopicRule
+                // bypass creating iot topic rule,
+                return
+              }
               console.log('replaceTopicRule: ', iotTopicRuleParams);
               iot.replaceTopicRule(iotTopicRuleParams, function(err, data) {
                 if (err) console.log(err); // an error occurred
@@ -784,7 +844,7 @@ app.post('/mservices', function(req, res) {
           ReturnValues:'ALL_NEW'
         }, (err, dbData) => {
           if(err) {
-            console.log('DynamoDB error: ', err)
+            console.log('DynamoDB put error: ', err)
           } else{
             res.json({success: 'microservice updated', microservice: dbData})
           }
@@ -971,8 +1031,8 @@ app.delete('/mservices', function(req, res) {
           res.json({error: err})
         } else {
           lambda.deleteFunction({
-            FunctionName: functionName, 
-            Qualifier: "1"
+            FunctionName: functionName 
+            // Qualifier: "1" // delete only a version
           }, function(err, data) {
             if (err) {
               console.log(err, err.stack); // an error occurred
@@ -1010,7 +1070,7 @@ app.delete('/mservices', function(req, res) {
             }else{
               gulp.task('delete-lambda')();
             }
-          }); // end getTopicRule
+          }); // end deleteTopicRule
 
       } // if without error
     }); // end lambda getFunction

@@ -82,12 +82,27 @@ let messageQueueSend = async (queueName, messageData) => {
     }   // if try failed, cannot find the queue name
 };
 
-let messagePublish = async (messageData) => {
+let messagePublish = async (messageData, forceToSender) => {
+    if (environment.OUTPUT_MESSAGE_TOPIC === 'null') {
+        return
+    }
     let event = inputEvent
+    if (environment.hasOwnProperty('IS_SHARED') && environment.IS_SHARED === 'true') {
+        messageData.mserviceOwnerId = environment.OWNER_ID
+        messageData.mserviceName = environment.MSERVICE_NAME
+    } else {
+        delete messageData.mserviceOwnerId
+    }
+    let theSenderId = senderId
+    if (typeof forceToSender !== 'undefined') {
+        if (environment.hasOwnProperty('SYSTEM_MSERVICE') && environment.SYSTEM_MSERVICE === 'true') {
+            theSenderId = forceToSender
+        }
+    }
     let dataString = JSON.stringify(messageData);
     var iotdata = new AWS.IotData({endpoint: environment.IOT_ENDPOINT});
     var params = {
-        topic: 'aiot/' + senderId + '/' + environment.OUTPUT_MESSAGE_TOPIC,
+        topic: 'aiot/' + theSenderId + '/' + environment.MSERVICE_NAME + '/' + environment.OUTPUT_MESSAGE_TOPIC,
         payload: dataString,
         qos: 0
         };
@@ -103,7 +118,7 @@ let consoleOutput = async (outputMessage) => {
     let dataString = JSON.stringify(outputMessage);
     var iotdata = new AWS.IotData({endpoint: environment.IOT_ENDPOINT});
     var params = {
-        topic: 'aiot/' + senderId + '/' + 'console/output',
+        topic: 'aiot/' + senderId + '/' + + environment.MSERVICE_NAME + '/' + 'console/output',
         payload: dataString,
         qos: 0
         };
@@ -117,7 +132,7 @@ let consoleOutput = async (outputMessage) => {
 let setInput = (event) => {
     inputEvent = event;
     
-    if ( process.env.hasOwnProperty('API_GATEWAY_NAME') ) {
+    if ( process.env.hasOwnProperty('API_GATEWAY_NAME') && event.hasOwnProperty('path') ) {
         let apiNamePart = /^\/[0-9a-zA-Z\-\_]+\//
         event.path = event.path.replace(apiNamePart, '/')
     }

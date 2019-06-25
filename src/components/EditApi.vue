@@ -67,7 +67,7 @@
             </b-col>
           </b-row>
           <b-row class="mt-3" v-if="api.ApiName !== null && api.ApiName !== ''">
-                <b-col sm="3" align="end" >
+                <b-col sm="3" align="start" >
                   <h5 id="popoverInvokeUrl"> Invoke URL <i class="fas fa-info-circle"></i></h5>
                 </b-col>
                 <b-col >
@@ -225,7 +225,7 @@ export default {
     }
     let msFound = this.mservices.find(ms => ms.ServiceName === this.api.Handler)
     console.log('msFound: ', msFound)
-    if (msFound !== null) {
+    if (typeof msFound !== 'undefined' && msFound !== null) {
       this.apiService = msFound
       console.log('found: ', this.apiService)
       this.$forceUpdate()

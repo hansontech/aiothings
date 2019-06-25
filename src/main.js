@@ -28,7 +28,7 @@ import Spinner from 'vue-simple-spinner'
 import SocialSharing from 'vue-social-sharing'
 import VueStripeCheckout from 'vue-stripe-checkout'
 import { library, dom } from '@fortawesome/fontawesome-svg-core'
-import { faCoffee, faHeart, faTrashAlt, faPhone, faEnvelope, faInfoCircle, faInfo } from '@fortawesome/free-solid-svg-icons'
+import { faCoffee, faHeart, faTrashAlt, faPhone, faEnvelope, faInfoCircle, faInfo, faCube } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faGithub, faSlack, faFacebookF, faFacebook, faLinkedin, faTwitter, faGooglePlus, faLine, faWeibo, faWeixin } from '@fortawesome/free-brands-svg-icons'
 // https://fontawesome.com/icons?d=gallery
@@ -162,7 +162,7 @@ Vue.use(LiquorTree)
 
 // codemirror imports end ----------------------------------
 
-library.add(faCoffee, faHeart, faTrashAlt, faPhone, faEnvelope, faInfoCircle, faInfo)
+library.add(faCoffee, faHeart, faTrashAlt, faPhone, faEnvelope, faInfoCircle, faInfo, faCube)
 library.add(faGithub, faSlack, faFacebook, faFacebookF, faLinkedin, faTwitter, faGooglePlus, faLine, faWeibo, faWeixin)
 
 // require more codemirror resource...
@@ -176,8 +176,6 @@ Vue.use(VueCodemirror, {
 } */)
 // theme: 'base16-dark',
 
-Amplify.configure(awsmobile)
-
 // AWS CLI cloudfront reference:
 // https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Invalidation.html
 // to invalidate cloudfront cache, force to update contents to edges.
@@ -187,7 +185,13 @@ const hostUrl = window.location.protocol + '//' + window.location.host
 // const hostUrl = 'https://d3n2wrf9ttsajg.cloudfront.net'
 // const hostUrl = 'https://www.aiothings.com'
 // const hostUrl = 'http://localhost:8080'
+let awsmobile2 = awsmobile
+awsmobile2.oauth.redirectSignIn = hostUrl + '/callback/'
+awsmobile2.oauth.redirectSignOut = hostUrl + '/signout/'
 
+Amplify.configure(awsmobile2)
+
+/*
 const oauth = {
   // Domain name
   domain: config.awsCognitoDomain,
@@ -209,8 +213,8 @@ const oauth = {
       AdvancedSecurityDataCollectionFlag: true
   }
 }
-
-Auth.configure({ oauth: oauth })
+*/
+// 0528 remarked, to reflect new settings Auth.configure({ oauth: oauth })
 
 // Amplify.configure({
   // Auth: {

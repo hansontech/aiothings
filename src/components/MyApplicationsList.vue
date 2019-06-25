@@ -18,6 +18,9 @@
         <div>
           <pre id="log"></pre>
         </div>
+        <div>
+          <code>    </code>
+        </div>  
       </b-modal>
       <div v-if="isLoading" class="mb-2">
         <b-row>
@@ -79,6 +82,7 @@ import Sidebar from './Sidebar'
 import atHelper from '../aiot-helper'
 import store from '../store'
 import { API } from 'aws-amplify'
+import MQTTPattern from 'mqtt-pattern'
 
 export default {
   components: {
@@ -142,10 +146,10 @@ export default {
                'userId': username
           }
       })
-      // console.log('result: ', result)
       this.isLoading = false
       this.testResult = result
       let resultJson = JSON.parse(result)
+      console.log('result: ', resultJson)
       store.commit('setMservices', resultJson)
       // atHelper.reloadServices()
       this.services = this.$store.getters.mservices
@@ -194,6 +198,7 @@ export default {
        * @param array
        * @returns {*}
        */
+      /*
       var m = array.length
       var t, i
 
@@ -207,61 +212,79 @@ export default {
           array[m] = array[i]
           array[i] = t
       }
-
+      */
       return array
     },
-    treeify (flat) {
-      let map = {__root__: { children: [] }}
-      let msHasInput = {}
-      const parentIdField = 'InputMessageTopic'
-      const idField = 'OutputMessageTopic'
-      flat.forEach(function (node) {
-          var parentId = node[parentIdField] || '__root__'
-          var id = node[idField]
-          let name = node['ServiceName']
+    treeify (flat) { // flat has all microservices list
+      let map = {__root__: { topic: '__root__', element: [], children: [] }}
+      let msList = flat
+      for (let msListIndex in msList) {
+          let ms = msList[msListIndex]
+          let inputTopic = ms.InputMessageTopic
+          let outputTopic = ms.OutputMessageTopic
 
-          console.log('log: ', parentId, ' : ', name, ': ', id)
-          // init parent
-          if (!map.hasOwnProperty(parentId)) {
-              map[parentId] = { element: null, children: [] }
+          if (!map.hasOwnProperty(inputTopic)) { // for input topic
+              map[inputTopic] = { topic: inputTopic, element: [], children: [] }
+              map['__root__'].children.push({ms: null, map: map[inputTopic]})
           }
-
           // init self
-          if (!map.hasOwnProperty(id)) {
-              map[id] = { element: null, children: [] }
-          }
-
-          if (map[id].element !== null && map[id].element !== node) {
-            let duple = Object.assign({}, map[id])
-            duple.element = node
-            map[parentId].children.push(duple)
+          if (!map.hasOwnProperty(outputTopic)) { // for output topic
+              map[outputTopic] = { topic: outputTopic, element: [], children: [] }
           } else {
-            map[id].element = node
-            map[parentId].children.push(map[id])
+              map['__root__'].children = map['__root__'].children.filter(entry => entry.map.topic !== outputTopic)
           }
-          msHasInput[id] = true
-
-          if (!msHasInput.hasOwnProperty(parentId)) {
-            map['__root__'].children.push(map[id])
+          map[outputTopic].element.push(ms)
+          map[inputTopic].children.push({ms: ms, map: map[outputTopic]})
+      }
+      let rootChildrenList = [...map['__root__'].children]
+      for (let mapEntryIndex in map) {
+          let mapEntry = map[mapEntryIndex]
+          let mapEntryOutputTopic = mapEntry.topic
+          for (let rootChildrenIndex in rootChildrenList) {
+            let mapScan = rootChildrenList[rootChildrenIndex].map
+            let mapScanInputTopic = mapScan.topic
+            if (mapScanInputTopic !== mapEntryOutputTopic) {
+              let topicMatched = MQTTPattern.exec(mapScanInputTopic, mapEntryOutputTopic)
+              if (topicMatched !== null) {
+                // console.log('matched: ', mapScanInputTopic)
+                if (rootChildrenList[rootChildrenIndex].ms === null && mapScan.element.length > 0) {
+                  for (let ms of mapScan.element) {
+                    let found = mapEntry.children.find(child => child.ms === ms)
+                    if (typeof found !== 'undefined' && found !== null) {
+                    } else {
+                      mapEntry.children.push({ms: ms, map: mapScan})
+                    }
+                  }
+                } else {
+                  mapEntry.children.push({ms: rootChildrenList[rootChildrenIndex].ms, map: mapScan})
+                }
+                map['__root__'].children = map['__root__'].children.filter(entry => entry.map.topic !== mapScanInputTopic)
+              }
+            }
           }
-          map['__root__'].children = map['__root__'].children.filter(function (inode, index, arr) {
-           return (inode.element[parentIdField] !== id)
-          })
-      })
-      console.log('tree map: ', map)
-      console.log('has inputs: ', msHasInput)
+      }
+      // console.log('tree map: ', map)
       return map.__root__.children
     },
-
+    /*
+      cfg: {
+        hasNextSibling: '&boxvr;',
+        isLastChild: '&boxur;',
+        ancestorHasNextSibling: '&boxv;',
+        ancestorIsLastChild: ' '
+      },
+      decorator: function to add string to innerHTML,
+      indent: indent string, account for depth level, used by decorator
+    */
     treeIndent (branch, cfg, decorator, indent) {
       indent = indent || []
       let that = this
       branch.forEach(function (node, i) {
-          decorator(node.element, indent.concat(
+          decorator(node.ms, node.map.topic, node.map.element, indent.concat(
               i === branch.length - 1 ? cfg.isLastChild : cfg.hasNextSibling
           ))
 
-          that.treeIndent(node.children, cfg, decorator, indent.concat(
+          that.treeIndent(node.map.children, cfg, decorator, indent.concat(
               i === branch.length - 1 ? cfg.ancestorIsLastChild : cfg.ancestorHasNextSibling
           ))
       })
@@ -276,7 +299,7 @@ export default {
       })
       let mservicesList = JSON.parse(result)
       this.walkTreeLoading = false
-      // console.log('message trees: ', resultJson)
+      // console.log('message trees: ', mservicesList)
       /*
       var input = [
         { id: 1, parent_id: null, name: 'root' },
@@ -298,14 +321,24 @@ export default {
         isLastChild: '&boxur;',
         ancestorHasNextSibling: '&boxv;',
         ancestorIsLastChild: ' '
-      }, function (element, indent) {
+      }, function (ms, topic, element, indent) {
         if (typeof element === 'undefined') {
           return
         }
-        let nameField = 'ServiceName' // 'name'
+        let msName = ''
+        if (ms !== null) {
+          msName = '[' + ms.ServiceName + '] '
+        }
+        log.innerHTML += indent.join(' ') + ' ' + msName + topic + '\n'
+        // let nameField = 'ServiceName' // 'name'
         // console.log('service name: ', element[nameField])
-        log.innerHTML += indent.join(' ') + ' ' + element[nameField] + '\n'
+        /*
+        for (let ms of element) {
+          log.innerHTML += indent.join(' ') + ' ' + ms['InputMessageTopic'] + ' [' + ms[nameField] + '] ' + ms['OutputMessageTopic'] + '\n'
+        }
+        */
       })
+      log.innerHTML += '\n\n'
     }
   } // methods
 }
