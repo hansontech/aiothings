@@ -245,7 +245,7 @@ let iotPolicyTemplate = {
         "iot:DeleteThingShadow"
       ],
       "Resource": [
-        "arn:aws:iot:REGION_NAME:ACCOUNT_ID:thing/${iot:Connection.Thing.ThingName}"
+        "*"
       ]
     },
       {
@@ -254,7 +254,7 @@ let iotPolicyTemplate = {
             "iot:Connect"
           ],
           "Resource": [
-            "arn:aws:iot:REGION_NAME:ACCOUNT_ID:client/${iot:Connection.Thing.ThingName}"
+            "*"
           ]
       },
       {
@@ -263,8 +263,7 @@ let iotPolicyTemplate = {
             "iot:Subscribe"
           ],
           "Resource": [
-            "arn:aws:iot:REGION_NAME:ACCOUNT_ID:topicfilter/aiot/USER_ID/*",
-            "arn:aws:iot:REGION_NAME:ACCOUNT_ID:topicfilter/aiot/THING_ID/*"
+            "*" 
           ]
       },
       {
@@ -275,7 +274,8 @@ let iotPolicyTemplate = {
           ],
           "Resource": [
             "arn:aws:iot:REGION_NAME:ACCOUNT_ID:topic/aiot/USER_ID/*",
-            "arn:aws:iot:REGION_NAME:ACCOUNT_ID:topic/aiot/THING_ID/*"      
+            "arn:aws:iot:REGION_NAME:ACCOUNT_ID:topic/aiot/THING_ID/*",
+            "arn:aws:iot:REGION_NAME:ACCOUNT_ID:topic/$aws/*"   
           ]
       }
   ]
@@ -315,7 +315,7 @@ let applyThingCert = ( userId, thingNameTag, callback ) => {
       let iotPolicy = JSON.parse(iotPolicyTemplateStr)
       console.log('iotPolicy: ', iotPolicy)
       await iot.createPolicy({
-        policyDocument: iotPolicy, /* required */
+        policyDocument: iotPolicyTemplateStr, /* required */
         policyName: thingId /* required */
       }).promise()
       await iot.attachPolicy( {

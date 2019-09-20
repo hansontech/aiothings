@@ -48,16 +48,16 @@ import './lib/python-lint.js'
 // language js
 import 'codemirror/mode/javascript/javascript.js'
 import 'codemirror/addon/lint/javascript-lint.js'
-import 'codemirror/addon/hint/javascript-hint.js'
+// import 'codemirror/addon/hint/javascript-hint.js'
 
 // lint
 import 'codemirror/addon/lint/lint.css'
 import 'codemirror/addon/lint/lint.js'
 
 // hint
-import 'codemirror/addon/hint/show-hint.js'
-import 'codemirror/addon/hint/show-hint.css'
-import 'codemirror/addon/selection/active-line.js'
+// import 'codemirror/addon/hint/show-hint.js'
+// import 'codemirror/addon/hint/show-hint.css'
+// import 'codemirror/addon/selection/active-line.js'
 
 // highlightSelectionMatches
   import 'codemirror/addon/scroll/annotatescrollbar.js'

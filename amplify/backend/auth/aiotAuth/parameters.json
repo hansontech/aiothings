@@ -1,0 +1,85 @@
+{
+    "identityPoolName": "aiotIdentityPool2",
+    "allowUnauthenticatedIdentities": true,
+    "lambdaLogPolicy": "aiotAuth_lambda_log_policy",
+    "openIdLambdaRoleName": "aiotAuth_openid_lambda_role",
+    "openIdRolePolicy": "aiotAuth_openid_pass_role_policy",
+    "openIdLambdaIAMPolicy": "aiotAuth_openid_lambda_iam_policy",
+    "openIdLogPolicy": "aiotAuth_openid_lambda_log_policy",
+    "userPoolName": "aiotUserPool2",
+    "autoVerifiedAttributes": [
+        "email"
+    ],
+    "mfaConfiguration": "OFF",
+    "mfaTypes": [
+        "SMS Text Message"
+    ],
+    "roleName": "aiotAuth_sns-role",
+    "roleExternalId": "aiotAuth_role_external_id",
+    "policyName": "aiotAuth-sns-policy",
+    "smsAuthenticationMessage": "Your authentication code is {####}",
+    "smsVerificationMessage": "Your verification code is {####}",
+    "emailVerificationSubject": "Your AIoThings verification code",
+    "emailVerificationMessage": "Your verification code is {####}",
+    "defaultPasswordPolicy": true,
+    "passwordPolicyMinLength": 8,
+    "passwordPolicyCharacters": [
+        "Requires Lowercase",
+        "Requires Uppercase",
+        "Requires Numbers"
+    ],
+    "requiredAttributes": [
+        "email"
+    ],
+    "userpoolClientName": "aiotAuth_app_client",
+    "userpoolClientGenerateSecret": true,
+    "userpoolClientRefreshTokenValidity": 30,
+    "userpoolClientWriteAttributes": [
+        "email"
+    ],
+    "userpoolClientReadAttributes": [
+        "email"
+    ],
+    "mfaLambdaRole": "aiotAuth_totp_lambda_role",
+    "mfaLambdaLogPolicy": "aiotAuth_totp_lambda_log_policy",
+    "mfaPassRolePolicy": "aiotAuth_totp_pass_role_policy",
+    "mfaLambdaIAMPolicy": "aiotAuth_totp_lambda_iam_policy",
+    "userpoolClientLambdaRole": "aiotAuth_userpoolclient_lambda_role",
+    "userpoolClientLogPolicy": "aiotAuth_userpoolclient_lambda_log_policy",
+    "userpoolClientLambdaPolicy": "aiotAuth_userpoolclient_lambda_iam_policy",
+    "userpoolClientSetAttributes": true,
+    "useDefault": "manual",
+    "authSelections": "identityPoolAndUserPool",
+    "resourceName": "aiotAuth",
+    "thirdPartyAuth": true,
+    "authProviders": [
+        "graph.facebook.com",
+        "accounts.google.com"
+    ],
+    "hostedUI": true,
+    "hostedUIDomainName": "aiothings0528",
+    "authProvidersUserPool": [
+        "Facebook",
+        "Google"
+    ],
+    "hostedUIProviderMeta": "[{\"ProviderName\":\"Facebook\",\"authorize_scopes\":\"email,public_profile\",\"AttributeMapping\":{\"email\":\"email\",\"username\":\"id\"}},{\"ProviderName\":\"Google\",\"authorize_scopes\":\"openid email profile\",\"AttributeMapping\":{\"email\":\"email\",\"username\":\"sub\"}}]",
+    "oAuthMetadata": "{\"AllowedOAuthFlows\":[\"code\"],\"AllowedOAuthScopes\":[\"openid\",\"profile\",\"aws.cognito.signin.user.admin\"],\"CallbackURLs\":[\"https://www.aiothings.com/callback/\"],\"LogoutURLs\":[\"https://www.aiothings.com/signout/\"]}",
+    "authRoleName": {
+        "Ref": "AuthRoleName"
+    },
+    "unauthRoleName": {
+        "Ref": "UnauthRoleName"
+    },
+    "authRoleArn": {
+        "Fn::GetAtt": [
+            "AuthRole",
+            "Arn"
+        ]
+    },
+    "unauthRoleArn": {
+        "Fn::GetAtt": [
+            "UnauthRole",
+            "Arn"
+        ]
+    }
+}

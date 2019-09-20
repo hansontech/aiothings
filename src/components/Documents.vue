@@ -13,17 +13,13 @@
         </div>
         -->
         <!-- reference source CSS https://amsik.github.io/liquor-tree/#Guides -->
-        <!-- <div style="border-right: 1px solid blue; overflow-y: scroll; position: fixed; width: 250px; top: 70px; left: 0; bottom: 0;"> -->
-        <div class="menu" style="border-right: 1px solid blue; top: 70px;" >
-         
+        <div class="menu" style="border-right: 1px solid blue; top: 70px;" >         
           <doc-sidebar></doc-sidebar>
         </div>
-        <!-- <div style="position: fixed; overflow-y: auto; padding-left: 240px; top: 140px; right: 0; bottom: 0;"> -->
-        <div class="page">
-          <div class = 'page-content'>
+        <div id="docMain" class="page">
             <router-view/>
-          </div>
         </div>
+
     
   </b-container>
 </template>
@@ -104,44 +100,33 @@ export default {
 }
 </script>
 <style>
-#left {
-    position: absolute;
-    top: 70px;
-    bottom: 0;
-    left: 0;
-    /* min-width: 100px; */
-    width: 30%;
-    overflow-y: scroll; 
-}
-#right {
-    position: absolute;
-    top: 100px;
-    bottom: 0;
-    right: 0;
-    overflow-y: scroll;
-    width: 70%;
-}
 
+/* 
+  Explain to the position definitions,
+  https://www.w3schools.com/css/css_positioning.asp 
+*/
 .menu {
-  position: fixed;
+  position: fixed; /* fixed to top/left/right/bottom viewport */
   top: 0;
   left: 0;
+  right: 75%; /* right boundary is at 75% from the rightmost */
   bottom: 0;
-  width: 240px;
+  width: 25%;
   overflow-y: scroll;
-  border-right: 1px solid #efefef; }
+  -webkit-overflow-scrolling: touch; /* for iphone .. touch devices */
+  border-right: 1px solid #efefef; 
+}
 
 .page {
-  padding-left: 240px; 
-  }
-
-.page-content {
-  /* padding: 0px;
-  margin: 0 auto; */
-  width: 885px;
-  max-width: 100%;
+  position: fixed;
+  left: 25%;
+  top: 70px;  /* below the top menu portion */
+  right: 0%;  /* from rightmost */
+  bottom: 0%; /* to the end of the bottom */
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
   padding-bottom: 80px;
-  }
+}
 
 </style>
 

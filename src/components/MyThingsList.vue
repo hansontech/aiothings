@@ -2,9 +2,17 @@
   <b-container fluid> 
     <div>
        <b-row align-v="center" class="at-bottombar">
-          <b-col align="start">
+          <b-col align="start" sm="4">
             <h4>IoT Devices ({{things.length}})</h4>
           </b-col>
+         <b-col sm="4">
+            <b-form-input class="at-border" id="publishTopic"
+              type="text" 
+              v-model="msSearchString"
+              required
+              placeholder="Search ...">
+            </b-form-input>
+          </b-col>          
           <b-col sm="auto" align="end">
             <b-button variant="info" @click="refreshThings()">Refresh</b-button>
             <b-button variant="success" @click="createThing()" v-b-popover.hover.bottom="'Create new IoT device'" >Create</b-button>
@@ -30,7 +38,7 @@
       <b-row class="mt-2">
         <div class="at-scroll">
           <b-card-group columns>
-           <b-card v-for="(thing, index) in things" :key="thing.ThingId"
+           <b-card v-for="(thing, index) in filteredThings" :key="thing.ThingId"
               img-src="/static/photo-54.png"
               img-alt="Image"
               img-top
@@ -90,6 +98,7 @@ export default {
       thingsMap: {'x': 1},
       testFlag: false,
       things: null,
+      msSearchString: '',
       isLoading: false
     }
   },
@@ -107,6 +116,12 @@ export default {
         return ip
       }
       return ''
+    },
+    filteredThings () {
+      let foundThings = this.things.filter(thing => {
+        return thing.ThingName.toLowerCase().includes(this.msSearchString.toLowerCase())
+      })
+      return foundThings
     }
   },
   watch: {
@@ -262,6 +277,8 @@ export default {
 
 div.at-bottombar {
   /* background-color : grey; */
+  padding-bottom: 5px;
+  margin-bottom: 5px;
   border-bottom: 1px solid grey
 }
 </style>

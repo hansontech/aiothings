@@ -8,6 +8,9 @@ import store from './store'
 import config from './config'
 
 export default {
+  downloadBinaryFile (fileName, fileData) {
+    FileSaver.saveAs(fileData, fileName);
+  },
   async exportService (ms, isLoadCode) {
     // name
     // desc
@@ -270,7 +273,7 @@ export default {
             .replace(/\[THING_PEM_PRIVATE_KEY\]/g, thingCertPrivateKeyFileName)
             .replace(/\[THING_ARN\]/g, thingData.ThingArn)
             .replace(/\[IOT_HOST\]/g, config.awsIotHost)
-            .replace(/\[GG_HOST\]/g, 'cgreengrass-ats.iot.' + config.awsRegion + '.amazonaws.com')
+            .replace(/\[GG_HOST\]/g, 'greengrass-ats.iot.' + config.awsRegion + '.amazonaws.com')
 
     configJson = JSON.parse(configStr)
 

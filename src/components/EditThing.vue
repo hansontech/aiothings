@@ -182,6 +182,24 @@
                           </b-form-select>                       
                         </b-col>
                       </b-row>
+                      <b-row class="mt-1" v-if="ggFunction.FunctionConfiguration.Pinned === true">
+                        <b-col sm="4">
+                          Timeout
+                        </b-col>
+                        <b-col sm="8">
+                          <b-form-input v-model="ggFunction.FunctionConfiguration.Timeout" type="number" placeholder="in seconds">
+                          </b-form-input>                     
+                        </b-col>
+                      </b-row>
+                      <b-row class="mt-1">
+                        <b-col sm="4">
+                          Memory size
+                        </b-col>
+                        <b-col sm="8">
+                          <b-form-input v-model="ggFunction.FunctionConfiguration.MemorySize" type="number" placeholder=">= 32000 in KB">
+                          </b-form-input>                     
+                        </b-col>
+                      </b-row>
                       <b-row class="mt-1">
                         <b-col sm="4">
                           Resources used
@@ -198,9 +216,14 @@
                           <b-list-group>
                             <b-list-group-item v-for="(resourcePolicy, index) in ggFunction.FunctionConfiguration.Environment.ResourceAccessPolicies" :key="index">
                               <b-row>
-                                <b-col sm="9">
+                                <b-col sm="7">
                                   {{resourcePolicy.ResourceId}}
                                 </b-col>
+                                <b-col sm="2"> 
+                                  <b-button size="sm" @click="switchResourcePolicyPermission(index)">
+                                    {{resourcePolicy.Permission}}
+                                  </b-button>
+                                </b-col>                                
                                 <b-col sm="3" align="end">
                                   <b-button size="sm" @click="deleteEdgeFunctionResource(index)">
                                     <i class="fas fa-trash-alt"></i>
@@ -253,13 +276,13 @@
                               </b-dropdown>
                             </b-col>
                           </b-row>
-                          <b-row class="mt-2">
+                          <b-row class="mt-2" v-if="edgeFunctionToService(edgeFunction) !== null" >
                             <b-col>
                               {{edgeFunctionToService(edgeFunction).ServiceDesc}}
                             </b-col>
                           </b-row>
-                          <small>
-                          <b-row class="mt-1" align-v="center" style="border-top: 1px solid lightgrey; padding-top: 5px; margin-top: 5px;">
+                          <!--
+                          <b-row class="mt-1" v-if="edgeFunctionToService(edgeFunction) !== null" align-v="center" style="border-top: 1px solid lightgrey; padding-top: 5px; margin-top: 5px;">
                             <b-col sm="5">
                               Input:
                             </b-col>
@@ -267,12 +290,35 @@
                               {{edgeFunctionToService(edgeFunction).InputMessageTopic}}
                             </b-col>
                           </b-row>
-                          <b-row class="mt-1">
+                          <b-row class="mt-1" v-if="edgeFunctionToService(edgeFunction) !== null">
                             <b-col sm="5">
                               Output:
                             </b-col>
                             <b-col sm="7">
                               {{edgeFunctionToService(edgeFunction).OutputMessageTopic}}
+                            </b-col>
+                          </b-row>
+                          -->
+                          <b-row>
+                            <b-col align="left" v-if="edgeFunction.FunctionConfiguration.Environment.ResourceAccessPolicies.length > 0">
+                              Resources:
+                            </b-col>
+                          </b-row>
+                          <small>
+                          <b-row class="mt-1" v-if="edgeFunction.FunctionConfiguration.Environment.ResourceAccessPolicies.length > 0">
+                            <b-col>
+                              <b-list-group>
+                                <b-list-group-item v-for="(resource, index) in edgeFunction.FunctionConfiguration.Environment.ResourceAccessPolicies" :key="index" href="#">
+                                  <b-row>
+                                    <b-col sm="9" align="left">
+                                      {{resource.ResourceId}}
+                                    </b-col>
+                                    <b-col>
+                                      {{resource.Permission}}
+                                    </b-col>
+                                  </b-row>
+                                </b-list-group-item>    
+                              </b-list-group>
                             </b-col>
                           </b-row>
                           </small>
@@ -359,6 +405,14 @@
                       </b-row>
                       <b-row class="mt-1">
                         <b-col sm="4">
+                          Group Owner
+                        </b-col>
+                        <b-col sm="8">  
+                          <b-form-input v-model="ggLocalDeviceResource.ResourceDataContainer.LocalDeviceResourceData.GroupOwnerSetting.GroupOwner" type="text" placeholder="Other group name if need."></b-form-input>
+                        </b-col>
+                      </b-row>                        
+                      <b-row class="mt-1">
+                        <b-col sm="4">
                           Device path
                         </b-col>
                         <b-col sm="8">
@@ -384,7 +438,7 @@
                 </b-modal> 
                 <b-modal @ok="confirmSetLocalVolumeResource" id="setLocalVolumeResourceModal" ref="setLocalVolumeResourceModalRef" title="Set Volume Resource" class="my-modal">
                   <b-container fluid>
-                    <form @submit.stop.prevent="handleLocalVolumeResourceSubmit">
+                    <!-- <form @submit.stop.prevent="handleLocalVolumeResourceSubmit"> -->
                     <b-row>
                       <b-col sm="4">
                         Resource name (ID)
@@ -409,7 +463,15 @@
                         <b-form-input v-model="ggLocalVolumeResource.ResourceDataContainer.LocalVolumeResourceData.DestinationPath" type="text" placeholder="e.g. /dst/test"></b-form-input>
                       </b-col>
                     </b-row>
-                     </form>
+                    <b-row class="mt-1">
+                      <b-col sm="4">
+                        Group Owner
+                      </b-col>
+                      <b-col sm="8">  
+                        <b-form-input v-model="ggLocalVolumeResource.ResourceDataContainer.LocalVolumeResourceData.GroupOwnerSetting.GroupOwner" type="text" placeholder="Other group name if need."></b-form-input>
+                      </b-col>
+                    </b-row>                    
+                    <!-- </form> -->
                     <b-row style="border-top: 1px solid lightgrey; padding-top: 5px; margin-top: 5px;">
                       <small>
                       <p>
@@ -467,30 +529,23 @@ inside the container that the function runs in.</p>
                             </b-col>
                           </b-row>
                           <div  v-if="resourceType(resource) === 'Local Device'">
-                          <b-row>
-                            <b-col>
-                            {{resource.ResourceDataContainer.LocalDeviceResourceData.SourcePath}}
-                            </b-col>
-                          </b-row>
+                            <b-list-group>
+                              <b-list-group-item>{{resource.ResourceDataContainer.LocalDeviceResourceData.SourcePath}}</b-list-group-item>
+                              <b-list-group-item v-if="resource.ResourceDataContainer.LocalDeviceResourceData.GroupOwnerSetting.AutoAddGroupOwner === false">{{resource.ResourceDataContainer.LocalDeviceResourceData.GroupOwnerSetting.GroupOwner}}</b-list-group-item>
+                            </b-list-group>
                           </div>
                           <div v-if="resourceType(resource) === 'Local Volume'">
-                            <b-row>
-                              <b-col>
-                              {{resource.ResourceDataContainer.LocalVolumeResourceData.SourcePath}}
-                              </b-col>
-                            </b-row>
-                            <b-row>
-                              <b-col>
-                              {{resource.ResourceDataContainer.LocalVolumeResourceData.DestinationPath}}
-                              </b-col>
-                            </b-row>
+                            <b-list-group>
+                              <b-list-group-item>{{resource.ResourceDataContainer.LocalVolumeResourceData.SourcePath}}</b-list-group-item>
+                              <b-list-group-item>{{resource.ResourceDataContainer.LocalVolumeResourceData.DestinationPath}}</b-list-group-item>
+                              <b-list-group-item v-if="resource.ResourceDataContainer.LocalVolumeResourceData.GroupOwnerSetting.AutoAddGroupOwner === false">{{resource.ResourceDataContainer.LocalVolumeResourceData.GroupOwnerSetting.GroupOwner}}</b-list-group-item>
+                            </b-list-group>
                           </div>
                           <div v-if="resourceType(resource) === 'Machine Learning'">
-                            <b-row>
-                              <b-col>
-                                {{mlResourceModelFileName(resource)}}
-                              </b-col>
-                            </b-row>
+                            <b-list-group>
+                              <b-list-group-item>{{mlResourceModelFileName(resource)}}</b-list-group-item>
+                              <b-list-group-item>{{mlResourceModelDestPath(resource)}}</b-list-group-item>
+                            </b-list-group>
                           </div>
                       </b-card>
                     </b-card-group>
@@ -796,13 +851,13 @@ inside the container that the function runs in.</p>
                   <spinner v-if="isDownloading === true" size="medium" />
                   <b-col>
                     <p>
-                    An Edge device is more than a Thing device, it is able to execute microservices locally.
+                    An Edge device is more than a Thing device. It is able to run microservices locally.
                     </p><p>
-                    A regular Thing device is, in default, only capable to run Node-RED flows. 
+                    By default, regular Thing devices only exchange messages with AIoThings services. On the other hand, AIoThings manage, deploy and run microservices on Edge devices. 
                     </p><p>
                     In fact, an Edge device is an <a v-b-tooltip.hover="'Developers who use AWS IoT Greengrass can author AWS Lambda functions in the cloud and deploy them to core devices for local execution.'">AWS IoT Greengrass Core device.</a>
                     </p><p>
-                    Following is the steps introducing to setup a Greengrass Core device.
+                    The steps to setup a Greengrass Core device are:
                     </p><p>
                       <ol>
                         <li>Download <a target="_blank" href="https://github.com/awsdocs/aws-greengrass-developer-guide/blob/master/doc_source/what-is-gg.md#gg-downloads">AWS IoT Greengrass Core software</a> that runs on this core device.</li>
@@ -865,8 +920,8 @@ export default {
           ResourceDataContainer: {
             LocalDeviceResourceData: {
               GroupOwnerSetting: {
-                AutoAddGroupOwner: true
-                // GroupOwner: 'STRING_VALUE'
+                AutoAddGroupOwner: false, // if set to true then, GroupOwner must be assigned
+                GroupOwner: null
               },
               SourcePath: null // 'STRING_VALUE'
             }
@@ -879,8 +934,8 @@ export default {
             LocalVolumeResourceData: {
               DestinationPath: null, // 'STRING_VALUE',
               GroupOwnerSetting: {
-                AutoAddGroupOwner: true
-                // GroupOwner: 'STRING_VALUE'
+                AutoAddGroupOwner: false, // if set to true then, GroupOwner must be assigned
+                GroupOwner: null
               },
               SourcePath: null // 'STRING_VALUE'
             }
@@ -955,35 +1010,39 @@ export default {
             FunctionConfiguration: {
               EncodingType: 'json',
               Environment: {
-                AccessSysfs: true,
-                /*
+                AccessSysfs: true, // only if GreengrassContainer // true only when set GreengrassContainer,
                 Execution: {
-                  IsolationMode: GreengrassContainer | NoContainer,
+                  IsolationMode: 'GreengrassContainer' // GreengrassContainer | NoContainer
+                  /*
+                  ,
                   RunAs: {
                     Gid: 0,
                     Uid: 0
                   }
+                  */
                 },
-                */
                 ResourceAccessPolicies: [
                   /*
                   {
                     Permission: 'rw',
                     ResourceId: 'STRING_VALUE'
-                  },
-                  more items */
-                ]
-                // ,
-                // Variables: {
+                  }
+                  more items
+                  */
+                ],
+                Variables: {
                   /* '<__string>': 'STRING_VALUE',
                   '<__string>': ... */
-                // }
+                  'AIOT_RUN_FROM_EDGE': 'true',
+                  EDGE_THING_ID: ' '
+                }
               },
               // ExecArgs: 'STRING_VALUE',
               // Executable: 'STRING_VALUE',
-              MemorySize: 16000, // in KB
+
+              MemorySize: 64000, // only available when GreengrassContainer is set. 16M works, in KB // 16K was not enough.
               Pinned: true, // Pinned means the function is long-lived and starts when the core starts.
-              Timeout: 6 // in seconds
+              Timeout: 20 // in seconds
             },
             Id: null // 'STRING_VALUE'
       },
@@ -1021,9 +1080,15 @@ export default {
         CreationTimestamp: '0',
         Definition: {
           DefaultConfig: {
+            /*
             Execution: {
-              IsolationMode: 'GreengrassContainer'
+              IsolationMode: 'NoContainer', // 'GreengrassContainer'
+              RunAs: {
+                    Gid: '0',
+                    Uid: '0'
+              }
             }
+            */
           },
           Functions: []
         }
@@ -1255,10 +1320,11 @@ export default {
     ggFunctionResourceId: function (newValue, oldValue) {
       if (newValue !== undefined && newValue !== null && newValue !== oldValue) {
         let newResourcePolicy = {
-            Permission: 'rw',
+            Permission: 'ro',
             ResourceId: newValue
         }
         this.ggFunction.FunctionConfiguration.Environment.ResourceAccessPolicies.push(newResourcePolicy)
+        this.ggFunctionResourceId = null
       }
       this.$forceUpdate()
     },
@@ -1286,9 +1352,19 @@ export default {
   methods: {
     mlResourceModelFileName (edgeResource) {
       let uri = edgeResource.ResourceDataContainer.S3MachineLearningModelResourceData.S3Uri
-      if (uri) {
-        let fileName = uri.split(config.awsGreengrassBucket + '/public/' + this.thing.UserId + '_')[1]
+      if (uri !== null) {
+        let fileNameFilter = uri.split(config.awsGreengrassBucket + '-prod/public/' + this.thing.UserId + '_')
+        // console.log('file names: ', fileNameFilter)
+        let fileName = fileNameFilter[1] // uri.split(config.awsGreengrassBucket + '/public/' + this.thing.UserId + '_')[1]
         return fileName
+      } else {
+        return ''
+      }
+    },
+    mlResourceModelDestPath (edgeResource) {
+      let destPath = edgeResource.ResourceDataContainer.S3MachineLearningModelResourceData.DestinationPath
+      if (destPath !== null) {
+        return destPath
       } else {
         return ''
       }
@@ -1302,7 +1378,7 @@ export default {
       return 'unknown connector'
     },
     edgeFunctionToService (edgeFunction) {
-      console.log('edgeFunction: ', edgeFunction)
+      // console.log('edgeFunction: ', edgeFunction)
       let serviceName = this.edgeFunctionArnToName(edgeFunction)
       for (let service of this.services) {
         if (service.ServiceName === serviceName) {
@@ -1348,6 +1424,14 @@ export default {
     },
     deleteEdgeFunctionResource (index) {
       this.ggFunction.FunctionConfiguration.Environment.ResourceAccessPolicies.splice(index, 1)
+    },
+    switchResourcePolicyPermission (index) {
+      if (this.ggFunction.FunctionConfiguration.Environment.ResourceAccessPolicies[index].Permission === 'rw') {
+        this.ggFunction.FunctionConfiguration.Environment.ResourceAccessPolicies[index].Permission = 'ro'
+      } else {
+        this.ggFunction.FunctionConfiguration.Environment.ResourceAccessPolicies[index].Permission = 'rw'
+      }
+      // this.$forceUpdate()
     },
     editResourceDetail (edgeResourceOrigin) {
       let edgeResource = this.copyJson(edgeResourceOrigin)
@@ -1424,8 +1508,15 @@ export default {
       this.uploadEdge()
     },
     deleteFunctionFromEdge (index) {
+      let functionToDelete = this.edgeFunctions[index]
+      // let functionName = this.edgeFunctionArnToName(functionToDelete)
+      let subList = this.thing.EdgeDefinition.subscriptionDefinition.Definition.Subscriptions.filter(subscription => {
+        return (subscription.Source !== functionToDelete.FunctionArn && subscription.Target !== functionToDelete.FunctionArn)
+      })
+      this.thing.EdgeDefinition.subscriptionDefinition.Definition.Subscriptions = subList
       this.edgeFunctions.splice(index, 1)
       this.thing.EdgeDefinition.functionDefinition.CreationTimestamp = '0'
+      this.thing.EdgeDefinition.subscriptionDefinition.CreationTimestamp = '0'
       this.uploadEdge()
     },
     async deleteEdge () {
@@ -1440,6 +1531,10 @@ export default {
         })
         this.$delete(this.thing, 'EdgeDefinition')
         this.$delete(this.thing, 'EdgeData')
+        // TODO update thing
+        let storedThings = this.$store.getters.things
+        storedThings[this.thingIndex] = this.thing
+        this.$store.commit('setThings', storedThings)
       } catch (err) {
         console.log(err)
       }
@@ -1450,6 +1545,7 @@ export default {
       this.ggFunction = JSON.parse(JSON.stringify(this.initialGgFunction))
       this.ggFunction.FunctionArn = service.ServiceArn
       this.ggFunction.Id = service.ServiceName
+      this.ggFunction.FunctionConfiguration.Environment.Variables.EDGE_THING_ID = this.thing.ThingId
       this.$refs.addEdgeServiceModalRef.hide()
       this.$refs.setEdgeMicroserviceModalRef.show()
       // this.$forceUpdate()
@@ -1473,6 +1569,23 @@ export default {
       this.thing.EdgeDefinition.functionDefinition.Definition.Functions = newList
       this.thing.EdgeDefinition.functionDefinition.Definition.Functions.push(newFunction)
       this.thing.EdgeDefinition.functionDefinition.CreationTimestamp = '0'
+      let functionName = this.edgeFunctionArnToName(newFunction)
+      this.thing.EdgeDefinition.subscriptionDefinition.Definition.Subscriptions = this.thing.EdgeDefinition.subscriptionDefinition.Definition.Subscriptions.filter(subscription => {
+        return subscription.Id.includes(functionName) === false
+      })
+      this.thing.EdgeDefinition.subscriptionDefinition.Definition.Subscriptions.push({
+          Id: 'subFrom_' + functionName,
+          Source: newFunction.FunctionArn,
+          Subject: '#',
+          Target: 'cloud'
+      })
+      this.thing.EdgeDefinition.subscriptionDefinition.Definition.Subscriptions.push({
+          Id: 'subTo_' + functionName,
+          Source: 'cloud',
+          Subject: '#',
+          Target: newFunction.FunctionArn
+      })
+      this.thing.EdgeDefinition.subscriptionDefinition.CreationTimestamp = '0'
       this.uploadEdge()
     },
     async uploadEdge () {
@@ -1489,12 +1602,14 @@ export default {
         this.isEdgeUpdating = true
         const result = await API.post('thingApi', '/edge', { body })
         console.log('uploadEdge result: ', result)
-        this.$set(this.thing, 'EdgeDefinition', result.edgeDefinition)
-        this.$set(this.thing, 'EdgeData', result.edgeData)
-        // update to current cached things array
-        let storedThings = this.$store.getters.things
-        storedThings[this.thingIndex] = this.thing
-        this.$store.commit('setThings', storedThings)
+        if (result.edgeDefinition !== null && result.edgeData !== null) {
+          this.$set(this.thing, 'EdgeDefinition', result.edgeDefinition)
+          this.$set(this.thing, 'EdgeData', result.edgeData)
+          // update to current cached things array
+          let storedThings = this.$store.getters.things
+          storedThings[this.thingIndex] = this.thing
+          this.$store.commit('setThings', storedThings)
+        }
         this.isEdgeUpdating = false
         this.$forceUpdate()
     },
@@ -1559,23 +1674,27 @@ export default {
         }
       } // end if
     },
-    async uploadModelFile (file) {
+    uploadModelFile (file) {
       let reader = new window.FileReader() // if window is not used it says File READER is not defined
       let userId = this.thing.UserId
       let that = this
-      that.ggMLResource.ResourceDataContainer.S3MachineLearningModelResourceData.S3Uri = 's3://' + config.awsGreengrassBucket + '/public/' + userId + '_' + file.name
+      that.ggMLResource.ResourceDataContainer.S3MachineLearningModelResourceData.S3Uri = 's3://' + config.awsGreengrassBucket + '-prod/public/' + userId + '_' + file.name
       reader.onload = function (event) {
          // dispatch fileAttached to state UI postEditor with event.target.result as read dataURL
         let content = event.target.result
+        let fileName = userId + '_' + file.name
+        console.log('fileName: ', fileName)
         // still save to project bucket Storage.configure({level: 'public', bucket: this.ggS3BucketName})
-        Storage.put(userId + '_' + file.name, content)
+        Storage.put(fileName, content, {
+            contentType: 'application/zip'
+        })
         .then(result => {
           console.log(result)
            // s3://bucket/key
         })
         .catch(err => console.log(err))
       }
-      reader.readAsDataURL(file)
+      reader.readAsArrayBuffer(file)
     },
     confirmAddConnector (connector) {
       console.log('connector:', connector.ConnectorName)
@@ -1627,23 +1746,33 @@ export default {
       }
     },
     confirmSetLocalVolumeResource (evt) {
-      // Prevent modal from closing
-      evt.preventDefault()
       if (this.ggLocalVolumeResource.Name !== null &&
             this.ggLocalVolumeResource.ResourceDataContainer.LocalVolumeResourceData.SourcePath !== null &&
             this.ggLocalVolumeResource.ResourceDataContainer.LocalVolumeResourceData.DestinationPath !== null) {
         this.handleLocalVolumeResourceSubmit()
+      } else {
+        // Prevent modal from closing
+        evt.preventDefault()
       }
     },
     handleLocalVolumeResourceSubmit () {
-      this.$refs.setLocalVolumeResourceModalRef.hide()
+      // this.$refs.setLocalVolumeResourceModalRef.hide()
       this.ggLocalVolumeResource.Id = this.ggLocalVolumeResource.Name
+      // The GroupOwner value is ignored if GroupOwnerSetting#AutoAddGroupOwner is true.
+      if (this.ggLocalVolumeResource.ResourceDataContainer.LocalVolumeResourceData.GroupOwnerSetting.GroupOwner !== null) {
+        this.ggLocalVolumeResource.ResourceDataContainer.LocalVolumeResourceData.GroupOwnerSetting.AutoAddGroupOwner = false
+      } else {
+        this.ggLocalVolumeResource.ResourceDataContainer.LocalVolumeResourceData.GroupOwnerSetting.AutoAddGroupOwner = true
+        delete this.ggLocalVolumeResource.ResourceDataContainer.LocalVolumeResourceData.GroupOwnerSetting.GroupOwner
+      }
       this.handleResource(this.ggLocalVolumeResource)
     },
     confirmSetModbusConnector (evt) {
-      evt.preventDefault()
       if (this.ggModbusConnector.Parameters['ModbusSerialPort-ResourceId'] !== null) {
         this.handleModbusConnectorSubmit()
+      } else {
+        // Prevent modal from closing
+        evt.preventDefault()
       }
     },
     handleModbusConnectorSubmit () {
@@ -1656,7 +1785,6 @@ export default {
       this.handleConnector(this.ggModbusConnector)
     },
     confirmSetRaspPiGpioConnector (evt) {
-      evt.preventDefault()
       if (this.ggRaspPiGpioConnector.Parameters['GpioMem-ResourceId'] !== null) {
         if (this.ggRaspPiGpioConnector.Parameters.InputGpios === null) {
           delete this.ggRaspPiGpioConnector.Parameters.InputGpios
@@ -1668,6 +1796,9 @@ export default {
           delete this.ggRaspPiGpioConnector.Parameters.OutputGpios
         }
         this.handleRaspPiGpioConnectorSubmit()
+      } else {
+        // Prevent modal from closing
+        evt.preventDefault()
       }
     },
     handleRaspPiGpioConnectorSubmit () {
@@ -1675,12 +1806,14 @@ export default {
       this.handleConnector(this.ggRaspPiGpioConnector)
     },
     confirmSetImageClassArmv7Connector (evt) {
-      evt.preventDefault()
       if (this.ggMLConnector.Id !== null &&
             this.ggMLConnector.Parameters.MLModelDestinationPath !== null &&
             this.ggMLConnector.Parameters.MLModelResourceId !== null &&
             this.ggMLConnector.Parameters.LocalInferenceServiceName !== null) {
         this.handleImageClassArmv7ConnectorSubmit()
+      } else {
+        // Prevent modal from closing
+        evt.preventDefault()
       }
     },
     handleImageClassArmv7ConnectorSubmit () {
@@ -1688,11 +1821,13 @@ export default {
       this.handleConnector(this.ggMLConnector)
     },
     confirmSetImageClassArmv8Connector (evt) {
-      evt.preventDefault()
       if (this.ggMLConnector.Name !== null &&
             this.ggMLConnector.ResourceDataContainer.S3MachineLearningModelResourceData.DestinationPath !== null &&
             this.ggMLConnector.ResourceDataContainer.S3Uri !== null) {
         this.handleImageClassArmv8ConnectorSubmit()
+      } else {
+        // Prevent modal from closing
+        evt.preventDefault()
       }
     },
     handleImageClassArmv8ConnectorSubmit () {
@@ -1700,11 +1835,13 @@ export default {
       this.handleConnector(this.ggMLConnector)
     },
     confirmSetImageClassX86Connector (evt) {
-      evt.preventDefault()
       if (this.ggMLConnector.Name !== null &&
             this.ggMLConnector.ResourceDataContainer.S3MachineLearningModelResourceData.DestinationPath !== null &&
             this.ggMLConnector.ResourceDataContainer.S3Uri !== null) {
         this.handleImageClassX86ConnectorSubmit()
+      } else {
+        // Prevent modal from closing
+        evt.preventDefault()
       }
     },
     handleImageClassX86ConnectorSubmit () {
@@ -1735,31 +1872,40 @@ export default {
       })
       this.thing.EdgeDefinition.resourceDefinition.Definition.Resources = newList
       this.thing.EdgeDefinition.resourceDefinition.Definition.Resources.push(newResource)
-
+      console.log('newResource: ', newResource.ResourceDataContainer.LocalVolumeResourceData.GroupOwnerSetting)
       this.thing.EdgeDefinition.resourceDefinition.CreationTimestamp = '0'
       this.uploadEdge()
     },
     confirmSetLocalDeviceResource (evt) {
-      // Prevent modal from closing
-      evt.preventDefault()
       if (this.ggLocalDeviceResource.Name !== null &&
             this.ggLocalDeviceResource.ResourceDataContainer.LocalDeviceResourceData.SourcePath !== null) {
         this.handleDeviceResourceSubmit()
+      } else {
+        // Prevent modal from closing
+        evt.preventDefault()
       }
     },
     handleDeviceResourceSubmit () {
       this.ggLocalDeviceResource.Id = this.ggLocalDeviceResource.Name
+      // The GroupOwner value is ignored if GroupOwnerSetting#AutoAddGroupOwner is true.
+      if (this.ggLocalDeviceResource.ResourceDataContainer.LocalDeviceResourceData.GroupOwnerSetting.GroupOwner !== null) {
+        this.ggLocalDeviceResource.ResourceDataContainer.LocalDeviceResourceData.GroupOwnerSetting.AutoAddGroupOwner = false
+      } else {
+        this.gggLocalDeviceResource.ResourceDataContainer.LocalDeviceResourceData.GroupOwnerSetting.AutoAddGroupOwner = true
+        delete this.ggLocalDeviceResource.ResourceDataContainer.LocalDeviceResourceData.GroupOwnerSetting.GroupOwner
+      }
       this.$refs.setLocalDeviceResourceModalRef.hide()
       this.handleResource(this.ggLocalDeviceResource)
     },
     confirmSetMLResource (evt) {
-      // Prevent modal from closing
-      evt.preventDefault()
       console.log('ggMLResource: ', this.ggMLResource)
       if (this.ggMLResourceModelFileName !== null &&
             this.ggMLResource.ResourceDataContainer.S3MachineLearningModelResourceData.DestinationPath != null &&
             this.ggMLResource.Name !== null) {
         this.handleMLResourceSubmit()
+      } else {
+        // Prevent modal from closing
+        evt.preventDefault()
       }
     },
     handleMLResourceSubmit () {

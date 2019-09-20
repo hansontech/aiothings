@@ -29,24 +29,41 @@ export default {
         { 'text': 'AIoThings Services',
           state: { expanded: true },
           'children': [
-            { 'text': 'IoT Objects', data: { 'link': 'DocThingObject' } },
-            { 'text': 'IoT Enabler Hardware',
-              data: { 'link': 'DocThingEnabler' },
+            { 'text': 'IoT Devices',
+              data: { 'link': 'DocThingObject' },
               state: { expanded: true },
-              'children': [
-                { 'text': 'Raspberry Pi',
-                  data: { 'link': 'DocPi' },
-                  children: [
-                    { 'text': 'Node-RED', data: { 'link': 'DocNodeRed' } }
+              children: [
+                { 'text': 'IoT Enabler Hardware',
+                  data: { 'link': 'DocThingEnabler' },
+                  state: { expanded: true },
+                  'children': [
+                    { 'text': 'Raspberry Pi',
+                      data: { 'link': 'DocPi' },
+                      children: [
+                        { 'text': 'Node-RED', data: { 'link': 'DocNodeRed' } }
+                      ]
+                    },
+                    { 'text': 'ESP32/ESP8266',
+                      data: { 'link': 'DocESP8266' },
+                      children: [
+                        { 'text': 'Mongoose OS', data: { 'link': 'DocMongooseOs' } }
+                      ]
+                    }
                   ]
                 },
-                { 'text': 'ESP32/ESP8266',
-                  data: { 'link': 'DocESP8266' },
+                { 'text': 'Edge computing',
+                  data: { 'link': 'DocThingEdge' },
+                  state: { expanded: true },
                   children: [
-                    { 'text': 'Mongoose OS', data: { 'link': 'DocMongooseOs' } }
-                  ]
+                        { 'text': 'Configuration',
+                          data: { 'link': 'DocThingEdgeConfiguration' }
+                        },
+                        { 'text': 'Machine Learning',
+                          data: { 'link': 'DocThingEdgeMachineLearning' }
+                        }
+                      ]
                 }
-               ]
+              ]
             },
             { 'text': 'Microservices',
               data: { 'link': 'DocMicroservice' },
@@ -87,6 +104,12 @@ export default {
                 },
                 { 'text': 'storeGetObject',
                   data: { 'link': 'DocNodejsStoreGetObject' }
+                },
+                { 'text': 'setInterval',
+                  data: { 'link': 'DocNodejsSetInterval' }
+                },
+                { 'text': 'clearInterval',
+                  data: { 'link': 'DocNodejsClearInterval' }
                 },
                 { 'text': 'consoleOutput',
                   data: { 'link': 'DocNodejsConsoleOutput' }

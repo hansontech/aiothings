@@ -30,7 +30,10 @@ var gulpReplace = require('gulp-replace');
 var fs = require('fs-extra');
 const aws = require('aws-sdk');
 const splitargs = require('splitargs');
-
+var AdmZip = require("adm-zip");
+var dateTime = require("date-time");
+var md5 = require("md5");
+var mime = require('mime-types');
 // const config = require('./config');
 
 // import Lambda Environment variables
@@ -44,6 +47,7 @@ var config = {
     mserviceTableIndexByInputMessageTopic: "InputMessageTopic-index",
     mserviceTableIndexBySharedUserId: "IsShared-UserId-index",
     region: "ap-southeast-2",
+    awsAccountId: "414327512415",
     mserviceS3bucketName: "aiot-bucket" + '-' + process.env.ENV,
     mserviceRole: "arn:aws:iam::414327512415:role/aiot-mservice-role-default",
     awsIotEndpoint: "a3vgppxo7lddg8-ats.iot.ap-southeast-2.amazonaws.com",
@@ -116,7 +120,7 @@ app.get('/mservices', function(req, res) {
         }
       });
     }
-  }else if (query.userId) { // owned by this user
+  } else if (query.userId) { // owned by this user
     const partitionKeyName = 'UserId'
     condition[partitionKeyName] = {
       ComparisonOperator: 'EQ'
@@ -133,6 +137,7 @@ app.get('/mservices', function(req, res) {
         res.json({error: 'Could not load mservices: ' + err});
       } else {
         console.log('get mservices success::: ', data.Items);
+        console.log('mservices last evaluated key: ', data);
         let resultData = JSON.stringify(data.Items);
         res.json(resultData);
       }
@@ -369,7 +374,7 @@ app.post('/favorites', function(req, res) {
   });
 });
 
-app.post('/mservices', function(req, res) {
+app.post('/mservices', async function(req, res) {
   // Add your code here
   console.log("test 2nd phase")
   const inputs = req.body
@@ -392,25 +397,91 @@ app.post('/mservices', function(req, res) {
   
   var s3 = new aws.S3({params: {Bucket: config.mserviceS3bucketName}, region: config.region});
   // Write code string to a handler file
-  if (inputs.ServiceRuntime.search(/nodejs/i) !== -1) {
-    fs.writeFileSync(destDir + '/index.js', inputs.ServiceCode);
-  } else if (inputs.ServiceRuntime.search(/python/i) !== -1) {
-    fs.writeFileSync(destDir + '/main.py', inputs.ServiceCode);
+  if (inputs.hasOwnProperty('CodeEntryType') && inputs.CodeEntryType === 'zip') {
+    // if the source is from a zip file
+    // then, copy it to /tmp folder, and unzip it.
+    try {
+      let s3 = new aws.S3();
+      let objData = await s3.getObject({
+        Bucket: config.mserviceS3bucketName,
+        Key: 'public/' + inputs.CodeFileName,
+      }).promise()
+      //write the zip file locally in a tmp dir
+      let tmpZipFilename = '/tmp/' + md5(dateTime({showMilliseconds: true})) + '.zip';
+      fs.writeFileSync(tmpZipFilename, objData.Body);
+      //check that file in that location is a zip content type, otherwise throw error and exit
+      if (mime.lookup(tmpZipFilename) !== "application/zip") {
+        fs.unlinkSync(tmpZipFilename);
+        res.json({error: 'uploaded file is not of type zip.'})
+        return;
+      }
+      //find all files in the zip and the count of them
+      var zip = new AdmZip(tmpZipFilename);
+      var zipEntries = zip.getEntries();
+      var zipEntryCount = Object.keys(zipEntries).length;
+
+      //if no files found in the zip
+      if (zipEntryCount === 0){
+        fs.unlinkSync(tmpZipFilename);
+        res.json({error: 'the zip file was empty'})
+        return
+      }
+      zip.extractAllTo(destDir, /*overwrite*/true);
+      fs.unlinkSync(tmpZipFilename);
+    } catch (err) {
+      console.log('during zip extract: ', err)
+      res.json({error: err})
+      return
+    }
+  } else {
+    if (inputs.ServiceRuntime.search(/nodejs/i) !== -1) {
+      fs.writeFileSync(destDir + '/main.js', inputs.ServiceCode);
+    } else if (inputs.ServiceRuntime.search(/python/i) !== -1) {
+      fs.writeFileSync(destDir + '/main.py', inputs.ServiceCode);
+    }
   }
 
   const outputZipName = inputs.ServiceName + ".zip"
 
+  // ----------------------------
+  // -- gulp tasks definitions --
+  // ---------------------------- 
+
   // Create an archive folder and add the project files
-  gulp.task('copy-js-template', function () {
-    console.log('copy-js-template')
+  gulp.task('copy-language-template', function () {
+    console.log('copy-language-template')
     return gulp.src(filesToPack)
       .pipe(gulp.dest(destDir));
   });
   
-  gulp.task('template-update-name', function () {
-    console.log('template-update-name')
-    return gulp.src(['./js-template/package.json'])
-      .pipe(gulpReplace('mserviceName', inputs.ServiceName))
+  gulp.task('template-update-mservice-name', function () {
+    console.log('template-update-mservice-name')
+    let gulpStream = gulp.src(['./js-template/package.json'])
+    if (inputs.ServiceRuntime.includes('nodejs')) {
+      return gulpStream.pipe(gulpReplace('mserviceName', inputs.ServiceName))
+        .pipe(gulp.dest(destDir));
+    } else {
+      return gulpStream
+    }
+  });
+
+  gulp.task('template-update-handler-name', function () {
+    console.log('template-update-handler-name')
+    let moduleName = 'main'
+    let handlerName = 'handler'
+    let mainHandlerModule = './js-template/mservice_main.js'
+    if (inputs.ServiceRuntime.includes('python')) {
+      mainHandlerModule = './py-template/mservice_main.py'
+    }
+    if (inputs.hasOwnProperty('CodeEntryType') && 
+        inputs.CodeEntryType === 'zip' &&
+        inputs.hasOwnProperty('CodeHandler')   ) {
+      moduleName = inputs.CodeHandler.split('.')[0]
+      handlerName = inputs.CodeHandler.split('.')[1]
+    }
+    return gulp.src([mainHandlerModule])
+      .pipe(gulpReplace('__main__', moduleName))
+      .pipe(gulpReplace('__handler__', handlerName))
       .pipe(gulp.dest(destDir));
   });
   /**
@@ -551,6 +622,7 @@ app.post('/mservices', function(req, res) {
           'S3_BUCKET': config.mserviceS3bucketName,
           'OWNER_ID': inputs.UserId,
           'REGION': config.region,
+          'ACCOUNT_ID': config.awsAccountId,
           'IS_SHARED': inputs.IsShared,
           'USER_DATA_TABLE': config.userDataTable
         }
@@ -569,7 +641,9 @@ app.post('/mservices', function(req, res) {
           FunctionName: functionName,
           Handler: ((inputs.ServiceRuntime.search(/nodejs/i) !== -1)  ? "mservice_main.handler" : "mservice_main.handler"),
           Role: config.mserviceRole,
-          Runtime: fRuntime
+          Runtime: fRuntime,
+          Timeout: 15, // default is 3 seconds, max. 900 seconds
+          MemorySize: 128 // 128MB, +64 multiples
         };
         lambda.createFunction (params, function (err, data) {
           if (err) console.error("CREATE ERROR", err);
@@ -851,17 +925,15 @@ app.post('/mservices', function(req, res) {
         })
       }
     })           
-    
-
-    
   });
 
   // gulp by default uses the default task to execute 
   // when you type $ gulp in the command line.
 
   gulp.task('deploy-lambda', gulp.series(
-    'copy-js-template',
-    'template-update-name',
+    'copy-language-template',
+    'template-update-handler-name',
+    'template-update-mservice-name',
     // 'install-node-mods', // run parallelly?
     'zip',
     'upload-zip-to-s3',
@@ -873,7 +945,9 @@ app.post('/mservices', function(req, res) {
        res.json({success: 'post call succeed!', url: req.url, body: req.body})
     }
   ));
- 
+  // ------------------
+  // -- continued .. main routine --
+  // ------------------
   let params = {};
   partitionKeyName = 'ServiceName'
   params[partitionKeyName] = inputs.ServiceName
@@ -881,6 +955,7 @@ app.post('/mservices', function(req, res) {
     TableName: config.mserviceTableName,
     Key: params
   }
+  // check if the mservice exists and if yes, check the ownership
   dynamodb.get(getItemParams, (err, data) => {
     let isCreateUpdate = true;
     if (err) {  // not found, means a new mservice
@@ -894,7 +969,7 @@ app.post('/mservices', function(req, res) {
           console.log('start create and updates');
           res.json({error: 'service name is already used by others.'});
           isCreateUpdate = false;
-        }else { // if owned by this user
+         }else { // if owned by this user
           isCreateUpdate = true;
         }
       }catch (e) {
@@ -905,7 +980,9 @@ app.post('/mservices', function(req, res) {
       console.log('start create and updates');
       gulp.task('create-update-database')();
       gulp.task('deploy-lambda')();
-    }    
+    } else {
+      // end of the routine
+    }
   }) // dynamodb.get
   
 });

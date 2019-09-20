@@ -1,10 +1,9 @@
 <template>
   <b-container>
-  <div>
+  <div class="wrapper">
  <vue-markdown id="DocIntroduction">
 ### Introduction
-AIoThings has the features to build cloud and IoT applications rapidly, without the need for comprehensive cloud programming knowledge - that often prevent people from continuing their core design works.
-
+AIoThings is a SaaS (Software as a Service), a development platform with the ability to **quickly** build cloud and IoT applications, **without the need** of comprehensive cloud programming knowledge that often prevents developers from continuing their core design works.
 
 These features include:
 </vue-markdown> 
@@ -15,8 +14,14 @@ These features include:
               <li>Interact with popular mobile/home apps</li>
             </ul>
 <vue-markdown>
-  ***We also provide professional services for your engineering projects.***
-  ***Please contact us at service@hanson-tech.com***
+In response to the growing demand for IoT data analysis and AI (Artificial Intelligence) skills applied to applications, AIoThings can also effectively implement machine learning (ML) training and inference functions on cloud and edge devices with much less complexity.
+
+AIoThings is built on AWS.
+
+AIoThings is an open-source project and it's [source code](https://github.com/hansontech/aiothings) is also available for public access.
+
+***We also provide professional services for custom engineering projects.***
+***Please contact us at service@hanson-tech.com***
 </vue-markdown> 
 <vue-markdown id="DocGetStarted" class="mt-4"> 
 ### Get Started
@@ -333,17 +338,160 @@ The article [AWS IoT on Mongoose OS (Part 1 & 2)](https://aws.amazon.com/blogs/a
 
 </vue-markdown> 
 
+<vue-markdown id="DocThingEdge">
+### Edge computing
+
+IoT Device (also called IoT Object) can be solely a Thing device or function as an Edge device too. 
+Edge device, by AIoThings definition, is able to interact with AIoThings cloud to deploy user's Microservices.
+This feature is especially crucial for the automation of edge computing details, such as machine learning inferences functions running over edge devices to reduce traffics sending to the cloud and mitigate cloud computing loadings.
+However, in order to achieve this goal, Edge devices have to run an extra agent software to receive commands from the cloud.
+AWS IoT Greengrass Core software is the agent software, and AIoThings Edge device implementation is highly related to AWS Greengrass, although we did our best to reduce the complexity for user's easy understanding.
+
+With the Edge Setting tab of AIoThings IoT Device window, users can define three types of items deploying to this Edge device.
+1. **Microservice**: Similar to other microservices, users create and edit microservices being deployed to Edge deviecs. However, they have several differences comparing to ones running on cloud, including that they use AWS Greengrass Core SDK APIs instead of AIoThings SDK or AWS SDK to pusbish and receive messages. 
+2. **Resource**: Local resources, such as files and directories of lcoal file system and device resources accessible through /dev from Unix systems. 
+3. **Connector**: Prebuilt modules that help accelerate the development lifecycle for common edge scenarios. They make it easier to interact with local infrastructure, device protocols, AWS, and other cloud services. With connectors, you can spend less time learning new protocols and APIs and more time focusing on the logic that matters to your business.
+
+</vue-markdown>
+<vue-markdown id="DocThingEdgeConfiguration">
+#### Configuration of Edge devices
+</vue-markdown>
+
+<div>
+    The steps to setup a Greengrass Core device are:
+                      <ol>
+                        <li>Download <a target="_blank" href="https://github.com/awsdocs/aws-greengrass-developer-guide/blob/master/doc_source/what-is-gg.md#gg-downloads">AWS IoT Greengrass Core software</a> that runs on this core device.</li>
+                        <li>
+                          Download <a v-b-tooltip.hover="'that enable secure communications between AWS IoT'">security certificates</a> and <a v-b-tooltip.hover="'that contains configuration information specific to your AWS IoT Greengrass core and the AWS IoT endpoint.'">the config.json file of this device as a zipped setup file.</a>
+                        </li>
+                        <li>Move and decompress the downloaded files of [1] amd [2] to the Edge device, under the same path.
+                          <pre class="at-code"><code>sudo tar -xzvf greengrass-OS-architecture-1.7.0.tar.gz -C /
+sudo unzip thing-id-setup.zip -d /greengrass</code></pre>
+                        <li>Start AWS IoT Greengrass on your core device. 
+                          <pre class="at-code"><code>cd /greengrass/ggc/core/
+sudo ./greengrassd start</code></pre>
+                        </li>
+                        <li>Set up the core device to start AWS IoT Greengrass on system boot.<a href="https://docs.aws.amazon.com/greengrass/latest/developerguide/gg-core.html#start-on-boot">(Example)</a></li>
+                      </ol>
+                      <p>
+                        Check <a href="https://docs.aws.amazon.com/greengrass/latest/developerguide/gg-device-start.html">AWS page</a> for further information about the setup procedure.
+                      </p>
+</div>
+<vue-markdown id="DocThingEdgeMachineLearning">
+#### Machine Learning over Edge devices
+Machine learning (ML) inference function at Edge devices use edge-generated data and cloud-trained models. 
+This approach benefits from the low latency and cost savings of running local inference, still take advantage of cloud computing for training models and complex cloud applications.
+
+Users can train their inference models anywhere and deploy them as machine learning resources, then access the resources from microservices running over Edge devices.
+For example, users can build and train deep-learning models in Amazon SageMaker.
+
+In order to perform inference function successfully at an Edge device, the Edge device needs to install runtime framework libraries for ML inference first, then access these libraries later from the inferencing microservices.
+These frameworks can be [Apache MXNet](https://mxnet.incubator.apache.org) or [TensorFlow](https://www.tensorflow.org).
+
+The runtime libraries usually provide various releases optimized to their specific hardware architecture (for example, NVIDIA CUDA and Intel MKL).
+Python 2.7 is, currently, the programming language in support from AIoThings for ML inference functions.
+
+Local microservices at edge devices run on a container environment. For this reason, local and cloud resources need to map to logical paths of the container for microservices to access. 
+These resources include:
+* **Local device resource**, device files, such as /dev/video0
+* **Local volume resource**, local files or directories
+* **Machine learning model resource**, a ML model that includes multiple files representing model parameters, synset - synonym ring, computation graph (of Neuro Network) respectively.
+
+a ML model should be zipped and uploaded during the creation of a resource, and map to a logical pathname. Then, in the inference function, the model data will be accessed through regular file read operations with {logical pathname}+{file name} as the full file path.
+
+Following is the snippet of an example inference function:
+```
+import greengrasssdk
+import numpy as np
+import mxnet as mx
+import cv2
+Batch = namedtuple('Batch', ['data'])
+
+class ImagenetModel(object):
+    #Loads a pre-trained model locally or from an external URL
+    #and returns an MXNet graph that is ready for prediction
+    def __init__(self, synset_path, network_prefix, params_url=None,
+                 symbol_url=None, synset_url=None, context=mx.cpu(),
+                 label_names=['prob_label'], input_shapes=[('data', (1, 3, 224, 224))]):
+
+        with open(synset_path, 'r') as f:
+            self.synsets = [l.rstrip() for l in f]
+
+        # Load the network parameters from default epoch 0
+        sym, arg_params, aux_params = mx.model.load_checkpoint(network_prefix, 0)
+
+        # Load the network into an MXNet module and bind the corresponding parameters
+        self.mod = mx.mod.Module(symbol=sym, label_names=label_names, context=context)
+        self.mod.bind(for_training=False, data_shapes=input_shapes)
+        self.mod.set_params(arg_params, aux_params)
+        self.camera = None
+
+    def predict_from_image(self, cvimage, reshape=(224, 224), N=5):
+        topN = []
+
+        # Switch RGB to BGR format (which ImageNet networks take)
+        img = cv2.cvtColor(cvimage, cv2.COLOR_BGR2RGB)
+        if img is None:
+            return topN
+
+        # Resize image to fit network input
+        img = cv2.resize(img, reshape)
+        img = np.swapaxes(img, 0, 2)
+        img = np.swapaxes(img, 1, 2)
+        img = img[np.newaxis, :]
+
+        # Run forward on the image
+        self.mod.forward(Batch([mx.nd.array(img)]))
+        prob = self.mod.get_outputs()[0].asnumpy()
+        prob = np.squeeze(prob)
+        # Extract the top N predictions from the softmax output
+        a = np.argsort(prob)[::-1]
+        for i in a[0:N]:
+            topN.append((prob[i], self.synsets[i]))
+        return topN
+
+model_path = '/greengrass-machine-learning/mxnet/squeezenet/'
+global_model = ImagenetModel(model_path + 'synset.txt', model_path + 'squeezenet_v1.1')
+
+def microservice_object_classification_run():
+    # comply to AIoThings message header, in order to be subscribed by cloud microservices
+    messageHeader = 'aiot/' + os.environ['OWNER_ID'] + '/' + os.environ['MSERVICE_NAME'] 
+    try:
+        image = cv2.imread('/home/ggc_user/pi/camera_image.jpg', cv2.IMREAD_COLOR)
+        predictions = global_model.predict_from_image(image)
+        # publish predictions
+        client.publish(topic= messageHeader + '//world', payload='New Prediction: {}'.format(str(predictions)))
+    except:
+        e = sys.exc_info()[0]
+        print("Exception occured during prediction: %s" % e)
+```
+
+Please note that, this function imports AWS's **Greengrass SDK** from the statement of 'import greengrasssdk', and uses **publish** API to send the inference results as AIoThings messages.
+AIoThings only allow messages complying to its message header format to be receivable from its cloud microservices. The message header format is: **'aiot/{Sender's User Id}/{Sender's Microservice Name}/'**
+
+</vue-markdown>
+<vue-markdown>
+```
+
+
+
+```
+</vue-markdown>
+
 <vue-markdown id="DocMicroservice">
+
 ### Microservice
 
-Microservice plays the most important role in AIoThings. It makes this cloud configurable through programming.
+Microservice plays the most important role in AIoThings. It makes this cloud system programmable.
 
-Microservices deliver functionality as granular building blocks, allowing developers to quickly build, test, deploy
-Microservices are also great enablers for continuous delivery, allowing frequent releases for users while keeping
-the rest of the system available and stable.
+Microservices deliver functionalities through code blocks and message events, allowing developers to quickly build, test and deploy new applications.
 
+Microservices are also the great enablers of continuous delivery, allowing frequent releases while keeping the rest of the system available and stable.
 
 A microservice includes a code block and input/output message topics.
+
+The code can be edited inline via the AIOThings editor or uploaded as a ZIP archive from local storage.
+The advantage of using a ZIP file is that the code can be a package that includes multiple user modules and imported libraries.
 
 The code block looks like: 
 ```Javascript
@@ -357,10 +505,13 @@ exports.handler = async (event, context) => {
     aiot.setInput(event);
     // Add your code here
     await aiot.consoleOutput('console display:' + process.env.MSERVICE_NAME); // display from console
-	  await aiot.messagePublish({data: 'payload'}); // must be a JSON
+    await aiot.messagePublish({data: 'payload'}); // must be a JSON
 };
 ```
-By importing aiothings module to the code block, developers can use [Microservices APIs](#DocMicroserviceApi) to access data storage, message queues and database globally.
+
+For a ZIP file to upload, the entry point of the main user module and handler routine needs to be specified separately. 
+
+By importing 'aiothings' library module to the code block, developers can use [Microservices APIs](#DocMicroserviceApi) to access data storage, message queues and database globally.
 
 Message queue as an example, it provides an ordered queue storage between two or more microservices. A use case is that, IoT data sent from devices are put to a message queue first, and mobile app will retrive them later when it becomes active.
 
@@ -748,6 +899,51 @@ let data = await aiot.storeGetObject( 'ObjectOne' );
 ```
 </vue-markdown> 
 
+<vue-markdown class="borderLine" id="DocNodejsSetInterval">
+#### setInterval
+
+```JavaScript
+setInterval(periodTime, messageTopic, messageData, numberOfTimes)
+```
+To publish message periodically as assigned until a clearInterval is called.
+The period time must be a multiple of 10 seconds, and the occurences of message publishing would also be aligned by 10 second boundaries.
+If the message topic has been registered in the existing intervals, then the old one will be replaced by the new request.
+
+* periodTime -- (Number)
+  * The period time between each occurence. It must be a multiple of 10 (in seconds)
+* messageTopic -- (String)
+  * The topic of messages to publish
+* messageData -- (JSON)
+  * The message body in JSON form to publish
+* numberOfTimes -- (Number)
+  * The number of occurences repeating to publish messages
+  * For resource concerns, currently, the maximum number of repetitions is ten. If the input value is larger than 10, then the actual count will be ceiled to 10.
+  
+**Example**
+```JavaScript
+const aiot = require('aiothings');
+await aiot.setInterval(10, 'timer/alert', {data: 'new cycle'});
+```
+</vue-markdown> 
+
+<vue-markdown class="borderLine" id="DocNodejsClearInterval">
+#### clearInterval
+
+```JavaScript
+clearInterval(messageTopic)
+```
+To cancel the interval request previosly registered through **setInterval**.
+
+* messageTopic -- (String)
+  * The message topic used by setInterval.
+
+**Example**
+```JavaScript
+const aiot = require('aiothings');
+await aiot.clearInterval('timer/alert');
+```
+</vue-markdown> 
+
 <vue-markdown class="borderLine" id="DocNodejsConsoleOutput">
 #### consoleOutput
 
@@ -812,7 +1008,8 @@ function elementInViewport (el) {
     el = el.offsetParent
     top += el.offsetTop
   }
-
+  // console.log(el.id, top, height)
+  // console.log(window.pageYOffset, window.innerHeight)
   return (
     top >= window.pageYOffset &&
     (top + height) <= (window.pageYOffset + window.innerHeight)
@@ -843,21 +1040,46 @@ export default {
   },
   methods: {
     offsetAnchor () {
+      console.log('offsetAnchor')
       if (location.hash.length !== 0) {
           window.scrollTo(window.scrollX, window.scrollY - 80)
       }
     },
+    handleWheel (event) {
+      // console.log('wheel: ')
+      // let that = this
+      // let currentDocElement = null
+      for (let el of this.idDocs) {
+        // "el" is your element
+        let bounding = el.getBoundingClientRect()
+        // console.log(bounding.y, el.id)
+        if (bounding.y > 0 && el.id.startsWith('Doc')) {
+          // .y is relative position from top of viewport,
+          // as the ids are ordered too, means, the values will change from negative, zero to positive numbers.
+          // Find the first position .y element
+          // All element ids of the page start with 'Doc',
+          // use this check to avoid cases of other ids from parents.
+          // console.log('change to: ', el.id) // log the ID
+          if (this.activeId !== el.id) {
+            this.activeId = el.id
+            eventBus.$emit('changeDocId', el.id)
+          }
+          return
+        }
+      }
+    },
     handleScroll () {
-      // console.log('scroll')
+      // console.log('scroll: ', window.pageYOffset)
       let that = this
       let currentDocElement = null
       Array.prototype.forEach.call(this.idDocs, function (el, i) {
         // "el" is your element
-        // console.log( el.id ); // log the ID
+        // console.log(el.id) // log the ID
         if (elementInViewport(el)) {
           if (that.activeId !== el.id) {
             that.activeId = el.id
             if (!currentDocElement || (currentDocElement && currentDocElement.offsetTop > el.offsetTop)) {
+              // console.log('el: ', el.id)
               currentDocElement = el
               eventBus.$emit('changeDocId', that.activeId)
             }
@@ -882,17 +1104,24 @@ export default {
       Otherwise, the TAG (id=) portion is hidden by the top menu portion
     */
     // This will capture hash changes while on the page
-    window.addEventListener('hashchange', this.offsetAnchor)
+    // window.addEventListener('hashchange', this.offsetAnchor)
 
+    // let docMain = document.getElementById('docMain')
     // http://jschof.com/vue/scroll-tracking-in-vue-applications-some-gotchas/
-    document.addEventListener('scroll', this.handleScroll)
+
+    // 'scroll' event is not fired when layout position is set to 'fixed'
+    // window.addEventListener('scroll', this.handleScroll, false)
+
+    // insteadly, use 'wheel' mouse wheel event to trigger the scrolling event
+    window.addEventListener('wheel', this.handleWheel, false)
   },
   mounted () {
     this.idDocs = document.querySelectorAll('[id]')
-    console.log('idDocs: ', this.idDocs)
+    // console.log('idDocs: ', this.idDocs)
   },
   destroyed () {
-    document.removeEventListener('scroll', this.handleScroll)
+    // document.removeEventListener('scroll', this.handleScroll)
+    document.removeEventListener('wheel', this.handleWheel)
   }
 }
 </script>
@@ -918,4 +1147,15 @@ vue-markdown {
   margin-bottom: 5px;
   border-bottom: 1px dotted grey
 }
+/*
+html, body {
+    margin:0;
+    padding:0;
+    height: 100%;
+}
+.wrapper {
+    height: 100%;
+    overflow-x: hidden;
+} 
+*/
 </style>

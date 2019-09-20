@@ -54,6 +54,10 @@ let createEdge = (userId, certId, thingNameTag, thingId, edgeDefinition, callbac
           edgeData.ggGroup = {}
           edgeData.ggGroup.created = await greengrass.createGroup({Name: thingId + '_' + 'groupDefinition'}).promise()
           console.log('group definition created ..');
+          await greengrass.associateRoleToGroup({
+            GroupId: edgeData.ggGroup.created.Id, /* required */
+            RoleArn: 'arn:aws:iam::414327512415:role/aiot-iot-greengrass-default' /* required */
+          }).promise()
           console.log('edgeData: ', edgeData)
           console.log('edgeDefinition: ', edgeDefinition)
           callback(null, edgeData, edgeDefinition)
@@ -101,6 +105,20 @@ let updateEdge = async (userId, certId, edgeData, edgeDefinition) => {
           delete edgeData.ggFunction
       } else {
           console.log('create function def ver:', edgeDefinition.functionDefinition.Definition)
+          // TODO
+          // console.log('functions [0]: ', edgeDefinition.functionDefinition.Definition.Functions[0])
+          // Duplicate lambda function environment variables to the edge deployment
+          let lambda = new AWS.Lambda()
+          for (let edgeFunction of edgeDefinition.functionDefinition.Definition.Functions) {
+            let funcData = await lambda.getFunctionConfiguration({
+              FunctionName: edgeFunction.FunctionArn
+            }).promise()
+            for (let funcEnvVarKey of Object.keys(funcData.Environment.Variables)) {
+              if (edgeFunction.FunctionConfiguration.Environment.Variables.hasOwnProperty(funcEnvVarKey) === false) {
+                edgeFunction.FunctionConfiguration.Environment.Variables[funcEnvVarKey] = funcData.Environment.Variables[funcEnvVarKey]
+              }
+            }
+          }
           edgeData.ggFunction.version = await greengrass.createFunctionDefinitionVersion({
             FunctionDefinitionId: edgeData.ggFunction.created.Id, /* required */
             Functions: edgeDefinition.functionDefinition.Definition.Functions
@@ -110,6 +128,7 @@ let updateEdge = async (userId, certId, edgeData, edgeDefinition) => {
     console.log('after create function def ver:', edgeDefinition)
     if (edgeDefinition.hasOwnProperty('resourceDefinition') && edgeDefinition.resourceDefinition.CreationTimestamp === '0') {
       if (edgeDefinition.resourceDefinition.hasOwnProperty('Arn') === false) { 
+        console.log('create resource def')
         edgeData.ggResource = {}
         edgeData.ggResource.created = await greengrass.createResourceDefinition({
           Name: 'resourceDefinition' /* required */
@@ -121,6 +140,16 @@ let updateEdge = async (userId, certId, edgeData, edgeDefinition) => {
           }).promise()
           delete edgeData.ggResource
       } else {
+          /*
+          console.log('resources: ', edgeDefinition.resourceDefinition.Definition.Resources)
+          for (let resource of edgeDefinition.resourceDefinition.Definition.Resources) {
+            console.log('resource list: ', resource)
+            if (resource.ResourceDataContainer.hasOwnProperty('LocalVolumeResourceData')) {
+              console.log('resources - : ', resource.Name, resource.ResourceDataContainer.LocalVolumeResourceData)
+            }
+          }
+          console.log('ggResource ID: ', edgeData.ggResource.created.Id)
+          */
           edgeData.ggResource.version = await greengrass.createResourceDefinitionVersion({
               ResourceDefinitionId: edgeData.ggResource.created.Id, /* required */
               Resources: edgeDefinition.resourceDefinition.Definition.Resources
@@ -287,7 +316,12 @@ let getDeployStatus = async (deployId, edgeData) => {
 
 
 let deleteEdge = async (userId, certId, edgeData) => {
+  console.log('deleteEdge')
   try {
+    await greengrass.resetDeployments({
+      GroupId: edgeData.ggGroup.created.Id,
+      Force: true
+    }).promise()
     console.log('edgeData: ', edgeData)
     if (edgeData.ggConnector !== undefined) {
       await greengrass.deleteConnectorDefinition({

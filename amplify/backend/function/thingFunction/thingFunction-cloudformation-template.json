@@ -60,7 +60,7 @@
 				"Timeout": "25",
 				"Code": {
 					"S3Bucket": "aiothings-20190217141129-deployment",
-					"S3Key": "amplify-builds/thingFunction-1559394437-latest-build.zip"
+					"S3Key": "amplify-builds/thingFunction-1568943621-latest-build.zip"
 				}
 			}
 		},

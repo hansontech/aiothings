@@ -2,8 +2,16 @@
   <div>
       <div class="at-bottombar">
         <b-row align-v="center">
-          <b-col  align="start">
+          <b-col align="start" sm="4">
             <p class="h4">My Microservices ({{mservicesCounter}})</p>
+          </b-col>
+          <b-col sm="4">
+            <b-form-input class="at-border" id="publishTopic"
+              type="text" 
+              v-model="msSearchString"
+              required
+              placeholder="Search ...">
+            </b-form-input>
           </b-col>
           <b-col sm="auto" align="end">
             <b-button variant="info" v-b-modal.walkTreeModal v-b-popover.hover.bottom="'Show microservices\' message trees'" @click="walkTree()">Tree</b-button> 
@@ -36,7 +44,7 @@
         <div class="at-scroll">
           <b-card-group columns>
            <!--  img-src="https://picsum.photos/600/300/?image=25" -->
-           <b-card v-for="(service, index) in services" :key="service.ServiceName"
+           <b-card v-for="(service, index) in filteredServices" :key="service.ServiceName"
               img-src="/static/photo-27.png"
               img-top
             >
@@ -97,9 +105,10 @@ export default {
       what: 0,
       mservicesCounter: 0,
       loading: false,
-      services: {},
+      services: [],
       testResult: '',
       walkTreeLoading: false,
+      msSearchString: '',
       isLoading: false
     }
   },
@@ -117,7 +126,14 @@ export default {
         deep: true
     }
   },
-  computed: {},
+  computed: {
+    filteredServices () {
+      let foundServices = this.services.filter(service => {
+        return service.ServiceName.toLowerCase().includes(this.msSearchString.toLowerCase())
+      })
+      return foundServices
+    }
+  },
   created () {
   },
   async mounted () { // enter everytime the page becomes active
@@ -216,6 +232,17 @@ export default {
       return array
     },
     treeify (flat) { // flat has all microservices list
+      /*
+        map is a set object that is indexed by topic strings
+        each entry of the map object has
+          'topic': the topic string
+          'children': the list of microservices (ms) their input topic is the 'topic'.
+            'ms': field to link to the ms, and
+            'map': field to link to its output topic's map entry.
+          'element': a list of ms, their output topics are this map entry's 'topic'
+        __root__ is the head entry of the whole map structure,
+          that includes children their input topics cannot find any ms with its output topic to feed in.
+      */
       let map = {__root__: { topic: '__root__', element: [], children: [] }}
       let msList = flat
       for (let msListIndex in msList) {
@@ -223,20 +250,34 @@ export default {
           let inputTopic = ms.InputMessageTopic
           let outputTopic = ms.OutputMessageTopic
 
-          if (!map.hasOwnProperty(inputTopic)) { // for input topic
-              map[inputTopic] = { topic: inputTopic, element: [], children: [] }
-              map['__root__'].children.push({ms: null, map: map[inputTopic]})
+          if (inputTopic !== 'null') { // 'null' is ignored for the tree generation
+            if (!map.hasOwnProperty(inputTopic)) { // for input topic
+                map[inputTopic] = { topic: inputTopic, element: [], children: [] }
+                map['__root__'].children.push({ms: null, map: map[inputTopic]})
+                // not yet find any ms that has its out topic equals to this input topic, assigning null
+            }
           }
           // init self
-          if (!map.hasOwnProperty(outputTopic)) { // for output topic
-              map[outputTopic] = { topic: outputTopic, element: [], children: [] }
-          } else {
-              map['__root__'].children = map['__root__'].children.filter(entry => entry.map.topic !== outputTopic)
+          if (outputTopic !== 'null') {
+            if (!map.hasOwnProperty(outputTopic) && outputTopic !== 'null') { // for output topic
+                map[outputTopic] = { topic: outputTopic, element: [], children: [] }
+            } else {
+                map['__root__'].children = map['__root__'].children.filter(entry => entry.map.topic !== outputTopic)
+                // as we found a ms with its output topic,
+                // we remove entries from __root__'s children if the entries have input topics that are equal to this output topic
+            }
+            map[outputTopic].element.push(ms)
+            // add ms to the element list, as the ms' output topic is equal to the map entry's topic
           }
-          map[outputTopic].element.push(ms)
-          map[inputTopic].children.push({ms: ms, map: map[outputTopic]})
+          if (inputTopic !== 'null' && outputTopic !== 'null') {
+            map[inputTopic].children.push({ms: ms, map: map[outputTopic]})
+            // by it's definition
+          }
       }
-      let rootChildrenList = [...map['__root__'].children]
+      let rootChildrenList = [...map['__root__'].children] // shallow cloning using spread operator
+      // to process the cases of that input topics are with patterns, including wildcards, such as 't1/+/t3/+' fiting tp 't1/t2/t3'
+      // if a map entry's 'topic' fit to one of root's children's input topics,
+      // then, move the root's child to join as the map entry's children.
       for (let mapEntryIndex in map) {
           let mapEntry = map[mapEntryIndex]
           let mapEntryOutputTopic = mapEntry.topic
@@ -244,10 +285,15 @@ export default {
             let mapScan = rootChildrenList[rootChildrenIndex].map
             let mapScanInputTopic = mapScan.topic
             if (mapScanInputTopic !== mapEntryOutputTopic) {
+              // check if the entry's topic fits to the root's child's input topic pattern
+              // (input topic may be a pattern, including wildcards, expression)
               let topicMatched = MQTTPattern.exec(mapScanInputTopic, mapEntryOutputTopic)
-              if (topicMatched !== null) {
+              if (topicMatched !== null) { // means fitting to the output topic is input pattern
                 // console.log('matched: ', mapScanInputTopic)
                 if (rootChildrenList[rootChildrenIndex].ms === null && mapScan.element.length > 0) {
+                  // __root__ supposes have children solely that cannot find their cooresponding ms
+                  // 'element' is a number of ms that have the common output topic as this map entry's 'topic'
+                  // 'children' is a number of {ms, map entry} their output topic is the 'topic' of this map entry.
                   for (let ms of mapScan.element) {
                     let found = mapEntry.children.find(child => child.ms === ms)
                     if (typeof found !== 'undefined' && found !== null) {
@@ -255,7 +301,7 @@ export default {
                       mapEntry.children.push({ms: ms, map: mapScan})
                     }
                   }
-                } else {
+                } else { // this case is probably not exist ...
                   mapEntry.children.push({ms: rootChildrenList[rootChildrenIndex].ms, map: mapScan})
                 }
                 map['__root__'].children = map['__root__'].children.filter(entry => entry.map.topic !== mapScanInputTopic)
