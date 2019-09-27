@@ -2,13 +2,21 @@
    <b-container fluid> 
       <div class="at-bottombar">
         <b-row align-v="center">
-            <b-col align="start">
-              <h4>My REST APIs ({{apis.length}})</h4>
-            </b-col>
-            <b-col sm="auto" align="end">
-              <b-button variant="info" @click="reloadApis()">Refresh</b-button>
-              <b-button variant="success" @click="createApi()" >Create</b-button>
-            </b-col>
+          <b-col sm="4" align="start">
+            <h4>My REST APIs ({{apis.length}})</h4>
+          </b-col>
+          <b-col sm="4">
+            <b-form-input class="at-border" id="publishTopic"
+              type="text" 
+              v-model="apiSearchString"
+              required
+              placeholder="Search ...">
+            </b-form-input>
+          </b-col>  
+          <b-col sm="4" align="end">
+            <b-button variant="info" @click="reloadApis()">Refresh</b-button>
+            <b-button variant="success" @click="createApi()" >Create</b-button>
+          </b-col>
         </b-row>
       </div>
       <div v-if="isApiReloading" class="mb-2">
@@ -34,7 +42,7 @@
             </div>
             <div class="at-scroll">
               <b-card-group columns>
-                <b-card v-for="(api, index) in apis" :key="index"
+                <b-card v-for="(api, index) in filteredApis" :key="index"
                     class="mb-2 at-card">
                     <b-row style="height: 30px">
                       <b-col class="color-box" style="background-color: MediumAquamarine; height: 30px">
@@ -68,8 +76,8 @@
                     <b-row class="ml-0 mt-2">
                       <b-col>  
                         <b-list-group>
-                          <b-list-group-item v-for="(path, index) in api.Paths" :key="index">
-                            {{path}}
+                          <b-list-group-item v-for="(path, index) in api.Paths" v-b-popover.hover.bottom="'https://api.aiothings.com/' + api.ApiName.toLowerCase() + '/' + path.toLowerCase()" :key="index">
+                            <code>{{path}}</code>
                           </b-list-group-item>
                         </b-list-group>
                       </b-col>
@@ -94,14 +102,24 @@ export default {
       loadedUserData: null,
       loadingUsers: {},
       select_options: {text: 'toggle'},
-      apis: {},
+      apis: null,
       isApiActionRunning: false,
       isApiReloading: false,
       timeLeftBeforeActionComplete: 0,
-      apiActionTimer: null
+      apiActionTimer: null,
+      apiSearchString: ''
     }
   },
   computed: {
+    filteredApis () {
+      let foundApis = this.apis.filter(api => {
+        return api.ApiName.toLowerCase().includes(this.apiSearchString.toLowerCase())
+      })
+      foundApis.sort(function (a, b) {
+        return a.ApiName.localeCompare(b.ApiName)
+      })
+      return foundApis
+    }
   },
   watch: {
     apis: {
@@ -115,7 +133,7 @@ export default {
     console.log('apis mounted')
     this.apis = this.$store.getters.apis
     if (this.apis === null || this.apis.length === 0) {
-      this.apis = {}
+      this.apis = []
       console.log('reload api')
       this.reloadApis()
     }
@@ -179,7 +197,7 @@ export default {
       this.isApiReloading = false
       this.apis = this.$store.getters.apis
       if (this.apis === null) {
-        this.apis = {}
+        this.apis = []
       }
       console.log('apis: ', this.apis)
       this.$forceUpdate()

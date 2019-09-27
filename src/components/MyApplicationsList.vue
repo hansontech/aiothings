@@ -20,6 +20,7 @@
             <b-button variant="success" @click="createService()" >Create</b-button>
           </b-col>
         </b-row>
+        <spinner v-if="isExporting === true" size="medium" />
       </div>
       <b-modal id="walkTreeModal" ok-only title="Trees by Message Topics">
         <spinner v-if="walkTreeLoading === true" size="medium" />
@@ -44,11 +45,18 @@
         <div class="at-scroll">
           <b-card-group columns>
            <!--  img-src="https://picsum.photos/600/300/?image=25" -->
-           <b-card v-for="(service, index) in filteredServices" :key="service.ServiceName"
+           <!-- 
               img-src="/static/photo-27.png"
               img-top
-            >
-              <b-row>
+           -->
+           <b-card v-for="(service, index) in filteredServices" :key="service.ServiceName"
+              class="mb-2 at-card"
+           >
+              <b-row style="height: 30px">
+                <b-col class="color-box" style="background-color: gainsboro; height: 30px">
+                </b-col>
+              </b-row>
+              <b-row class="mt-2">
                 <b-col>
                   <h5 class="card-text">
                     {{service.ServiceName}}
@@ -109,7 +117,8 @@ export default {
       testResult: '',
       walkTreeLoading: false,
       msSearchString: '',
-      isLoading: false
+      isLoading: false,
+      isExporting: false
     }
   },
   watch: {
@@ -131,6 +140,9 @@ export default {
       let foundServices = this.services.filter(service => {
         return service.ServiceName.toLowerCase().includes(this.msSearchString.toLowerCase())
       })
+      foundServices.sort(function (a, b) {
+        return a.ServiceName.localeCompare(b.ServiceName)
+      })
       return foundServices
     }
   },
@@ -149,9 +161,14 @@ export default {
   },
   methods: {
     async exportServices () {
+      /*
       for (let service of this.services) {
         await atHelper.exportService(service)
       }
+      */
+      this.isExporting = true
+      await atHelper.exportServices(this.services)
+      this.isExporting = false
     },
     async reloadServices () {
       const username = store.getters.username
@@ -164,15 +181,19 @@ export default {
       })
       this.isLoading = false
       this.testResult = result
-      let resultJson = JSON.parse(result)
-      console.log('result: ', resultJson)
-      store.commit('setMservices', resultJson)
-      // atHelper.reloadServices()
-      this.services = this.$store.getters.mservices
-      if (this.services === null) {
-        this.services = {}
+      if (result.hasOwnProperty('error')) {
+        console.log('reloadService error: ', result.error)
+      } else {
+        let resultJson = JSON.parse(result)
+        // console.log('result: ', resultJson)
+        store.commit('setMservices', resultJson)
+        // atHelper.reloadServices()
+        this.services = this.$store.getters.mservices
+        if (this.services === null) {
+          this.services = {}
+        }
+        this.mservicesCounter = this.services.length
       }
-      this.mservicesCounter = this.services.length
     },
     createService () {
       console.log('createService')
@@ -400,6 +421,16 @@ div.at-bottombar {
 
 .at-bar {
   border-bottom: 1px solid green;
+}
+
+.color-box {
+    width: 100%;
+    display: inline-block;
+    background-color: var(--color);
+    position: absolute;
+    right: 0px;
+    left: 0px;
+    top: 0px;
 }
 
 </style>

@@ -8,10 +8,63 @@ import store from './store'
 import config from './config'
 
 export default {
-  downloadBinaryFile (fileName, fileData) {
+  async downloadBinaryFile (fileName, fileData) {
     FileSaver.saveAs(fileData, fileName);
   },
-  async exportService (ms, isLoadCode) {
+  async exportServices(mservices) {
+    let zip = new JSZip()
+    try {
+      Storage.configure({level: 'public', bucket: config.awsMserviceBucket})
+      for (let ms of mservices) { // for each microservice
+        let msZipFolder = zip.folder(ms.ServiceName)
+        await this.exportServiceToZip(msZipFolder, ms, true)
+      } // end of for loop
+      // console.log('export zip')
+      let zipContent = await zip.generateAsync({type:"blob"})
+      const userId = store.getters.username
+      FileSaver.saveAs(zipContent, userId + '.zip')
+    } catch (err) {
+      console.log('export error: ', err)
+    }
+  },
+  async exportService(mservice, isLoadCode) {
+    let zip = new JSZip()
+    try {
+      Storage.configure({level: 'public', bucket: config.awsMserviceBucket})
+      await this.exportServiceToZip (zip, mservice, isLoadCode)
+      let zipContent = await zip.generateAsync({type:"blob"})
+      const userId = store.getters.username
+      FileSaver.saveAs(zipContent, userId + '-' + mservice.ServiceName + '.zip')
+    } catch (err) {
+      console.log('export service error: ', err)
+    }
+  },
+  async exportServiceToZip (zipFolder, ms, isLoadCode) {
+    /* mservice header file */
+    let serviceHeader = ''
+    serviceHeader += ('Name: ' + ms.ServiceName + '\n')
+    serviceHeader += ('\n' + ms.ServiceDesc + '\n\n')
+    serviceHeader += ('Input Message Topic: ' + ms.InputMessageTopic + '\n')
+    serviceHeader += ('Output Message Topic: ' + ms.OutputMessageTopic + '\n')
+    let headerFileName = ms.ServiceName + '.txt'
+    zipFolder.file(headerFileName, serviceHeader)
+    /* mservice code file (zipped or a single main) */
+    if (ms.hasOwnProperty('CodeEntryType') && ms.CodeEntryType === 'zip') {
+      if (ms.CodeFileName !== '' && ms.CodeFileName !== ' ') {
+        let codeFileName = ms.CodeFileName
+        let resultUrl = await Storage.get(codeFileName)
+        let dataResponse = await fetch(resultUrl)
+        let blob = await dataResponse.blob()   
+        zipFolder.file(ms.ServiceName + '.zip', blob.arrayBuffer())
+      }
+    } else {
+      let fileNameExtension = ms.ServiceRuntime.includes('nodejs') ? '.js' : '.py'
+      let serviceFileName = ms.ServiceName + fileNameExtension
+      let sourceCode = (isLoadCode === false) ? ms.ServiceCode : await this.loadSourceFromS3(ms.ServiceCode)
+      zipFolder.file(serviceFileName, sourceCode)
+    }
+  },
+  async exportService_old (ms, isLoadCode) {  // not been used anymore obsolete implementationxs
     // name
     // desc
     // code
@@ -26,7 +79,7 @@ export default {
       sourceCode = await this.loadSourceFromS3(ms.ServiceCode)
     }
     let fileNameExtension = ''
-    if (ms.ServiceRuntime === 'nodejs') {
+    if (ms.ServiceRuntime.includes('nodejs')) {
       fileNameExtension = '.js'
     } else {
       fileNameExtension = '.py'
@@ -37,17 +90,33 @@ export default {
     serviceData += ('/*\n' + ms.ServiceDesc + '\n*/\n')
     serviceData += ('// Input Message Topic: ' + ms.InputMessageTopic + '\n')
     serviceData += ('// Output Message Topic:' + ms.OutputMessageTopic + '\n')
-    serviceData += (sourceCode + '\n')
-    this.downloadFile(serviceFileName, serviceData)
+    if (ms.hasOwnProperty('CodeEntryType') && ms.CodeEntryType === 'zip') {
+      this.downloadFile(serviceFileName, serviceData) // to download the header
+      if (ms.CodeFileName !== '' && ms.CodeFileName !== ' ') {
+        let fileName = ms.CodeFileName
+        Storage.configure({level: 'public', bucket: config.awsMserviceBucket})
+        try {
+          let result = await Storage.get(fileName)
+          await this.downloadBinaryFile(fileName, result)
+        } catch (err) {
+          console.log(err)
+        }
+      }
+    } else {
+      serviceData += (sourceCode + '\n')
+      // this.downloadFile(serviceFileName, serviceData)
+      let blob = new Blob([serviceData], { type: 'text/plain' })
+      FileSaver.saveAs(blob, serviceFileName);
+    }
   },
   async loadSourceFromS3 (s3filename) {
     Storage.configure({level: 'public', bucket: config.awsMserviceBucket})
-    console.log('loadSourceFromS3')
+    // console.log('loadSourceFromS3')
     let s3url = await Storage.get(s3filename)
     let dataResponse = await fetch(s3url)
     // https://css-tricks.com/using-fetch/
     let dataText = await dataResponse.text()
-    console.log('loadSourceFromS3: ', dataText)
+    // console.log('loadSourceFromS3: ', dataText)
     return dataText
   },
   async deleteFavorite (serviceName) {

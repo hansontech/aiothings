@@ -63,7 +63,7 @@ const dynamodb = new aws.DynamoDB.DocumentClient();
  * Example get method *
  **********************/
 
-app.get('/mservices', function(req, res) {
+app.get('/mservices', async function(req, res) {
   // Add your code here
   let event = req.apiGateway.event
   let query = event.queryStringParameters
@@ -71,12 +71,7 @@ app.get('/mservices', function(req, res) {
   console.log('query: ', query)
   if (query.userId && query.isShared === 'true') {
     console.log('query shared: ', query.isShared)
-    /*
-    if (query.continueIndex !== null) {
-      // TODO
-    }else
-    */
-    if (query.userId && query.isShared === 'true') { // shared from others
+    try {
       // https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GettingStarted.Js.04.html
       let scanParams = {
         TableName: config.mserviceTableName,
@@ -111,37 +106,48 @@ app.get('/mservices', function(req, res) {
         }
       }
       console.log('start scan: ', scanParams);
-      dynamodb.scan(scanParams, (err, data) => {
-        if (err) {
-          res.json({error: 'Could not load items: ' + err});
+      let msList = []
+      do {
+        let data = await dynamodb.scan(scanParams).promise()
+        msList = msList.concat(data.Items)
+        if (typeof data.LastEvaluatedKey !== 'undefined') {
+          scanParams.ExclusiveStartKey = data.LastEvaluatedKey
         } else {
-          console.log('scan completed');
-          res.json(JSON.stringify(data.Items));
+          break
         }
-      });
+      } while (true)
+      res.json(JSON.stringify(msList));
+    } catch (err) {
+      res.json({error: 'Failed load shared microservices: ' + err});
     }
   } else if (query.userId) { // owned by this user
-    const partitionKeyName = 'UserId'
-    condition[partitionKeyName] = {
-      ComparisonOperator: 'EQ'
-    }
-    condition[partitionKeyName]['AttributeValueList'] = { 'S' : query.userId }
-    queryParams = {
-      TableName: config.mserviceTableName,
-      IndexName: config.mserviceTableIndexByUserId,
-      KeyConditions: condition
-    } 
-    dynamodb.query(queryParams, (err, data) => {
-      if (err) {
-        console.log('get mservices error: ', err)
-        res.json({error: 'Could not load mservices: ' + err});
-      } else {
-        console.log('get mservices success::: ', data.Items);
-        console.log('mservices last evaluated key: ', data);
-        let resultData = JSON.stringify(data.Items);
-        res.json(resultData);
+    try {
+      const partitionKeyName = 'UserId'
+      condition[partitionKeyName] = {
+        ComparisonOperator: 'EQ'
       }
-    });
+      condition[partitionKeyName]['AttributeValueList'] = { 'S' : query.userId }
+      let queryParams = {
+        TableName: config.mserviceTableName,
+        IndexName: config.mserviceTableIndexByUserId,
+        KeyConditions: condition
+      }
+      let msList = []
+      do {
+        let data = await dynamodb.query(queryParams).promise()
+        msList = msList.concat(data.Items)
+        if (typeof data.LastEvaluatedKey !== 'undefined') {
+          queryParams.ExclusiveStartKey = data.LastEvaluatedKey
+        } else {
+          break
+        }
+      } while (true)
+      let resultData = JSON.stringify(msList);
+      res.json(resultData);
+    } catch (err) {
+      console.log('get mservices error: ', err)
+      res.json({error: 'Failed load mservices: ' + err});
+    }
   }
 });
 
@@ -167,20 +173,27 @@ app.get('/messagetrees', async function(req, res) {
     IndexName: config.mserviceTableIndexByUserId,
     KeyConditions: condition
   }
-  dynamodb.query(queryParams, async (err, data) => {
-    if (err) {
-      console.log('trees: query mservices error: ', err)
-      res.json(JSON.stringify({error: err}));
-    } else {
+  try {
+    let mservices = []
+    do {
+      let data = await dynamodb.query(queryParams).promise()
       // Following globals will be added through recursive call trees
       // mservicesRelated 
       // mservicesReachedMap    
-      let mservices = data.Items;
-      await getMessageTrees(mservices);
-      resultData = JSON.stringify(mservicesRelated);
-      res.json(resultData);
-    }
-  });
+      mservices = mservices.concat(data.Items)
+      if (typeof data.LastEvaluatedKey !== 'undefined') {
+        scanParams.ExclusiveStartKey = data.LastEvaluatedKey
+      } else {
+        break
+      }
+    } while (true)
+    await getMessageTrees(mservices)
+    resultData = JSON.stringify(mservicesRelated)
+    res.json(resultData)
+  } catch (err) {
+    console.log('trees: query mservices error: ', err)
+    res.json(JSON.stringify({error: err}))
+  }
 
   async function getMessageTrees (mservices) {
     for (let mservice of mservices) {
@@ -309,7 +322,7 @@ app.get('/favorite-mservices', function(req, res) {
   queryParams = {
     TableName: config.relationTableName,
     KeyConditions: condition
-  } 
+  }
   dynamodb.query(queryParams, async (err, data) => {
     if (err) {  // not found, means a new mservice
       console.log('query err: ', err);
@@ -347,7 +360,6 @@ app.get('/favorite-mservices', function(req, res) {
     } // for loop
     return mservices
   }
-
 });
 
 /****************************

@@ -71,7 +71,8 @@ export default {
               children: [
                 { 'text': 'Private & shared', data: { 'link': 'DocMicroserviceShared' } },
                 { 'text': 'Message topic', data: { 'link': 'DocMicroserviceTopic' } },
-                { 'text': 'Tree of topics', data: { 'link': 'DocMessageTopicTree' } }
+                { 'text': 'Tree of topics', data: { 'link': 'DocMessageTopicTree' } },
+                { 'text': 'Export microservices', data: { 'link': 'DocMicroserviceExport' } }
               ]
             },
             { 'text': 'REST APIs', data: { 'link': 'DocApi' } },

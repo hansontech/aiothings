@@ -574,7 +574,7 @@ During the execution of the code block, the microservice publishes output messag
 <vue-markdown id="DocMessageTopicTree">
 #### Message Topic Tree
 
-The button located in the microservice list window is a utility for displaying multi-level message topic structure. With this display, users get a summary of their message flows, as well as the relationship between message topics and microservices.
+The **Tree** button on the microservices window displays multi-level tree structure among topics of input/output messages and the corresponding microservices. With this tree, users are able to take a look at the summary of message flows, as well as the relationship between message topics and microservices.
 
 ```TopicTree
 ├ test/input
@@ -600,12 +600,19 @@ The button located in the microservice list window is a utility for displaying m
 The last few lines of the example tree show that the input message with topic ***timer/minutes*** triggers the microservice ***minuteUpdater***, and the microservice will publish the output message using the topic ***ifttt/output/new_thing_created***. Subsequently, the microservice ***iftttSenderService*** is triggered by its input message topic ***ifttt/output/#*** to capture the previously published ***ifttt/output/new_thing_created*** message.
 
 As you can from this example, this function takes into account the wildcard pattern of the input message topic when generating tree charts.
+</vue-markdown>
+
+<vue-markdown id="DocMicroserviceExport">
+#### Export Microservices
+
+The **Export** button downloads all user available microservices to the local storage as a zipped file.
 
 ```EmptyLines
 
 
 ```
 </vue-markdown>
+
 
 <vue-markdown id="DocApi" class="mt-3">
 ### REST API

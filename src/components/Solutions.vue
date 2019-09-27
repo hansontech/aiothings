@@ -63,12 +63,14 @@
             <div class="at-scroll">
               <b-card-group columns>
                 <b-card v-for="(service, index) in services" :key="service.ServiceName"
-                    img-src="/static/photo-27.png"
-                    img-alt="Image"
                     img-top
                     tag="article"
                     class="mb-2 at-card">
-                    <b-row>
+                    <b-row style="height: 30px">
+                      <b-col class="color-box" style="background-color: gainsboro; height: 30px">
+                      </b-col>
+                    </b-row>
+                    <b-row class="mt-2">
                       <b-col>
                         <p class="card-text">
                           {{service.ServiceName}}
@@ -441,5 +443,15 @@ div.at-bottombar {
   background:url(../assets/loader.gif) center center no-repeat;
   /* spinner indicator effect */
  }
+
+.color-box {
+    width: 100%;
+    display: inline-block;
+    background-color: var(--color);
+    position: absolute;
+    right: 0px;
+    left: 0px;
+    top: 0px;
+}
 
 </style>

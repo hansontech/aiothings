@@ -38,13 +38,15 @@
       <b-row class="mt-2">
         <div class="at-scroll">
           <b-card-group columns>
+          <!-- img-src="/static/photo-54.png" -->
            <b-card v-for="(thing, index) in filteredThings" :key="thing.ThingId"
-              img-src="/static/photo-54.png"
-              img-alt="Image"
-              img-top
               tag="article"
               class="mb-2 at-card">
-              <b-row>
+              <b-row style="height: 30px">
+                <b-col class="color-box" style="background-color: lightblue; height: 30px">
+                </b-col>
+              </b-row>
+              <b-row class="mt-2">
                 <b-col align="start">
                   <h5 class="card-text">
                     {{thing.ThingName}}
@@ -120,6 +122,9 @@ export default {
     filteredThings () {
       let foundThings = this.things.filter(thing => {
         return thing.ThingName.toLowerCase().includes(this.msSearchString.toLowerCase())
+      })
+      foundThings.sort(function (a, b) {
+        return a.ThingName.localeCompare(b.ThingName)
       })
       return foundThings
     }
@@ -280,5 +285,15 @@ div.at-bottombar {
   padding-bottom: 5px;
   margin-bottom: 5px;
   border-bottom: 1px solid grey
+}
+
+.color-box {
+    width: 100%;
+    display: inline-block;
+    background-color: var(--color);
+    position: absolute;
+    right: 0px;
+    left: 0px;
+    top: 0px;
 }
 </style>

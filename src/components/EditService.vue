@@ -416,14 +416,23 @@ export default {
       */
       reader.readAsArrayBuffer(file)
     },
-    downloadZipFile () {
+    async downloadZipFile () {
       if (this.mservice.CodeFileName === '' || this.mservice.CodeFileName === ' ') {
         return
       }
       this.isZipDownloading = true
       let that = this
       let fileName = this.mservice.CodeFileName
-      Storage.get(fileName)
+      try {
+        let result = await Storage.get(fileName)
+        await atHelper.downloadBinaryFile(fileName, result)
+        that.isZipDownloading = false
+      } catch (err) {
+        console.log(err)
+        that.isZipDownloading = false
+      }
+      /*
+      await Storage.get(fileName)
       .then(function (result) {
         console.log(result)
         // s3://bucket/key
@@ -434,6 +443,7 @@ export default {
         console.log(err)
         that.isZipDownloading = false
       })
+      */
     }
   }
 }
