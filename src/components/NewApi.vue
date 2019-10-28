@@ -67,7 +67,11 @@
                   <b-collapse v-model="showCheckNameMessage" id="collapse1" class="mt-2">
                     <b-card>
                       {{checkNameResultMessage}} 
-                      <b-btn variant="primary" v-b-toggle.collapse1 @click="showCheckNameMessage = !showCheckNameMessage" size="sm">Confirm</b-btn>
+                      <b-button variant="primary" 
+                        :class="showCheckNameMessage ? 'collapsed' : null"
+                        :aria-expanded="showCheckNameMessage ? 'true' : 'false'"
+                        aria-controls="collapse1"
+                        @click="showCheckNameMessage = !showCheckNameMessage" size="sm">Confirm</b-button>
                     </b-card>
                   </b-collapse>
                 </b-col>
@@ -145,9 +149,11 @@
               </b-col>
               <b-col sm="7"> 
                 <b-form-select v-model="api.AuthorizationType" class="mb-3">
-                  <option :value="'NONE'">None</option>
-                  <option :value="'AWS_IAM'">Auth - Authentication required</option>
-                  <!-- <option :value="'COGNITO_USER_POOLS'">OAuth 2.0</option> -->
+                  <option :value="'NONE'">Public access</option>
+                  <!-- <option :value="'AWS_IAM'">Authentication required</option> -->
+                  <option :value="'AUTH-SHARE'">Authenticated access</option>
+                  <option :value="'AUTH'">Owner access only</option>
+                   <!-- <option :value="'COGNITO_USER_POOLS'">OAuth 2.0</option> -->
                 </b-form-select>
               </b-col>
               <b-popover target="popoverAuthOption" triggers="hover focus">

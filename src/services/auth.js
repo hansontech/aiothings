@@ -1,19 +1,18 @@
 import store from '../store'
-// import config from '../config'
 import { Auth } from 'aws-amplify'
 
 export default {
 
   authenticate: function () {
-    const config = Auth.configure()
-    console.log('config: ', config)
+    const authConfig = Auth.configure()
+    // console.log('authConfig: ', authConfig)
     let {
         domain,
         redirectSignIn,
         // redirectSignOut,
         scope,
-        responseType } = config.oauth
-    const clientId = config.userPoolWebClientId
+        responseType } = authConfig.oauth
+    const clientId = authConfig.userPoolWebClientId
 
     var verification = generateVerification()
     store.commit('setVerification', verification)
@@ -21,13 +20,13 @@ export default {
     scope = scope.join(' ')
     scope = encodeURI(scope)
     console.log('authenticate: ', scope)
-    console.log('oauth: ', config.oauth)
+    console.log('oauth: ', authConfig.oauth)
     responseType = 'code'
     // let redirectCallback = 'https://www.aiothings.com/callback' // for test
 
     const url = 'https://' + domain + '/login?redirect_uri=' + redirectSignIn + '&response_type=' + responseType + '&client_id=' + clientId + '&state=' + verification + '&scope=' + scope
 
-    // console.log('url:: ', url)
+    console.log('url:: ', url)
     // Launch hosted UI
     window.location.assign(url)
   },

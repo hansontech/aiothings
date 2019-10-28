@@ -59,6 +59,24 @@
                   class="mt-3">
               <b-form-radio-group class="pt-3" v-model="mservice.IsShared" :options="[{text: 'Yes', value: 'true'}, {text: 'No', value: 'false'}]" />
             </b-form-group>
+            <b-form-group
+                :label-cols="3"
+                breakpoint="md"
+                label-size="lg"
+                label-class="font-weight-bold"
+                label="Deploy message"
+                label-for="inputHorizontal">
+              <b-form-input v-model="mservice.DeployMessage" :placeholder="deployMessageFormat" id="inputHorizontal"></b-form-input>
+            </b-form-group>
+            <b-form-group
+                :label-cols="3"
+                breakpoint="md"
+                label-size="lg"
+                label-class="font-weight-bold"
+                label="Undeploy message"
+                label-for="inputHorizontal">
+              <b-form-input v-model="mservice.UndeployMessage" :placeholder="deployMessageFormat" id="inputHorizontal"></b-form-input>
+            </b-form-group>
       </b-tab>
       <b-tab title="Source Code" @click="setCmActive">
           <b-alert variant="danger"
@@ -163,7 +181,7 @@
 
 import { API, Storage } from 'aws-amplify'
 import atHelper from '../aiot-helper'
-import config from '../config'
+// import config from '../config'
 
 export default {
   name: 'device',
@@ -186,7 +204,8 @@ export default {
           {value: 'inline', text: 'Edit code inline'},
           {value: 'zip', text: 'Upload .zip file'}
       ],
-      errorMsg: ''
+      errorMsg: '',
+      deployMessageFormat: 'Optional, a JSON form of { "topic": ... "data": ... }'
     }
   },
   computed: {
@@ -235,6 +254,8 @@ export default {
     }
     this.loadSource()
   },
+  mounted () {
+  },
   beforeDestroy () {
   },
   watch: {
@@ -276,9 +297,12 @@ export default {
       atHelper.exportService(ms, false) // false means no need to load source code
     },
     setCmActive () {
-      console.log('setCmActive')
-      var that = this
-      let cm = that.codemirror
+      console.log('setCmActive: ')
+      if (typeof this.$refs.sourceEditor === 'undefined') {
+        return
+      }
+      // var that = this
+      let cm = this.codemirror
       let runtime = this.mservice.ServiceRuntime
       if (runtime !== null && runtime.toLowerCase().includes('python')) {
         cm.setOption('indentWithTabs', true)
@@ -303,7 +327,7 @@ export default {
     },
     async loadSource () {
       this.isSourceLoading = true
-      Storage.configure({level: 'public', bucket: config.awsMserviceBucket})
+      Storage.configure({level: 'public'})
       console.log('start loadSource key: ', this.mservice.ServiceCode)
       let s3url = await Storage.get(this.mservice.ServiceCode)
       let dataResponse = await fetch(s3url)

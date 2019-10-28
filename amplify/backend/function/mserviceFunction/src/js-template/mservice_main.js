@@ -1,4 +1,4 @@
-const aiot = null
+let aiot = null
 const userMain = require('__main__');
 
 // process.env.INPUT_MESSAGE_TOPIC

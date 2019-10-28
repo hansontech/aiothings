@@ -43,7 +43,7 @@
     <!-- <p>{{$route.path}}</p> -->
     <b-button-group vertical class="at-sidebar-button" style="width:100%">
       <b-button size=" " :variant="reachRoute('mythings','')" @click="toMyThings()" :disabled="!isLoggedIn" >My IoT Devices</b-button>
-      <b-button size=" " :variant="reachRoute('myapps')" @click="toMyApps()" :disabled="!isLoggedIn">My &#181Services</b-button>
+      <b-button size=" " :variant="reachRoute('myapps')" @click="toMyApps()" :disabled="!isLoggedIn">My &#181;Services</b-button>
       <b-button size=" " :variant="reachRoute('myapis')" @click="toMyApis()" :disabled="!isLoggedIn">My REST APIs </b-button>
       <!-- &#160&#160&#160&#160&#160 -->
       <b-button size=" " :variant="reachRoute('myfavorites')" @click="toMyFavorites()" :disabled="!isLoggedIn">My Favorites</b-button>
@@ -59,11 +59,13 @@
     <b-button-group vertical class="at-sidebar-button" style="width:100%">
       <b-button size=" " v-b-popover.hover.bottom="'Console IO from/to services'" :variant="reachRoute('myconsole')" @click="toMyConsole()" :disabled="!isLoggedIn">My Console</b-button>
     </b-button-group> 
-  
+    <b-button-group vertical class="at-sidebar-button" style="width:100%">
+      <b-button size=" " variant="info" v-b-popover.hover.bottom="'Download App configuration files'" @click="downloadConfig()">App Config</b-button>
+    </b-button-group>
+    <p></p>
     <b-button-group vertical class="at-sidebar-button" style="width:100%">
       <b-button size=" " :variant="reachRoute('docs')" @click="toDocs()">Docs</b-button>
     </b-button-group> 
-  
     </div>
     <!-- 
     <b-button-group vertical>
@@ -100,6 +102,8 @@ import { eventBus } from '../main'
 // import { Auth } from 'aws-amplify'
 // import * as apiGateway from '../lib/api-gateway'
 // import jwt from 'jwt-decode'
+// import FileSaver from 'file-saver'
+import atHelper from '../aiot-helper'
 
 export default {
   name: 'user',
@@ -168,6 +172,12 @@ export default {
     */
   },
   methods: {
+    async downloadConfig () {
+      let res = await fetch('/static/aws-exports.js')
+      // let data = await res.text()
+      let blob = await res.blob()
+      await atHelper.downloadBinaryFile('aws-exports.js', blob)
+    },
     toQuit () {
       eventBus.$emit('pageBack')
     },
@@ -215,7 +225,7 @@ export default {
       this.$router.replace({name: 'solutions'})
     },
     toDocs () {
-      this.$router.replace({name: 'docs'})
+      this.$router.push({name: 'docs'})
     },
     onSubmit () {
       this.makeGuess(this.guess)

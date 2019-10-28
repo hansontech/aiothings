@@ -8,8 +8,8 @@
             <b>hings</b>
           </h1>
         </b-col>
-      </b-row>  
-      <b-row align-v="top" class="h-50">
+      </b-row>
+      <b-row align-v="center">
         <b-col class="text-center">
           <h3 style="color:white">
             Rapid Cloud / IoT Application DevOps Tool

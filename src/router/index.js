@@ -21,6 +21,7 @@ import Recommended from '@/components/Recommended'
 import Solution from '@/components/Solution'
 import Solutions from '@/components/Solutions'
 import Login from '@/components/Login'
+import Signout from '@/components/Signout'
 import Documents from '@/components/Documents'
 // import DocIntroduction from '@/components/DocIntroduction'
 import DocMain from '@/components/DocMain'
@@ -360,6 +361,15 @@ const router = new VueRouter({
       component: Callback,
       meta: {
         title: 'Authenticating...',
+        auth: false
+      }
+    },
+    {
+      path: '/signout',
+      name: 'signout',
+      component: Signout,
+      meta: {
+        title: 'Signed out',
         auth: false
       }
     },

@@ -71,7 +71,8 @@ export default {
               children: [
                 { 'text': 'Private & shared', data: { 'link': 'DocMicroserviceShared' } },
                 { 'text': 'Message topic', data: { 'link': 'DocMicroserviceTopic' } },
-                { 'text': 'Tree of topics', data: { 'link': 'DocMessageTopicTree' } },
+                { 'text': 'Message tree', data: { 'link': 'DocMessageTopicTree' } },
+                { 'text': 'Deploy microservice', data: { 'link': 'DocMicroserviceDeploy' } },
                 { 'text': 'Export microservices', data: { 'link': 'DocMicroserviceExport' } }
               ]
             },
@@ -86,7 +87,7 @@ export default {
         },
         { 'text': 'Microservice APIs',
           data: { 'link': 'DocMicroserviceApi' },
-          state: { expanded: true },
+          state: { expanded: false },
           'children': [
             { 'text': 'Node.js',
               state: { expanded: true },
@@ -118,7 +119,8 @@ export default {
               ]
             }
            ]
-        }
+        },
+        { 'text': 'Programming Environment', data: { 'link': 'DocProgramming' } }
         /*,
         { 'text': 'Examples',
           state: { expanded: true },
@@ -193,7 +195,7 @@ export default {
       }
     },
     toMain () {
-      this.$router.replace('/user')
+      this.$router.push({name: 'home'})
     }
   }
 }

@@ -536,7 +536,7 @@ app.post('/mservices', async function(req, res) {
           gulp.task('create-update-lambda')()
         } 
     });
-    console.log('finished upload-zip-to-s3')
+    // console.log('finished upload-zip-to-s3')
     return true
   });
 
@@ -609,7 +609,19 @@ app.post('/mservices', async function(req, res) {
         else fn();
       });
     }
-
+    let funcEnvs = {
+      'INPUT_MESSAGE_TOPIC': inputs.InputMessageTopic,
+      'OUTPUT_MESSAGE_TOPIC': inputs.OutputMessageTopic,
+      'USER_POOL_ID': config.awsUserPoolId,
+      'IOT_ENDPOINT': config.awsIotEndpoint,
+      'MSERVICE_NAME': inputs.ServiceName,
+      'S3_BUCKET': config.mserviceS3bucketName,
+      'OWNER_ID': inputs.UserId,
+      'REGION': config.region,
+      'ACCOUNT_ID': config.awsAccountId,
+      'IS_SHARED': inputs.IsShared,
+      'USER_DATA_TABLE': config.userDataTable
+    }
     function createFunction () {
       console.log('createFunction')
       let fRuntime = inputs.ServiceRuntime
@@ -625,19 +637,6 @@ app.post('/mservices', async function(req, res) {
             break
           }
         }
-        let funcEnvs = {
-          'INPUT_MESSAGE_TOPIC': inputs.InputMessageTopic,
-          'OUTPUT_MESSAGE_TOPIC': inputs.OutputMessageTopic,
-          'USER_POOL_ID': config.awsUserPoolId,
-          'IOT_ENDPOINT': config.awsIotEndpoint,
-          'MSERVICE_NAME': inputs.ServiceName,
-          'S3_BUCKET': config.mserviceS3bucketName,
-          'OWNER_ID': inputs.UserId,
-          'REGION': config.region,
-          'ACCOUNT_ID': config.awsAccountId,
-          'IS_SHARED': inputs.IsShared,
-          'USER_DATA_TABLE': config.userDataTable
-        }
         if (isAdminUser === 'true') {
           funcEnvs.SYSTEM_MSERVICE = isAdminUser
         }
@@ -646,7 +645,7 @@ app.post('/mservices', async function(req, res) {
             S3Bucket: bucketName,
             S3Key: 'public/' + zipFile
           },
-          Description: inputs.ServiceDesc,
+          Description: (inputs.ServiceDesc).substring(0, 255),
           Environment: {
             Variables: funcEnvs
           },
@@ -710,6 +709,7 @@ app.post('/mservices', async function(req, res) {
             // console.log('fRuntime ', fRuntime)
             // console.log('inputs ', inputs)
             try {
+              /*
               let funcData = await lambda.getFunctionConfiguration({
                 FunctionName: functionName
               }).promise()
@@ -719,6 +719,7 @@ app.post('/mservices', async function(req, res) {
               funcEnvs.OWNER_ID = inputs.UserId
               funcEnvs.IS_SHARED = inputs.IsShared
               funcEnvs.USER_DATA_TABLE = config.userDataTable
+              */
               let isAdminUser = 'false'
               for (let superuser of config.adminUsers) {
                 if (superuser === inputs.UserId) {
@@ -731,9 +732,10 @@ app.post('/mservices', async function(req, res) {
               } else if (funcEnvs.hasOwnProperty('SYSTEM_MSERVICE')) {
                 delete funcEnvs.SYSTEM_MSERVICE
               }
+              console.log('funcEnvs: ', funcEnvs)
               await lambda.updateFunctionConfiguration( {
                 FunctionName: functionName, /* required */
-                Description: inputs.ServiceDesc,
+                Description: (inputs.ServiceDesc).substring(0, 255),
                 Environment: {
                   Variables: funcEnvs
                 },
@@ -809,10 +811,10 @@ app.post('/mservices', async function(req, res) {
           };
           let addPermissionPromise = lambda.addPermission(addPermissionParams).promise()
           await addPermissionPromise.catch( function (err) { 
-            console.log('addPermission: error: ', err); // an error occurred
+            console.log('addPermission: warning: ', err); // an error occurred
           });
           // await addPermissionPromise
-          console.log('after add permission: ', data);
+          // console.log('after add permission: ', data);
           let iot = new aws.Iot();
           let theFunctionArn = data.Configuration.FunctionArn;
           let iotTopicRuleName = inputs.UserId + '_' + inputs.ServiceName + '_rule';

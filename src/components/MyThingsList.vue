@@ -8,7 +8,7 @@
          <b-col sm="4">
             <b-form-input class="at-border" id="publishTopic"
               type="text" 
-              v-model="msSearchString"
+              v-model="$parent.searchString"
               required
               placeholder="Search ...">
             </b-form-input>
@@ -39,7 +39,7 @@
         <div class="at-scroll">
           <b-card-group columns>
           <!-- img-src="/static/photo-54.png" -->
-           <b-card v-for="(thing, index) in filteredThings" :key="thing.ThingId"
+           <b-card v-for="(thing) in filteredThings" :key="thing.ThingId"
               tag="article"
               class="mb-2 at-card">
               <b-row style="height: 30px">
@@ -55,8 +55,8 @@
                 <b-col align="end">   
                   <b-dropdown variant="secondary" class="mx-0" right >
                     <!-- VUE reference: https://vuejs.org/v2/guide/events.html -->
-                    <b-dropdown-item @click.stop="showThingDetail(index)">Edit</b-dropdown-item>
-                    <b-dropdown-item @click.stop="deleteThing(index)" >Delete</b-dropdown-item>
+                    <b-dropdown-item @click.stop="showThingDetail(things.indexOf(thing))">Edit</b-dropdown-item>
+                    <b-dropdown-item @click.stop="deleteThing(things.indexOf(thing))" >Delete</b-dropdown-item>
                   </b-dropdown>
                 </b-col>
               </b-row>
@@ -66,7 +66,7 @@
                 </b-col>
               </b-row>
               <b-row class="ml-0 mt-1">
-                <b-col class="at-border" style="white-space: pre-wrap;">{{thing.ThingDesc}}</b-col>
+                <b-col class="at-border" style="white-space: pre-wrap;">{{truncatedString( thing.ThingDesc, 256 )}}</b-col>               
               </b-row>
             </b-card>
           </b-card-group>
@@ -100,7 +100,6 @@ export default {
       thingsMap: {'x': 1},
       testFlag: false,
       things: null,
-      msSearchString: '',
       isLoading: false
     }
   },
@@ -121,7 +120,7 @@ export default {
     },
     filteredThings () {
       let foundThings = this.things.filter(thing => {
-        return thing.ThingName.toLowerCase().includes(this.msSearchString.toLowerCase())
+        return thing.ThingName.toLowerCase().includes(this.$parent.searchString.toLowerCase())
       })
       foundThings.sort(function (a, b) {
         return a.ThingName.localeCompare(b.ThingName)
@@ -138,12 +137,12 @@ export default {
     }
   },
   async created () {
-      console.log('MyThingsList created:')
+      // console.log('MyThingsList created:')
       this.things = this.$store.getters.things
       if (this.things === null) {
         this.things = []
       }
-      // console.log('things now: ', this.things)
+      console.log('things now: ', this.things)
       this.thingsMap = new Map()
       if (this.things.length === 0) {
         await this.refreshThings()
@@ -158,7 +157,8 @@ export default {
             console.log(data.value.clientId, ': ', data.value.eventType)
             PubSub.publish('aiot/' + thing.ThingId + '/alive/req', { msg: 'update alive' })
           },
-          error: error => console.error('error: ', error)
+          error: error => console.error('error: ', error),
+          close: () => console.log('Done')
         }))
         // Subscribe client disconnected
         this.subs.push(PubSub.subscribe('$aws/events/presence/disconnected' + thing.ThingId).subscribe({
@@ -166,7 +166,8 @@ export default {
             console.log(data.value.clientId, ': ', data.value.eventType)
             this.thingsMap.delete(thing.ThingId)
           },
-          error: error => console.error('error: ', error)
+          error: error => console.error('error: ', error),
+          close: () => console.log('Done')
         }))
         // Subscribe alive response
         this.subs.push(PubSub.subscribe('aiot/' + thing.ThingId + '/alive/resp').subscribe({
@@ -184,14 +185,18 @@ export default {
               this.$set(this.thingsMap, thing.ThingId, deviceIpAddr)
               this.$set(this.things, 0, this.things[0])
               // console.log('thingsMap: ', this.thingsMap)
-              console.log('thingsMap value: ', this.thingsMap[thing.ThingId])
+              // console.log('thingsMap value: ', this.thingsMap[thing.ThingId])
               this.testFlag = true
           },
-          error: error => console.error('error: ', error)
+          error: error => console.error('error: ', error),
+          close: () => console.log('Done')
         }))
         // Publish client alive-req, wait for alive-resp
         await PubSub.publish('aiot/' + thing.ThingId + '/alive/req', { msg: 'update alive' })
       } // for loop
+  },
+  mounted () {
+    // console.log('MyThingList: ', this.$parent.searchString)
   },
   beforeDestroy () {
     // Unsubscribe client connected
@@ -200,21 +205,24 @@ export default {
       let subscribe = this.subs[i]
       subscribe.unsubscribe()
     }
-    console.log('MyThingsList beforeDestroy:')
+    // console.log('MyThingsList beforeDestroy:')
   },
   methods: {
+    truncatedString (textStr, length) {
+      return (textStr.length < (length)) ? textStr : (textStr.substring(0, length - 4) + '...')
+    },
     launchThingNodeRed (ipAddr) {
       // this.$router.push({name: 'thing', params: { url: ipAddr }})
       window.open('http://' + ipAddr + ':1880')
     },
     connectCallback () {
-      console.log('connectCallback')
+      // console.log('connectCallback')
     },
     messageCallback () {
-      console.log('messageCallback')
+      // console.log('messageCallback')
     },
     closeCallback () {
-      console.log('closeCallback')
+      // console.log('closeCallback')
     },
     async refreshThings () {
       this.isLoading = true
@@ -230,7 +238,7 @@ export default {
       this.$router.push({ name: 'newthing' })
     },
     showThingDetail (index) {
-      console.log('detail things:')
+      // console.log('detail things:')
       this.$router.push({name: 'edit', params: { thingIndex: index }})
     },
     deleteThing (index) {

@@ -10,6 +10,7 @@ var express = require('express')
 var bodyParser = require('body-parser')
 var awsServerlessExpressMiddleware = require('aws-serverless-express/middleware')
 const aws = require('aws-sdk');
+var fs = require('fs-extra');
 
 // declare a new express app
 var app = express()
@@ -31,7 +32,8 @@ var config = {
   mserviceTableIndexByUserId: "UserId-index",
   region: "ap-southeast-2",
   mserviceRole: "arn:aws:iam::414327512415:role/aiot-mservice-role-default",
-  awsUserPoolId: "ap-southeast-2_2gQEl126n"
+  awsUserPoolId: "ap-southeast-2_2gQEl126n",
+  apiGatewayAuthorizerFunction: 'apiAuthorizerFunction-prod'
 };
 aws.config.region = config.region;
 const dynamodb = new aws.DynamoDB.DocumentClient();
@@ -118,11 +120,13 @@ app.get('/checkname', function(req, res) {
 // deleteApi -
 async function deleteApi (apiName, restApiId, deploymentId) {
   console.log('deleteApi')
+  await apigateway.deleteBasePathMapping({
+    basePath: apiName.toLowerCase(),
+    domainName: config.apiDomainName
+  }).promise().catch((err) => {
+    console.log('warn: ', err)  
+  }) // assume complaining about the base path map has been deleted previously
   try {
-    await apigateway.deleteBasePathMapping({
-      basePath: apiName.toLowerCase(),
-      domainName: config.apiDomainName
-    }).promise()
     await apigateway.deleteStage({
       restApiId: restApiId,
       stageName: 'prod' 
@@ -148,10 +152,10 @@ async function deleteApi (apiName, restApiId, deploymentId) {
     await apigateway.deleteRestApi({
       restApiId: restApiId
     }).promise()
-    return true
+    return null
   } catch (err) {
     console.log('deleteApi: ', err)
-    return false
+    return {error: err}
   }
 }
 
@@ -179,11 +183,20 @@ app.post('/apis', async function(req, res) {
     if ((existingPathsStr !== newPathStr) || 
           existingApiObject.Handler !== apiObject.Handler ||
           existingApiObject.AuthorizationType != apiObject.AuthorizationType) {
-      // release resources from previous the definition
-      await deleteApi(existingApiObject.ApiName, existingApiObject.RestApiId, existingApiObject.DeploymentId)
+         // release resources from previous the definition
+      let deleteResult = await deleteApi(existingApiObject.ApiName, existingApiObject.RestApiId, existingApiObject.DeploymentId)
       isCreateNewApi = true
+      if (deleteResult !== null && deleteResult.hasOwnProperty('error')) {
+        // console.log('error: ', deleteResult.error.message)
+        if (deleteResult.error.message.includes('Invalid API identifier')) {
+        } else {
+          res.json(deleteResult);
+          return
+        }
+      }
     }
   }
+  console.log('continue creating api..')
   if (isCreateNewApi === true) {
     // create an Api Gateway structure  
     try {
@@ -209,33 +222,44 @@ app.post('/apis', async function(req, res) {
           rootResourceId = resource.id
         }
       }
-      let parentResourceId = rootResourceId
       let parentResourceTree = []
-      for( let pathFull of apiObject.Paths) {
+      for( let pathFull of apiObject.Paths) { // for every path
         let pathParts = pathFull.split('/')
         let level = 0
-        for (let pathLevel in pathParts) {
+        let subPath = ''
+        let parentResourceId = rootResourceId
+        for (let pathLevel in pathParts) {  // for each path level of the path
           let pathPart = pathParts[pathLevel]
-          let resourceData = await apigateway.createResource({
-            parentId: parentResourceId,
-            pathPart: pathPart,
-            restApiId: restApiId
-          }).promise()
-          let resourceId = resourceData.id
-
-          if (level === pathParts.length-1) {
-            await createLeafPath(restApiId, resourceId, inputs.handler)
-            continue
-          } 
-          // otherwise
-          let resourceFound = parentResourceTree.find(resource => resource.pathName === pathPart)
-          if (resourceFound === undefined || resourceFound.length === 0) {
-            resourceFound = [{pathName: pathPart, resourceId: resourceId, subtree: []}]
-            parentResourceTree.push(resourceFound[0])
+          subPath = subPath + '/' + pathPart
+          let resourceFound = parentResourceTree.find(resource => {
+            let result = resource.pathName === subPath
+            return result
+          })
+          console.log('parentResourceTree: ', parentResourceTree)
+          console.log('resourceFound: ', resourceFound)
+          let resourceId = null          
+          if (resourceFound === undefined) {
+            // if the path level is first reached, then construct the tree entry
+            let resourceData = await apigateway.createResource({
+              parentId: parentResourceId,
+              pathPart: pathPart,
+              restApiId: restApiId
+            }).promise()  // create resource for each path level
+            let resource = {pathName: subPath, resourceId: resourceData.id}
+            parentResourceTree.push(resource)
+            resourceId = resourceData.id
+          } else {
+            resourceId = resourceFound.resourceId           
           }
-          parentResourceId = resourceFound[0].resourceId
-          parentResourceTree = resourceFound[0].subtree
-          level++
+          console.log('level: ', level)
+          console.log('pathParts level: ', pathParts.length)
+          if (level === pathParts.length-1) { // if it is the end level of the path
+            await createLeafPath(apiObject.ApiName, pathFull, restApiId, resourceId, inputs.handler)
+          } else {
+            // otherwise
+            parentResourceId = resourceId
+            level++
+          }
         } // for each path level of a path case
       } // for each path case 
       // console.log('before deployment')
@@ -259,6 +283,7 @@ app.post('/apis', async function(req, res) {
       return
     }
   } // end if create new Api structure
+  console.log('db put')
   try {
     let dbData = await dynamodb.put({
       TableName: config.apiTableName,
@@ -307,16 +332,85 @@ app.post('/apis', async function(req, res) {
     }
   }
   // createLeafPath - 
-  async function createLeafPath(restApiId, resourceId, mservice) {
+  async function createLeafPath(apiName, pathFull, restApiId, resourceId, mservice) {
+    console.log('createLeafPath: ', pathFull)
     try{
       for(let methodStr of ['ANY']){ // ['POST', 'GET', 'PUT', 'DELETE']){
-        await apigateway.putMethod({
+        let authType = apiObject.AuthorizationType
+        switch (authType) {
+          case 'NONE': 
+            authType = 'NONE'
+          break
+          case 'AUTH': 
+            authType = 'CUSTOM'
+            break
+          case 'AUTH-SHARE':
+            authType = 'CUSTOM'
+            break
+          default:
+            break
+        }
+        let putMethodParas = {
           restApiId: restApiId,
           resourceId: resourceId,
           httpMethod: methodStr,
-          authorizationType: apiObject.AuthorizationType,  // NONE | AWS_IAM | COGNITO_USER_POOLS
+          authorizationType: authType,  // NONE | AWS_IAM | COGNITO_USER_POOLS | CUSTOM
           apiKeyRequired: false
-        }).promise()
+        }
+        if (putMethodParas.authorizationType === 'CUSTOM') {
+          let apiGatewayAuthorizer = 'aiotApiGatewayAuthorizer'
+          let authorizersData = await apigateway.getAuthorizers({
+            restApiId: restApiId, /* required */
+          }).promise()
+          console.log('authorizersData.items: ', authorizersData.items)
+          let authorizer = authorizersData.items.find( item => {
+            return item.name === apiGatewayAuthorizer
+          })
+          let authorizerData = null
+          console.log('authorizer: ', authorizer)
+          if (typeof authorizer !== 'undefined') {
+            authorizerData = authorizer
+          } else {
+            console.log('createAuthorizer')
+            let authorizerFuncData = await lambda.getFunctionConfiguration({
+              FunctionName: config.apiGatewayAuthorizerFunction
+            }).promise()
+            if (authorizerFuncData.Role !== config.mserviceRole) {
+              await lambda.updateFunctionConfiguration({
+                FunctionName: config.apiGatewayAuthorizerFunction, /* required */
+                Role: config.mserviceRole
+              }).promise()
+            }
+            authorizerData = await apigateway.createAuthorizer({
+              name: apiGatewayAuthorizer, /* required */
+              restApiId: restApiId, /* required */
+              type: 'TOKEN', // TOKEN | REQUEST | COGNITO_USER_POOLS, /* required */
+              identitySource: 'method.request.header.Authorization',
+              authorizerUri: 'arn:aws:apigateway:' + config.region + ':lambda:path/2015-03-31/functions/' + authorizerFuncData.FunctionArn + '/invocations',
+              authorizerCredentials: config.mserviceRole
+            }).promise();
+            /*
+              The role (authorizerCredentials) needs to include following to [Trust relationships] tab of role definition
+              {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "apigateway.amazonaws.com",
+                        "lambda.amazonaws.com"
+                      ]
+                    },
+                    "Action": "sts:AssumeRole"
+                  }
+                ]
+              }
+            */
+          }
+          putMethodParas.authorizerId = authorizerData.id
+        }
+        await apigateway.putMethod(putMethodParas).promise()
         // console.log('putIntegration')
         let functionArn = mservice.ServiceArn.replace(':' + mservice.ServiceName + '_Latest', '')
         await apigateway.putIntegration({
@@ -351,6 +445,17 @@ app.post('/apis', async function(req, res) {
           restApiId: restApiId,
           statusCode: '200',
           responseTemplates: { 'application/json' :  ''}
+        }).promise()
+        let corsTemplate = fs.readFileSync('./cors-template.yaml', 'utf8')
+        // console.log('corsTemplate: ', corsTemplate)
+        corsTemplate = corsTemplate.replace(/\[PATH\]/g, pathFull)
+        corsTemplate = corsTemplate.replace(/\[API\]/g, apiName)
+        // console.log('cors: ', corsTemplate)
+        await apigateway.putRestApi({
+          body: Buffer.from(corsTemplate) /* Strings will be Base-64 encoded on your behalf */, /* required */
+          restApiId: restApiId, /* required */
+          failOnWarnings: false,
+          mode: 'merge'
         }).promise()
       } // for methods
     } catch (err) {
@@ -406,9 +511,12 @@ app.delete('/apis', async function(req, res) {
     let apiItem = dbGetData.Item
     if (apiItem.hasOwnProperty('RestApiId') && apiItem.hasOwnProperty('DeploymentId')) {
       let deleteResult = await deleteApi(apiObject.ApiName, apiItem.RestApiId, apiItem.DeploymentId)
-      if (deleteResult === false) {
-        res.json({error: 'api deletion is failed'});
-        return
+      if (deleteResult !== null && deleteResult.hasOwnProperty('error')) {
+        if (deleteResult.error.includes('NotFoundException')) {
+        } else {
+          res.json(deleteResult);
+          return
+        }
       }
     }
   }

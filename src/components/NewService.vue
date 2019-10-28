@@ -67,7 +67,11 @@
                   <b-collapse v-model="showCheckNameMessage" id="collapse1" class="mt-2">
                     <b-card>
                       {{checkNameResultMessage}} 
-                      <b-btn variant="primary" v-b-toggle.collapse1 @click="showCheckNameMessage = !showCheckNameMessage" size="sm">Confirm</b-btn>
+                      <b-button variant="primary" 
+                        :class="showCheckNameMessage ? 'collapsed' : null"
+                        :aria-expanded="showCheckNameMessage ? 'true' : 'false'"
+                        aria-controls="collapse1"
+                        @click="showCheckNameMessage = !showCheckNameMessage" size="sm">Confirm</b-button>
                     </b-card>
                   </b-collapse>
                 </b-col>
@@ -98,7 +102,25 @@
                   label-size="lg"
                   label-class="font-weight-bold"
                   class="mt-3">
-              <b-form-radio-group class="pt-3" v-model="mservice.IsShared" :options="[{text: 'Yes', value: 'true'}, {text: 'No', value: 'false'}]" />
+            <b-form-radio-group class="pt-3" v-model="mservice.IsShared" :options="[{text: 'Yes', value: 'true'}, {text: 'No', value: 'false'}]" />
+            </b-form-group>
+                        <b-form-group
+                :label-cols="3"
+                breakpoint="md"
+                label-size="lg"
+                label-class="font-weight-bold"
+                label="Deploy message"
+                label-for="inputHorizontal">
+            <b-form-input v-model="mservice.DeployMessage" :placeholder="deployMessageFormat" id="inputHorizontal"></b-form-input>
+            </b-form-group>
+                       <b-form-group
+                :label-cols="3"
+                breakpoint="md"
+                label-size="lg"
+                label-class="font-weight-bold"
+                label="Undeploy message"
+                label-for="inputHorizontal">
+              <b-form-input v-model="mservice.UndeployMessage" :placeholder="deployMessageFormat" id="inputHorizontal"></b-form-input>
             </b-form-group>
       </b-tab>
       <b-tab title="Source Code" @click="setCmActive">
@@ -258,7 +280,8 @@ export default {
       templateCode: {
         nodejs: '',
         python: ''
-      }
+      },
+      deployMessageFormat: 'Optional, a JSON form of { "topic": ... "data": ... }'
     }
   },
   watch: {
@@ -446,7 +469,7 @@ export default {
                 'userId': username
             }
       })
-      let resultJson = JSON.parse(result)
+      let resultJson = result
       console.log('reloadServices:: ', resultJson.length)
       store.commit('setMservices', resultJson)
     },

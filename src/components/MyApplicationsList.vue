@@ -2,18 +2,30 @@
   <div>
       <div class="at-bottombar">
         <b-row align-v="center">
-          <b-col align="start" sm="4">
-            <p class="h4">My Microservices ({{mservicesCounter}})</p>
+          <b-col align="start" sm="3">
+            <p class="h4">My Microservices <small>({{mservicesCounter}})</small></p>
           </b-col>
           <b-col sm="4">
             <b-form-input class="at-border" id="publishTopic"
               type="text" 
-              v-model="msSearchString"
+              v-model="$parent.searchString"
               required
               placeholder="Search ...">
             </b-form-input>
           </b-col>
-          <b-col sm="auto" align="end">
+          <b-col sm="1">
+            <b-form-checkbox
+              id="checkbox-1"
+              v-model="searchDeployableOnly"
+              size="sm"
+              v-b-popover.hover.bottom="'Show deployable services only'"
+              name="checkbox-1"
+              value="true"
+              unchecked-value="false">
+              <small>Deployable</small>
+            </b-form-checkbox>
+          </b-col>
+          <b-col sm="4" align="end">
             <b-button variant="info" v-b-modal.walkTreeModal v-b-popover.hover.bottom="'Show microservices\' message trees'" @click="walkTree()">Tree</b-button> 
             <b-button variant="info" @click="exportServices()" v-b-popover.hover.bottom="'Export all designs to local files'">Export</b-button> 
             <b-button variant="info" @click="reloadServices()">Refresh</b-button>
@@ -49,41 +61,47 @@
               img-src="/static/photo-27.png"
               img-top
            -->
-           <b-card v-for="(service, index) in filteredServices" :key="service.ServiceName"
-              class="mb-2 at-card"
+           <b-card v-for="service in filteredServices" :key="service.ServiceName"
+              class="at-card"
            >
-              <b-row style="height: 30px">
+              <b-row>
                 <b-col class="color-box" style="background-color: gainsboro; height: 30px">
                 </b-col>
               </b-row>
-              <b-row class="mt-2">
-                <b-col>
-                  <h5 class="card-text">
+              <b-row class="mt-3">
+                <b-col sm="10">
+                  <b class="card-text">
                     {{service.ServiceName}}
-                  </h5>
+                  </b>
                 </b-col>
-                <b-col align="end">   
-                  <b-dropdown variant="secondary" class="mx-0" right >
+                <b-col sm="2" align="end">   
+                  <b-dropdown :variant="service.hasOwnProperty('DeployMessage') ? (service.hasOwnProperty('IsDeployed') && service.IsDeployed === 'true' ? 'success' : 'Primary') : 'secondary'" class="mx-0" right >
                     <!-- VUE reference: https://vuejs.org/v2/guide/events.html -->
-                    <b-dropdown-item @click = "showServiceDetail(index)" >Edit</b-dropdown-item>
-                    <b-dropdown-item @click = "copyService(index)" >Duplicate</b-dropdown-item>        
-                    <b-dropdown-item @click.stop="deleteService(index)" >Delete</b-dropdown-item>
+                    <b-dropdown-item v-if="service.hasOwnProperty('DeployMessage') && service.IsDeployed !== 'true'" @click ="deployService(service)" ><b>Deploy</b></b-dropdown-item>
+                    <b-dropdown-item v-if="service.hasOwnProperty('DeployMessage') && service.IsDeployed === 'true'" @click ="deployService(service)" ><b>Redeploy</b></b-dropdown-item>
+                    <b-dropdown-item v-if="service.hasOwnProperty('UndeployMessage') && service.IsDeployed === 'true'" @click ="undeployService(service)" ><b>Undeploy</b></b-dropdown-item>
+                    <b-dropdown-item @click ="showServiceDetail(services.indexOf(service))" >Edit</b-dropdown-item>
+                    <b-dropdown-item @click ="copyService(services.indexOf(service))">Duplicate</b-dropdown-item>        
+                    <b-dropdown-item @click.stop="deleteService(services.indexOf(service))" >Delete</b-dropdown-item>
                   </b-dropdown>
                 </b-col>
               </b-row>
-              <b-row class="ml-0 mt-1 at-bar">  
+              <b-row class="ml-0 mt-1"> 
+                <b-col class="at-border" style="white-space: pre-wrap;">{{truncatedString( service.ServiceDesc, 256 )}}</b-col>
+                <!--
                 <p class="card-text">
-                  {{service.ServiceDesc}}
+                  {{service.ServiceDesc).replace(/(\r\n|\n|\r)/gm,'\&#13;\&#10;")}}
+                </p>
+                -->
+              </b-row>
+              <b-row v-if="service.InputMessageTopic !== 'null'" class="ml-0 mt-1">  
+                <p class="card-text">
+                  Input: <code>{{service.InputMessageTopic}}</code>
                 </p>
               </b-row>
-              <b-row class="ml-0 mt-1">  
+              <b-row v-if="service.OutputMessageTopic !== 'null'" class="ml-0">  
                 <p class="card-text">
-                  Subscribe: <code>{{service.InputMessageTopic}}</code>
-                </p>
-              </b-row>
-              <b-row class="ml-0">  
-                <p class="card-text">
-                  Publish: <code>{{service.OutputMessageTopic}}</code>
+                  Output: <code>{{service.OutputMessageTopic}}</code>
                 </p>
               </b-row>
             </b-card>
@@ -97,8 +115,9 @@
 import Sidebar from './Sidebar'
 import atHelper from '../aiot-helper'
 import store from '../store'
-import { API } from 'aws-amplify'
+import { API, PubSub } from 'aws-amplify'
 import MQTTPattern from 'mqtt-pattern'
+import JSON5 from 'json5'
 
 export default {
   components: {
@@ -116,15 +135,15 @@ export default {
       services: [],
       testResult: '',
       walkTreeLoading: false,
-      msSearchString: '',
       isLoading: false,
-      isExporting: false
+      isExporting: false,
+      searchDeployableOnly: 'false'
     }
   },
   watch: {
     services: {
         handler: function (newList, oldList) {
-          console.log('services changed:')
+          // console.log('services changed:')
           if (newList !== null) {
             this.mservicesCounter = newList.length
           } else {
@@ -138,7 +157,12 @@ export default {
   computed: {
     filteredServices () {
       let foundServices = this.services.filter(service => {
-        return service.ServiceName.toLowerCase().includes(this.msSearchString.toLowerCase())
+        return service.ServiceName.toLowerCase().includes(this.$parent.searchString.toLowerCase()) &&
+               (this.searchDeployableOnly !== 'true' ||
+                  (this.searchDeployableOnly === 'true' &&
+                    (service.hasOwnProperty('DeployMessage') && service.DeployMessage !== '')
+                  )
+               )
       })
       foundServices.sort(function (a, b) {
         return a.ServiceName.localeCompare(b.ServiceName)
@@ -147,19 +171,62 @@ export default {
     }
   },
   created () {
+    // console.log('MyApplicationList created')
   },
   async mounted () { // enter everytime the page becomes active
     this.services = this.$store.getters.mservices
     if (this.services !== null) {
       this.mservicesCounter = this.services.length
     } else {
-      this.services = {}
+      this.services = []
       this.mservicesCounter = 0
       await this.reloadServices()
     }
-    console.log('mounted services no.:', this.mservicesCounter)
+    // console.log('MyApplicationList mounted')
   },
   methods: {
+    truncatedString (textStr, length) {
+      return (textStr.length < (length)) ? textStr : (textStr.substring(0, length - 4) + '...')
+    },
+    async deployService (service) {
+      // console.log('deploy: ', service.DeployMessage)
+      let result = await this.servicePublish(service, service.DeployMessage)
+      if (result === true) {
+        service.IsDeployed = 'true'
+        await this.updateService(service)
+      }
+    },
+    async undeployService (service) {
+      // console.log('undeploy: ', service.UndeployMessage)
+      let result = await this.servicePublish(service, service.UndeployMessage)
+      if (result === true) {
+        service.IsDeployed = 'false'
+        await this.updateService(service)
+      }
+    },
+    async servicePublish (service, messageStr) {
+      let message = null
+      try {
+        // https://stackoverflow.com/questions/9637517/parsing-relaxed-json-without-eval
+        // message = JSON.parse(messageStr.replace(/(['"])?([a-z0-9A-Z_]+)(['"])?:/g, '"$2": '))
+        message = JSON5.parse(messageStr)
+      } catch (e) {
+        console.log('invalid JSON')
+        return false
+      }
+      // console.log('message: ', message)
+      if (message.hasOwnProperty('topic') === false) {
+        return false
+      }
+      const senderId = this.$store.getters.username
+      let messageTopic = 'aiot/' + senderId + '/' + service.ServiceName + '/' + message.topic
+      let messageData = {}
+      if (message.hasOwnProperty('data')) {
+        messageData = { data: message.data }
+      }
+      await PubSub.publish(messageTopic, messageData)
+      return true
+    },
     async exportServices () {
       /*
       for (let service of this.services) {
@@ -172,7 +239,7 @@ export default {
     },
     async reloadServices () {
       const username = store.getters.username
-      console.log('reloadServices: username: ', username)
+      // console.log('reloadServices: username: ', username)
       this.isLoading = true
       const result = await API.get('mserviceApi', '/mservices', {
           'queryStringParameters': {
@@ -184,13 +251,14 @@ export default {
       if (result.hasOwnProperty('error')) {
         console.log('reloadService error: ', result.error)
       } else {
-        let resultJson = JSON.parse(result)
+        // let resultJson = JSON.parse(result)
+        let resultJson = result
         // console.log('result: ', resultJson)
         store.commit('setMservices', resultJson)
         // atHelper.reloadServices()
         this.services = this.$store.getters.mservices
         if (this.services === null) {
-          this.services = {}
+          this.services = []
         }
         this.mservicesCounter = this.services.length
       }
@@ -227,6 +295,16 @@ export default {
       }).catch(error => {
         console.log(error.response)
       })
+    },
+    async updateService (mservice) {
+        this.isLoading = true
+        const body = mservice
+        const result = await API.post('mserviceApi', '/mservices', { body })
+        console.log('updateService: result: ', result)
+        if (result.hasOwnProperty('success')) {
+          this.$store.dispatch('replaceMservice', mservice)
+        }
+        this.isLoading = false
     },
     shuffle (array) {
       /**
@@ -280,7 +358,7 @@ export default {
           }
           // init self
           if (outputTopic !== 'null') {
-            if (!map.hasOwnProperty(outputTopic) && outputTopic !== 'null') { // for output topic
+            if (!map.hasOwnProperty(outputTopic)) { // for output topic
                 map[outputTopic] = { topic: outputTopic, element: [], children: [] }
             } else {
                 map['__root__'].children = map['__root__'].children.filter(entry => entry.map.topic !== outputTopic)
@@ -290,8 +368,12 @@ export default {
             map[outputTopic].element.push(ms)
             // add ms to the element list, as the ms' output topic is equal to the map entry's topic
           }
-          if (inputTopic !== 'null' && outputTopic !== 'null') {
-            map[inputTopic].children.push({ms: ms, map: map[outputTopic]})
+          if (inputTopic !== 'null') {
+            if (outputTopic !== 'null') {
+              map[inputTopic].children.push({ms: ms, map: map[outputTopic]})
+            } else {
+              map[inputTopic].children.push({ms: ms, map: null})
+            }
             // by it's definition
           }
       }
@@ -344,16 +426,24 @@ export default {
       indent: indent string, account for depth level, used by decorator
     */
     treeIndent (branch, cfg, decorator, indent) {
+      // console.log('treeIndent')
       indent = indent || []
       let that = this
       branch.forEach(function (node, i) {
-          decorator(node.ms, node.map.topic, node.map.element, indent.concat(
-              i === branch.length - 1 ? cfg.isLastChild : cfg.hasNextSibling
-          ))
+          // console.log('node: ', node)
+          if (node.map !== null) {
+            decorator(node.ms, node.map.topic, node.map.element, indent.concat(
+                i === branch.length - 1 ? cfg.isLastChild : cfg.hasNextSibling
+            ))
 
-          that.treeIndent(node.map.children, cfg, decorator, indent.concat(
-              i === branch.length - 1 ? cfg.ancestorIsLastChild : cfg.ancestorHasNextSibling
-          ))
+            that.treeIndent(node.map.children, cfg, decorator, indent.concat(
+                i === branch.length - 1 ? cfg.ancestorIsLastChild : cfg.ancestorHasNextSibling
+            ))
+          } else { // null case
+            decorator(node.ms, '', null, indent.concat(
+                i === branch.length - 1 ? cfg.isLastChild : cfg.hasNextSibling
+            ))
+          }
       })
     },
     async walkTree () {
@@ -364,7 +454,8 @@ export default {
                'userId': username
           }
       })
-      let mservicesList = JSON.parse(result)
+      // let mservicesList = JSON.parse(result)
+      let mservicesList = result
       this.walkTreeLoading = false
       // console.log('message trees: ', mservicesList)
       /*
@@ -388,15 +479,18 @@ export default {
         isLastChild: '&boxur;',
         ancestorHasNextSibling: '&boxv;',
         ancestorIsLastChild: ' '
-      }, function (ms, topic, element, indent) {
+      }, function (ms, topic, element, indent) { // the decorator
         if (typeof element === 'undefined') {
           return
         }
         let msName = ''
         if (ms !== null) {
-          msName = '[' + ms.ServiceName + '] '
+          msName = '<em class="reverse">' + ms.ServiceName + '</em> '
+          // '<ins><em>' + ms.ServiceName + '</em></ins> '
         }
-        log.innerHTML += indent.join(' ') + ' ' + msName + topic + '\n'
+        log.innerHTML += indent.join(' ') + ' ' + msName +
+                        ((topic !== '') ? ((msName !== '') ? '&boxh; ' : '') + topic : '') +
+                        '\n'
         // let nameField = 'ServiceName' // 'name'
         // console.log('service name: ', element[nameField])
         /*
@@ -431,6 +525,11 @@ div.at-bottombar {
     right: 0px;
     left: 0px;
     top: 0px;
+}
+
+.reverse {
+  background-color:black;
+  color: white;
 }
 
 </style>

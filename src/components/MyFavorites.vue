@@ -58,12 +58,12 @@
                     </b-row>
                     <b-row class="ml-0 mt-1">  
                       <p class="card-text">
-                        Subscribe: <code>{{service.InputMessageTopic}}</code>
+                        Input: <code>{{service.InputMessageTopic}}</code>
                       </p>
                     </b-row>
                     <b-row class="ml-0">  
                       <p class="card-text">
-                        Publish: <code>{{service.OutputMessageTopic}}</code>
+                        Output: <code>{{service.OutputMessageTopic}}</code>
                       </p>
                     </b-row>
                 </b-card>
@@ -101,7 +101,7 @@ export default {
     }
   },
   mounted () {
-    console.log('favorites mounted')
+    // console.log('favorites mounted')
     this.favoriteServices = this.$store.getters.favoriteMservices
     if (this.favoriteServices === null || this.favoriteServices.length === 0) {
       this.favoriteServices = {}
@@ -113,7 +113,7 @@ export default {
     }
   },
   created () {
-    console.log('favorites created')
+    // console.log('favorites created')
   },
   beforeDestroy () {
     // Unsubscribe client connected

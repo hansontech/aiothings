@@ -81,7 +81,7 @@
     <!-- routes will be rendered here -->
     <div class="mt-3">
       <!-- must reserve more space for header, TODO -->
-      <pre> 
+      <pre style="background-color: white; border: 0px; padding: 0px;"> 
       </pre>
       <router-view></router-view>
     </div>
@@ -92,7 +92,7 @@
 <script>
 
 import { eventBus } from './main'
-import auth from './services/auth'
+// import auth from './services/auth'
 import { Auth, API } from 'aws-amplify'
 import atHelper from './aiot-helper'
 
@@ -294,10 +294,23 @@ export default {
       console.log('gotoUserPage')
       this.$router.push({name: 'mythings'})
     },
-    authenticate () {
-      auth.authenticate()
+    authenticate () { // Sign In / Sign Up using Hosted UI
+      console.log('sign in/up')
+      // obsoleted since 2019/10/20, auth.authenticate()
+      // To make sure aws-sdk and aws-amplify in node mosules consistent
+      // Check by command 'npm list |grep aws'
+      Auth.federatedSignIn() // command to show Hosted UI
     },
     signout () {
+      Auth.signOut()
+      .then(data => {
+        console.log('signed out: ', data)
+        this.$store.dispatch('signout').then(() => {
+          this.$router.push({ name: 'home' })
+        })
+      })
+      .catch(err => console.log(err))
+      /*
       const currentUser = Auth.userPool.getCurrentUser()
       if (currentUser != null) {
           currentUser.signOut()
@@ -305,6 +318,7 @@ export default {
       this.$store.dispatch('signout').then(() => {
         this.$router.push({ name: 'home' })
       })
+      */
     },
     login: function () {
       console.log('login')

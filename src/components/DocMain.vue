@@ -470,15 +470,8 @@ Please note that, this function imports AWS's **Greengrass SDK** from the statem
 AIoThings only allow messages complying to its message header format to be receivable from its cloud microservices. The message header format is: **'aiot/{Sender's User Id}/{Sender's Microservice Name}/'**
 
 </vue-markdown>
-<vue-markdown>
-```
 
-
-
-```
-</vue-markdown>
-
-<vue-markdown id="DocMicroservice">
+<vue-markdown class="chapterSpace" id="DocMicroservice">
 
 ### Microservice
 
@@ -490,7 +483,7 @@ Microservices are also the great enablers of continuous delivery, allowing frequ
 
 A microservice includes a code block and input/output message topics.
 
-The code can be edited inline via the AIOThings editor or uploaded as a ZIP archive from local storage.
+The code can be edited inline via the AIoThings editor or uploaded as a ZIP archive from local storage.
 The advantage of using a ZIP file is that the code can be a package that includes multiple user modules and imported libraries.
 
 The code block looks like: 
@@ -577,24 +570,33 @@ During the execution of the code block, the microservice publishes output messag
 The **Tree** button on the microservices window displays multi-level tree structure among topics of input/output messages and the corresponding microservices. With this tree, users are able to take a look at the summary of message flows, as well as the relationship between message topics and microservices.
 
 ```TopicTree
-├ test/input
-│ └ [testPython] test/output
+├ test/timer
+│ └ testTimerScheduler 
 ├ device/data
-│ ├ [sampleApiHandler] device/command
-│ └ [ggHelloWorld] device/command
+│ └ sampleApiHandler ─ device/command
+├ ifttt/setup
+│ └ iftttServiceSetup 
+├ device/timer/remove
+│ └ testTimerRemove 
+├ aiot_iotdata/query
+│ └ aiotIotDataQuery ─ aiot_iotdata/response
+│   └ iotDataReceiver 
+├ aiot_iotdata/put
+│ └ aiotIotDataPut 
 ├ ifttt/input/create_new_thing1
-│ └ [iftttCreateNewThingHandler] ifttt/output/new_thing_created
+│ └ iftttCreateNewThingHandler ─ ifttt/output/new_thing_created
 │   └ ifttt/output/#
-│     └ [iftttSenderService] null
-├ ifttt/demo1/setup
-│ └ [iftttDemoSetup] ifttt/setup
-│   └ [iftttServiceSetup] null
+│     └ iftttSenderService 
+├ device/null
+│ └ aiotIotDataApiHandler 
+├ device/timer/add
+│ └ testTimer ─ device/command
 ├ ifttt/input/create_new_thing
-│ └ [simuOnlinePayment] userid_1536893927497/paid
+│ └ simuOnlinePayment ─ Facebook_10212683421500597_1536893927497/paid
 └ timer/minute
-  └ [minuteUpdater] ifttt/output/new_thing_created
+  └ minuteUpdater ─ ifttt/output/new_thing_created
     └ ifttt/output/#
-      └ [iftttSenderService] null
+      └ iftttSenderService 
 ```
 
 The last few lines of the example tree show that the input message with topic ***timer/minutes*** triggers the microservice ***minuteUpdater***, and the microservice will publish the output message using the topic ***ifttt/output/new_thing_created***. Subsequently, the microservice ***iftttSenderService*** is triggered by its input message topic ***ifttt/output/#*** to capture the previously published ***ifttt/output/new_thing_created*** message.
@@ -602,19 +604,43 @@ The last few lines of the example tree show that the input message with topic **
 As you can from this example, this function takes into account the wildcard pattern of the input message topic when generating tree charts.
 </vue-markdown>
 
-<vue-markdown id="DocMicroserviceExport">
+<vue-markdown id="DocMicroserviceDeploy">
+#### Deploy and Undeploy
+
+The design pattern of using microservices often includes first to subscribe a service, and then to wait for the messages sending by the subscribed service, and, at the end of the service round, to stop the subscription that has done before.
+**Deploy** and **Undeploy** provide a convenient way to let users send these subscription messages through AIoThings user interface.
+We can treat Deploy as an action to set a microservice, or a group of microservices related, to an active running state ready to serve.
+
+* Deploy: By selecting this action from the microservice list window, the system will publishe [deploy message] once.
+* Undeploy: By selecting this action, the system will publishe [undeploy message] once.
+
+Since only certain microservices need the deploy action, the deploy and un-deploy messages of a microservice can be optionally defined.
+
+The Deploy / Undeploy message consists of 1) Topic and 2) Data two parts, and microservices define these optional values by themselves.
+
+Deploy message example:
+```Deploy
+{
+  topic: 'ifttt/setup', 
+  data: {
+    Service: {
+      ServiceKey: 'ebqwhq0MOsPmUGptlS4wFC8kVPl8wumZvXoUz4Tarz4HRJbrUBsL-4xusnN_kz10', 
+      triggers : [ 'a', 'b', 'c']
+    }
+  }
+}
+```
+</vue-markdown>
+
+<vue-markdown class="chapterSpace" id="DocMicroserviceExport">
 #### Export Microservices
 
 The **Export** button downloads all user available microservices to the local storage as a zipped file.
 
-```EmptyLines
-
-
-```
 </vue-markdown>
 
 
-<vue-markdown id="DocApi" class="mt-3">
+<vue-markdown id="DocApi" class="mt-5">
 ### REST API
 
 A RESTful API is an application program interface (API) that uses HTTP requests to GET, PUT, POST and DELETE data.
@@ -627,7 +653,24 @@ A REST API is defined to include following parts:
 2. **Description**: to describe what this API stands for and how to use it. It may include the HTTP methods in support, their query parameters, and also the expected responses.
 3. **Path**: The list of paths supported. For REST API requests with supported paths, the gateway will pass the request to the REST API's predefined backend handler (a microservice).
 4. **Handler**: The backend handler that handles this API request. Handlers are actually microservices capable to process HTTP requests.
-5. **Authorization**: The authorization option for this REST API. If set to Auth, the API requires the autorization check from the gateway before passing the request to the handler, or NONE for no authorization check is required. The authorization data is obtained through user's login process, and is used to sign the HTTP requests. 
+5. **Authorization**: The authorization option for this REST API. If set it to 'Authenticated access', then the API requires the autorization check from the gateway before passing the request to the handler. 'Owner access only' means that the API is only authorized to the owner of the API. or 'Public access' allows anonymous access and no need of authorization information. The authorization data is obtained through user's login process, and is used to sign the HTTP requests. 
+
+For authorization required options, the API request needs to provide the 'authorization' parameter in the request header, and the value is the access token of the user authentication data which is replied by the authentication server.
+</vue-markdown>
+<b-img style="padding:20px;" src="/static/authentication_abstract_flow.png" fluid align=center />
+<vue-markdown>
+```JavaScript
+  let result = await API.get('myApi', '/query', {
+        headers: {
+          'Authorization': 'Bearer ' + userAuthentication.accessToken,
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache'
+        },
+        queryStringParameters: {
+          'ThingId': 'Facebook_XXXXXXX_YYYYYY'
+        }
+  });
+```
  
 A REST API can be accessed through the URL address with the form of 
 ```URL
@@ -778,12 +821,8 @@ Then, the API replies the query result synchronously with it's response.
   }
 ```
 
-```
-
-
-```
 </vue-markdown> 
-<vue-markdown id="DocMicroserviceApi">
+<vue-markdown class="chapterSpace" id="DocMicroserviceApi">
 ### Microservice APIs
 
 The set of APIs are used inside Microservices to achieve the functions required to implement applications, including to publish messages, to put/get from storage, and to save/retrieve from message queues.
@@ -793,17 +832,9 @@ In fact, the Microservice APIs here are also implemented by APIs from AWS SDK.
 
 </vue-markdown>
 
-<vue-markdown id="DocMicroserviceApiNodejs">
-```
+<vue-markdown class="chapterSpace" id="DocMicroserviceApiNodejs">
 
-
-```
 ### Node.js functions 
-
-
-&nbsp;
-&nbsp;
-&nbsp;
 
 </vue-markdown>
 <div class="borderLine">
@@ -970,6 +1001,52 @@ await aiot.consoleOutput('this is a debug message');
 ```
 </vue-markdown> 
 
+<vue-markdown class="mt-2" id="DocProgramming">
+### Programming Environment
+
+AIoThings takes advantage of AWS development tools to further accelerate the speed of building web and mobile applications. We'll introduce these tools and examples here to show how to manage AIoThings resources from a user application.
+
+[AWS Amplify](https://aws-amplify.github.io/docs/) is a framework provided by AWS, including tools for developing cloud back-end services and SDKs for various front-end applications to access these back-end services.
+AIoThings is committed to producing cloud services quickly and easily. At the same time, it uses the AWS Amplify SDK to allow front-end web and mobile applications to access its cloud resources.
+
+In order to properly configure the AWS SDK to use the AIoThings resource, AIoThings provides its configuration file (the [aws-exports.js](https://aws-amplify.github.io/docs/js/authentication#sign-in) file for JavaScript and the [awsconfiguration.json](https://aws-amplify.github.io/docs/ios/authentication) file for the Android and iOS mobile environments). These configuration files are explained in detail in the AWS Amplify documentation of integrating them into the user's web and mobile development environment.
+
+The configuration files can be downloaded through **App Config** button of [User's main page](/user).
+
+Once the configuration file is properly installed, a typical application scenario will first sign in to the AIoThings user identity and use the authenticated identity to access the AIoThings resources, such as calling a REST API, or subscribing and publishing messages.
+
+***JavaScript example for user sign-in and calling a REST API***
+```javascript
+
+  import { Auth, API } from 'aws-amplify';
+
+  await Auth.signIn(username, password); // directly assigning username and password
+  or
+  await Auth.federatedSignIn(); // Popup default Hosted UI 
+  or
+  await AuthfederatedSignIn({provider: ‘Facebook’}); // Using social media account 
+
+  let result = await API.get('myApi', '/query', {
+        headers: {
+          'Authorization': (await Auth.currentSession()).getAccessToken().getJwtToken(),
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache'
+        },
+        queryStringParameters: {
+          'ThingId': 'Facebook_XXXXXXX_YYYYYY'
+        }
+  });
+```
+
+</vue-markdown> 
+
+<!--  an example of the same effect of ```
+<pre>
+<code>
+  import { Auth, API } from 'aws-amplify';
+</code>
+</pre>
+-->
 <!--
 <vue-markdown id="DocExamplesClawMachine">
 
@@ -1003,7 +1080,7 @@ For this exercise, we upgrade the claw machine to accept online payments and NFC
 </template>
 
 <script>
-import VueMarkdown from 'vue-markdown'
+// import VueMarkdown from 'vue-markdown'
 import { eventBus } from '../main'
 
 // utility copied from https://stackoverflow.com/questions/123999/how-to-tell-if-a-dom-element-is-visible-in-the-current-viewport
@@ -1030,9 +1107,6 @@ export default {
       idDocs: null,
       activeId: null
     }
-  },
-  components: {
-    VueMarkdown
   },
   computed: {
   },
@@ -1165,4 +1239,14 @@ html, body {
     overflow-x: hidden;
 } 
 */
+pre {
+  background:#F8F9F9;
+  border: 1px solid lightgray;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.chapterSpace {
+    margin-top: 50px;
+}
 </style>

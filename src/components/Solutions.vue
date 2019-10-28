@@ -100,12 +100,12 @@
                     </b-row>
                     <b-row class="ml-0 mt-1">  
                       <p class="card-text">
-                       Subscribe: <code>{{service.InputMessageTopic}}</code>
+                       Input: <code>{{service.InputMessageTopic}}</code>
                       </p>
                     </b-row>
                     <b-row class="ml-0">  
                       <p class="card-text">
-                        Publish: <code>{{service.OutputMessageTopic}}</code>
+                        Output: <code>{{service.OutputMessageTopic}}</code>
                       </p>
                     </b-row>
                 </b-card>
@@ -261,8 +261,8 @@ export default {
     })
     this.loadedUserData = this.$store.getters.atusers
       // await this.$store.commit('setAtusers', null)
-    console.log('loadedUserData: ', this.loadedUserData)
-    console.log('store: ', this.$store)
+    // console.log('loadedUserData: ', this.loadedUserData)
+    // console.log('store: ', this.$store)
     if (typeof this.loadedUserData === 'undefined' || this.loadedUserData === null) {
       this.loadedUserData = {}
       this.$store.commit('setAtusers', this.loadedUserData)
@@ -276,7 +276,7 @@ export default {
     }
   },
   created () {
-    console.log('solutions created')
+    // console.log('solutions created')
     this.nodeRedLink = 'https://flows.nodered.org/?sort=downloads'
     this.solutions = this.$store.getters.solutions
     if (this.solutions === null) {
@@ -342,7 +342,7 @@ export default {
         username = ' '
       }
       this.isLoadingServices = true
-      console.log('reloadServices: username: ', username, ' search: ', searchText)
+      // console.log('reloadServices: username: ', username, ' search: ', searchText)
       const result = await API.get('mserviceApi', '/mservices', {
           'queryStringParameters': {
                'userId': username,
@@ -351,7 +351,8 @@ export default {
           }
       })
       // console.log(result)
-      let resultJson = JSON.parse(result)
+      // let resultJson = JSON.parse(result)
+      let resultJson = result
       this.$store.commit('setSharedMservices', resultJson)
       // atHelper.reloadServices()
       this.services = this.$store.getters.sharedMservices

@@ -9,7 +9,7 @@ let storeGetObject = async (objectName) => {
     let s3 = new AWS.S3();
     let params = {
         Bucket:  environment.S3_BUCKET,
-        Key: 'public/' + objectName
+        Key: 'private/' + objectName
     };
     let data = null;
     try {
@@ -26,7 +26,7 @@ let storePutObject = async (objectName, data) => {
     let dataString = JSON.stringify(data)
     let params = {
       Bucket: environment.S3_BUCKET,
-      Key: 'public/' + objectName,
+      Key: 'private/' + objectName,
       Body: dataString
     };
     try {

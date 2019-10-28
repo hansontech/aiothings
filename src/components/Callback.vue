@@ -12,7 +12,7 @@
 
 // import store from '../store'
 // import router from '../router'
-import { Auth } from 'aws-amplify'
+// import { Auth } from 'aws-amplify'
 // import Amplify from 'aws-amplify'
 // import { CognitoAuth } from 'amazon-cognito-auth-js'
 // import authService from '../services/auth'
@@ -114,7 +114,7 @@ export default {
     })
     */
     var curUrl = window.location.href
-    console.log('callback: ', curUrl)
+    console.log('callback is called: ', curUrl)
       /*
       identityPoolId: 'ap-southeast-2:00294c49-1629-49e7-88d7-4720566c1377',
       // REQUIRED - Amazon Cognito Identity Pool ID
@@ -125,13 +125,12 @@ export default {
       // OPTIONAL - Amazon Cognito Web Client ID
       // ....
       */
-
+    /*
     Auth.configure({
-
       oauth: Auth.configure().oauth
       // mandatorySignIn: true
     })
-
+    */
     /*
     try {
       let authData = authService.authenticateData()
@@ -163,6 +162,14 @@ export default {
     */
     // router.push({ name: 'user' })
     // this.$router.push('user')
+    console.log('dispatch')
+    /*
+    Hub.dispatch(
+    'auth',
+    {
+      event: 'cognitoHostedUI'
+    })
+    */
   }
 }
 </script>

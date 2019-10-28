@@ -121,8 +121,10 @@
               </b-col>
               <b-col sm="7"> 
                 <b-form-select v-model="api.AuthorizationType" class="mb-3">
-                  <option :value="'NONE'">None</option>
-                  <option :value="'AWS_IAM'">Auth - Authentication required</option>
+                  <option :value="'NONE'">Public access</option>
+                  <!-- <option :value="'AWS_IAM'">Authentication required</option> -->
+                  <option :value="'AUTH-SHARE'">Authenticated access</option>
+                  <option :value="'AUTH'">Owner access only</option>
                   <!-- <option :value="'COGNITO_USER_POOLS'">OAuth 2.0</option> -->
                 </b-form-select>
               </b-col>
@@ -286,6 +288,8 @@ export default {
         if (result.error === null) {
           this.api = result.result
           this.$store.dispatch('replaceApi', this.api)
+        } else {
+          console.log('error: ', result.error)
         }
         this.isChangedNotSaved = false
         this.isUpdating = false

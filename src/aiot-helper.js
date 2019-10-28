@@ -8,13 +8,13 @@ import store from './store'
 import config from './config'
 
 export default {
-  async downloadBinaryFile (fileName, fileData) {
-    FileSaver.saveAs(fileData, fileName);
+  async downloadBinaryFile (fileName, fileDataBlob) {
+    FileSaver.saveAs(fileDataBlob, fileName);
   },
   async exportServices(mservices) {
     let zip = new JSZip()
     try {
-      Storage.configure({level: 'public', bucket: config.awsMserviceBucket})
+      Storage.configure({level: 'public'})
       for (let ms of mservices) { // for each microservice
         let msZipFolder = zip.folder(ms.ServiceName)
         await this.exportServiceToZip(msZipFolder, ms, true)
@@ -30,7 +30,7 @@ export default {
   async exportService(mservice, isLoadCode) {
     let zip = new JSZip()
     try {
-      Storage.configure({level: 'public', bucket: config.awsMserviceBucket})
+      Storage.configure({level: 'public'})
       await this.exportServiceToZip (zip, mservice, isLoadCode)
       let zipContent = await zip.generateAsync({type:"blob"})
       const userId = store.getters.username
@@ -94,7 +94,7 @@ export default {
       this.downloadFile(serviceFileName, serviceData) // to download the header
       if (ms.CodeFileName !== '' && ms.CodeFileName !== ' ') {
         let fileName = ms.CodeFileName
-        Storage.configure({level: 'public', bucket: config.awsMserviceBucket})
+        Storage.configure({level: 'public'})
         try {
           let result = await Storage.get(fileName)
           await this.downloadBinaryFile(fileName, result)
@@ -110,7 +110,7 @@ export default {
     }
   },
   async loadSourceFromS3 (s3filename) {
-    Storage.configure({level: 'public', bucket: config.awsMserviceBucket})
+    Storage.configure({level: 'public'})
     // console.log('loadSourceFromS3')
     let s3url = await Storage.get(s3filename)
     let dataResponse = await fetch(s3url)
@@ -138,7 +138,8 @@ export default {
       }
     })
     console.log(result)
-    let favoriteMservices = JSON.parse(result)
+    // let favoriteMservices = JSON.parse(result)
+    let favoriteMservices = result
     store.commit('setFavoriteMservices', favoriteMservices)
   },
   async reloadFavoriteServiceList () { // { 'ms1 name' : true, 'ms2 name' : true, ... }
@@ -152,7 +153,8 @@ export default {
       }
     })
     // console.log('reloadFavoriteServiceList: ', result)
-    let favoriteList = JSON.parse(result)
+    // let favoriteList = JSON.parse(result)
+    let favoriteList = result
     let favoriteMservices = {}
     for (let favorite of favoriteList) {
       favoriteMservices[favorite.ServiceName] = true
@@ -173,7 +175,8 @@ export default {
         }
     })
     // array as data should apply stringfy
-    let users = JSON.parse(result)
+    // let users = JSON.parse(result)
+    let users = result
     for (let user of users) {
       console.log('user: ', user.Username)
       const username = user.Username
@@ -206,7 +209,7 @@ export default {
     }
   },
   async loadMserviceSource (s3place) {
-    Storage.configure({level: 'public', bucket: config.awsMserviceBucket})
+    Storage.configure({level: 'public'})
     console.log('start loadSource')
     let s3url = await Storage.get(s3place)
     let dataResponse = await fetch(s3url)
@@ -230,7 +233,8 @@ export default {
                'continueIndex': continueIndex
           }
     })
-    let resultJson = JSON.parse(result)
+    // let resultJson = JSON.parse(result)
+    let resultJson = result
     store.commit('setSharedMServicesContinueIndex', resultJson.continueIndex)
     store.commit('addSharedMservices', JSON.parse(result))
   },
@@ -244,7 +248,8 @@ export default {
                'isShared': true
           }
     })
-    let resultJson = JSON.parse(result)
+    // let resultJson = JSON.parse(result)
+    let resultJson = result
     store.commit('setSharedMServicesContinueIndex', resultJson.continueIndex)
     store.commit('setSharedServices', JSON.parse(result))
   },
@@ -256,7 +261,8 @@ export default {
                'userId': username
           }
     })
-    let resultJson = JSON.parse(result)
+    // let resultJson = JSON.parse(result)
+    let resultJson = result
     console.log('reloadServices:: ', resultJson.length)
     store.commit('setMservices', resultJson)
   },
@@ -281,7 +287,9 @@ export default {
                'userId': username
           }
     })
-    let things = JSON.parse(result)
+    // console.log('things result:', result)
+    // let things = JSON.parse(result)
+    let things = result
     console.log('things: ', things)
     store.commit('setThings', things)
   },

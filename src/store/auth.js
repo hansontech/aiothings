@@ -54,7 +54,7 @@ export default {
       context.commit('setProfile', null)
       context.commit('setAccessToken', null)
       context.commit('setAuthenticated', false)
-      router.push({ name: 'login' })
+      // router.push({ name: 'login' })
     },
     profileUpdate: function (context, payload) {
       if (context.getters.username !== payload['cognito:username']) {

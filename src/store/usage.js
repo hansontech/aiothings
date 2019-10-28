@@ -45,11 +45,11 @@ export default {
     setConsoleInput: (state, consoleInput) => {
       if (consoleInput.hasOwnProperty('topic')) {
         state.consoleInputTopic = consoleInput.topic
-        console.log('write topic: ', consoleInput.topic)
+        // console.log('write topic: ', consoleInput.topic)
       }
       if (consoleInput.hasOwnProperty('body')) {
         state.consoleInputBody = consoleInput.body
-        console.log('write body: ', consoleInput.body)
+        // console.log('write body: ', consoleInput.body)
       }
     }
   },

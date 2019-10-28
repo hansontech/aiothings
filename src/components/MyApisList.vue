@@ -8,12 +8,13 @@
           <b-col sm="4">
             <b-form-input class="at-border" id="publishTopic"
               type="text" 
-              v-model="apiSearchString"
+              v-model="$parent.searchString"
               required
               placeholder="Search ...">
             </b-form-input>
           </b-col>  
           <b-col sm="4" align="end">
+            <!-- <b-button variant="info" @click="testApi()">Test</b-button> -->
             <b-button variant="info" @click="reloadApis()">Refresh</b-button>
             <b-button variant="success" @click="createApi()" >Create</b-button>
           </b-col>
@@ -57,9 +58,9 @@
                       <b-col align="end">   
                         <b-dropdown variant="secondary" class="mx-0" right >
                           <!-- VUE reference: https://vuejs.org/v2/guide/events.html -->
-                          <b-dropdown-item @click = "showApiDetail(index)" >Edit</b-dropdown-item>
-                          <b-dropdown-item @click = "copyApi(index)" >Copy</b-dropdown-item>
-                          <b-dropdown-item @click.stop="deleteApi(index)" >Delete</b-dropdown-item>
+                          <b-dropdown-item @click = "showApiDetail(apis.indexOf(api))" >Edit</b-dropdown-item>
+                          <b-dropdown-item @click = "copyApi(apis.indexOf(api))" >Copy</b-dropdown-item>
+                          <b-dropdown-item @click.stop="deleteApi(apis.indexOf(api))" >Delete</b-dropdown-item>
                         </b-dropdown>
                       </b-col>
                     </b-row>
@@ -92,7 +93,7 @@
 <script>
 
 import atHelper from '../aiot-helper'
-import { API } from 'aws-amplify'
+import { Auth, API } from 'aws-amplify'
 
 export default {
   name: 'myapis',
@@ -102,18 +103,17 @@ export default {
       loadedUserData: null,
       loadingUsers: {},
       select_options: {text: 'toggle'},
-      apis: null,
+      apis: [],
       isApiActionRunning: false,
       isApiReloading: false,
       timeLeftBeforeActionComplete: 0,
-      apiActionTimer: null,
-      apiSearchString: ''
+      apiActionTimer: null
     }
   },
   computed: {
     filteredApis () {
       let foundApis = this.apis.filter(api => {
-        return api.ApiName.toLowerCase().includes(this.apiSearchString.toLowerCase())
+        return api.ApiName.toLowerCase().includes(this.$parent.searchString.toLowerCase())
       })
       foundApis.sort(function (a, b) {
         return a.ApiName.localeCompare(b.ApiName)
@@ -130,7 +130,7 @@ export default {
     }
   },
   mounted () {
-    console.log('apis mounted')
+    // console.log('apis mounted')
     this.apis = this.$store.getters.apis
     if (this.apis === null || this.apis.length === 0) {
       this.apis = []
@@ -143,13 +143,32 @@ export default {
     }
   },
   created () {
-    console.log('apis created')
+    // console.log('apis created')
   },
   beforeDestroy () {
     // Unsubscribe client connected
     // Unsubscribe client disconnected
   },
   methods: {
+    async testApi () {
+      let accessToken = (await Auth.currentSession()).getAccessToken().getJwtToken()
+      try {
+        // console.log('token: ', accessToken)
+        let result = await API.get('myApi', '/query', {
+              headers: {
+                'Authorization': 'Bearer ' + accessToken,
+                'Accept': 'application/json',
+                'Cache-Control': 'no-cache'
+              },
+              queryStringParameters: {
+                'ThingId': 'Facebook_10212683421500597_1536893927497'
+              }
+        })
+        console.log('result: ', result)
+      } catch (e) {
+        console.log('error: ', e)
+      }
+    },
     createApi () {
       console.log('createApi')
       this.$router.push({ name: 'newApi' })

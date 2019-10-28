@@ -47,7 +47,7 @@ def storeGetObject(objectName):
     resultData = None
     try:
         client = boto3.client('s3')
-        data = client.get_object(Bucket = os.environ['S3_BUCKET'], Key = 'public/' + objectName)
+        data = client.get_object(Bucket = os.environ['S3_BUCKET'], Key = 'private/' + objectName)
         jsonString = data['Body'].read()
         resultData = (json.loads(jsonString))  # json.loads(data['Body'])
         print('get object: ', resultData)
@@ -60,7 +60,7 @@ def storePutObject(objectName, data):
     try:
         client = boto3.client('s3')
         dataString = json.dumps(data, separators=(',', ': '))
-        client.put_object(Bucket = os.environ['S3_BUCKET'], Key = 'public/' + objectName, Body = dataString)
+        client.put_object(Bucket = os.environ['S3_BUCKET'], Key = 'private/' + objectName, Body = dataString)
     except Exception as err:
         print(err)
 

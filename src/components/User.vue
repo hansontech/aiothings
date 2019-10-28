@@ -41,7 +41,12 @@ export default {
         body: null
       },
       consoleOutputs: [],
-      consoleSub: null
+      consoleSub: null,
+      searchString: {
+        mservice: '',
+        api: '',
+        thing: ''
+      }
     }
   },
   computed: {
@@ -78,8 +83,12 @@ export default {
               this.$store.commit('setConsoleOutputs', this.consoleOutputs)
               eventBus.$emit('newConsoleOutput')
           },
-          error: error => console.error('error: ', error)
+          error: error => console.error('error: ', error),
+          close: () => console.log('Done')
     })
+  },
+  mounted () {
+    this.$router.replace('/user/mythings')
   },
   beforeDestroy () {
     this.consoleSub.unsubscribe()

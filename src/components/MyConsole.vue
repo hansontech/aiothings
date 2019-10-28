@@ -75,6 +75,7 @@
 
 import { PubSub } from 'aws-amplify'
 import { eventBus } from '../main'
+import JSON5 from 'json5'
 
 export default {
   name: 'myconsole',
@@ -104,13 +105,11 @@ export default {
           if (newMessage.topic === undefined || newMessage.body === undefined) {
             return
           }
-          console.log('input: ', newMessage)
+          // console.log('input: ', newMessage)
           this.$store.commit('setConsoleInput', newMessage)
         },
         deep: true
     }
-  },
-  mounted () {
   },
   created () {
     this.inputMessage.topic = this.$store.getters.consoleInputTopic
@@ -135,7 +134,8 @@ export default {
               this.$store.commit('setConsoleOutputs', this.consoleOutputs)
               eventBus.$emit('newConsoleOutput')
           },
-          error: error => console.error('error: ', error)
+          error: error => console.error('error: ', error),
+          close: () => console.log('Done')
       })
       this.consoleSub.unsubscribe()
   },
@@ -166,7 +166,7 @@ export default {
       if (this.inputMessage.topic && this.inputMessage.topic !== ' ' && this.inputMessage.topic !== '') {
         let bodyJson = null
         try {
-          bodyJson = JSON.parse(this.inputMessage.body)
+          bodyJson = JSON5.parse(this.inputMessage.body)
         } catch (e) {
           this.$refs.missJsonModal.show()
           return

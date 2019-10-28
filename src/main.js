@@ -14,10 +14,10 @@ import VueAxios from 'vue-axios'
 import VueAuthenticate from 'vue-authenticate'
 import axios from 'axios'
 import LiquorTree from 'liquor-tree'
-// import VueMarkdown from 'vue-markdown'
+import VueMarkdown from 'vue-markdown'
 import store from './store/index.js'
-import Amplify, {Auth, Hub, Logger} from 'aws-amplify'
-import { AWSIoTProvider } from '@aws-amplify/PubSub/lib/Providers'
+import Amplify, {Auth, API, Hub} from 'aws-amplify'
+import { AWSIoTProvider } from '@aws-amplify/pubsub/lib/Providers'
 // import Amplify from 'aws-amplify'
 import awsmobile from './aws-exports'
 import config from './config'
@@ -162,6 +162,10 @@ Vue.use(LiquorTree)
 
 // codemirror imports end ----------------------------------
 
+// To enable output debug messages
+// window.LOG_LEVEL = 'DEBUG'
+// Amplify.Logger.LOG_LEVEL = 'DEBUG'
+
 library.add(faCoffee, faHeart, faTrashAlt, faPhone, faEnvelope, faInfoCircle, faInfo, faCube)
 library.add(faGithub, faSlack, faFacebook, faFacebookF, faLinkedin, faTwitter, faGooglePlus, faLine, faWeibo, faWeixin)
 
@@ -188,8 +192,16 @@ const hostUrl = window.location.protocol + '//' + window.location.host
 let awsmobile2 = awsmobile
 awsmobile2.oauth.redirectSignIn = hostUrl + '/callback/'
 awsmobile2.oauth.redirectSignOut = hostUrl + '/signout/'
+awsmobile2.aws_cloud_logic_custom.push({
+  name: 'myApi',
+  endpoint: 'https://api.aiothings.com/iotdata'
+  // region: 'ap-southeast-2'
+})
+// 'https://api.aiothings.com/iotdata',
+// 'https://zd8d553bfi.execute-api.ap-southeast-2.amazonaws.com/prod'
 
 Amplify.configure(awsmobile2)
+API.configure(awsmobile2)
 
 /*
 const oauth = {
@@ -263,8 +275,8 @@ Amplify.addPluggable(new AWSIoTProvider({
   aws_pubsub_region: config.awsRegion,
   aws_pubsub_endpoint: 'wss://' + config.awsIotHost + '/mqtt'
 }))
-
-// Vue.component('vue-markdown', VueMarkdown)
+Vue.component('vue-markdown', VueMarkdown)
+console.log('Markdown', VueMarkdown)
 
 Vue.use(VueStripeCheckout, 'pk_live_zocZmh9i0DOGAcmgI7i6MwzH00JJO7x6bH') // publishable key
 
@@ -313,12 +325,6 @@ Vue.use(VueAuthenticate, {
     })
   }
 })
-
-const authLogger = new Logger('Auth Watcher')
-authLogger.onHubCapsule = async (capsule) => {
-  console.log('event:', capsule.payload.event)
-  if (capsule.payload.event === 'cognitoHostedUI') {
-    console.log('Hosted UI detected')
     /*
     Auth.currentSession()
     .then(session => {
@@ -335,6 +341,46 @@ authLogger.onHubCapsule = async (capsule) => {
     })
     .catch(err => console.log('get current credentials err', err))
     */
+/*
+const authLogger = new Logger('Auth Watcher')
+authLogger.onHubCapsule = async (capsule) => {
+  // console.log('event:', capsule.payload.event)
+  if (capsule.payload.event === 'cognitoHostedUI' || capsule.payload.event === 'configured') {
+    // console.log('Hosted UI detected')
+
+    let authSessionPromise = Auth.currentSession()
+    authSessionPromise.catch(err => console.log('failed get user session: ', err))
+    let session = await authSessionPromise
+    // console.log('user session: ', session)
+    store.dispatch('profileUpdate', session.idToken.payload)
+
+    let authCredentialsPromise = Auth.currentCredentials()
+    authCredentialsPromise.catch(err => console.log('get current credentials err', err))
+    let credentials = await authCredentialsPromise
+    // console.log('credentials: ', credentials)
+    const identityId = credentials._identityId
+    await atHelper.allowLoginIdentityUseIoT(identityId)
+    // console.log('jump to mythings')
+    router.replace({ name: 'myapps' })
+  }
+}
+*/
+// depreciated 2019/10/18
+// Hub.listen('auth', authLogger)
+
+Hub.listen('auth', listenHandler)
+
+async function listenHandler (data) {
+  const { payload } = data
+  console.log('listen: ', payload.event)
+  await onAuthEvent(payload)
+  // console.log('A new auth event has happened: ', data.payload.data.username + ' has ' + data.payload.event)
+}
+
+async function onAuthEvent (payload) {
+  console.log('event:', payload.event)
+  if (payload.event === 'cognitoHostedUI') {
+    // console.log('Hosted UI detected')
 
     let authSessionPromise = Auth.currentSession()
     authSessionPromise.catch(err => console.log('failed get user session: ', err))
@@ -345,15 +391,13 @@ authLogger.onHubCapsule = async (capsule) => {
     let authCredentialsPromise = Auth.currentCredentials()
     authCredentialsPromise.catch(err => console.log('get current credentials err', err))
     let credentials = await authCredentialsPromise
-    console.log('credentials: ', credentials)
+    // console.log('credentials: ', credentials)
     const identityId = credentials._identityId
     await atHelper.allowLoginIdentityUseIoT(identityId)
     // console.log('jump to mythings')
     router.replace({ name: 'myapps' })
   }
 }
-
-Hub.listen('auth', authLogger)
 
 Vue.component('at-sidebar', Sidebar)
 Vue.component('doc-sidebar', DocSidebar)
@@ -363,8 +407,6 @@ export var eventBus = new Vue({})
 
 Vue.component('at-whitepaper', atWhitepaper)
 Vue.config.productionTip = false
-// window.LOG_LEVEL = 'DEBUG'
-// Amplify.Logger.LOG_LEVEL = 'DEBUG'
 
 /* eslint-disable no-new */
 new Vue({

@@ -244,7 +244,7 @@
                     <b-button v-b-modal.addEdgeServiceModal v-b-popover.hover.bottom="'Add new microservice to run on this edge'" variant="info" @click="addNewEdgeService()">Add New</b-button>
                   </b-col>
                 </b-row> 
-                <b-row align-v="center" style="border-bottom: 1px solid grey">
+                <b-row class="mt-1" align-v="center" style="border-bottom: 1px solid grey; margin-bottom: 5px;">
                   <b-col align="start">
                   </b-col>
                 </b-row>
@@ -256,10 +256,7 @@
                 <b-row class="mt-1" v-else>
                   <div class="at-scroll">
                     <b-card-group columns>
-                      <b-card v-for="(edgeFunction, index) in edgeFunctions" :key="index"
-                          img-top
-                          tag="article"
-                          class="mb-2 at-card">
+                      <b-card v-for="(edgeFunction, index) in edgeFunctions" :key="index" class="at-card">
                           <b-row style="height: 30px">
                             <b-col class="color-box" style="background-color: gainsboro; height: 30px">
                             </b-col>
@@ -406,11 +403,11 @@
                         </b-col>
                       </b-row>
                       <b-row class="mt-1">
-                        <b-col sm="4">
+                        <b-col sm="4" v-b-popover.hover.top="'Another OS group name for permission (Optional)'">
                           Group Owner
                         </b-col>
                         <b-col sm="8">  
-                          <b-form-input v-model="ggLocalDeviceResource.ResourceDataContainer.LocalDeviceResourceData.GroupOwnerSetting.GroupOwner" type="text" placeholder="Other group name if need."></b-form-input>
+                          <b-form-input v-model="ggLocalDeviceResource.ResourceDataContainer.LocalDeviceResourceData.GroupOwnerSetting.GroupOwner" type="text" placeholder="Another OS group (Optional)"></b-form-input>
                         </b-col>
                       </b-row>                        
                       <b-row class="mt-1">
@@ -466,11 +463,11 @@
                       </b-col>
                     </b-row>
                     <b-row class="mt-1">
-                      <b-col sm="4">
+                      <b-col sm="4" v-b-popover.hover.top="'Another OS group name for permission (Optional)'">
                         Group Owner
                       </b-col>
                       <b-col sm="8">  
-                        <b-form-input v-model="ggLocalVolumeResource.ResourceDataContainer.LocalVolumeResourceData.GroupOwnerSetting.GroupOwner" type="text" placeholder="Other group name if need."></b-form-input>
+                        <b-form-input v-model="ggLocalVolumeResource.ResourceDataContainer.LocalVolumeResourceData.GroupOwnerSetting.GroupOwner" type="text" placeholder="Another OS group (Optional)"></b-form-input>
                       </b-col>
                     </b-row>                    
                     <!-- </form> -->
@@ -493,7 +490,7 @@ inside the container that the function runs in.</p>
                     <b-button v-b-modal.addResourceModal v-b-popover.hover.bottom="'Add new resource of this edge'" variant="info" @click="addNewResource()">Add New</b-button>
                   </b-col>
                 </b-row> 
-                <b-row align-v="center" style="border-bottom: 1px solid grey">
+                <b-row class="mt-1" align-v="center" style="border-bottom: 1px solid grey; margin-bottom: 5px;">
                   <b-col align="start">
                   </b-col>
                 </b-row>
@@ -506,12 +503,12 @@ inside the container that the function runs in.</p>
                   <div class="at-scroll">
                     <b-card-group columns>
                       <b-card v-for="(resource, index) in edgeResources" :key="index"
-                          class="mb-2 at-card">
+                          class="at-card">
                           <b-row >
                             <b-col class="color-box" v-bind:style="{'background-color': resourceCboxColor(resource)}">
                             </b-col>
                           </b-row>
-                          <b-row>
+                          <b-row class="mt-2">
                             <b-col align="start">
                               <p class="card-text">
                                 {{resource.Name}}
@@ -806,7 +803,7 @@ inside the container that the function runs in.</p>
                     <b-button v-b-modal.addConnectorModal v-b-popover.hover.bottom="'Add new connector to run on this edge'" variant="info" @click="addNewConnector()">Add New</b-button>
                   </b-col>
                 </b-row> 
-                <b-row align-v="center" style="border-bottom: 1px solid grey">
+                <b-row class="mt-1" align-v="center" style="border-bottom: 1px solid grey; margin-bottom: 5px;">
                   <b-col align="start">
                   </b-col>
                 </b-row>
@@ -819,7 +816,7 @@ inside the container that the function runs in.</p>
                   <div class="at-scroll">
                     <b-card-group columns>
                       <b-card v-for="(connector, index) in edgeConnectors" :key="index"
-                          class="mb-2 at-card">
+                          class="at-card">
                           <b-row >
                             <b-col class="color-box" v-bind:style="{'background-color': connectorCboxColor(connector), 'height': '20px'}">
                             </b-col>
@@ -922,8 +919,8 @@ export default {
           ResourceDataContainer: {
             LocalDeviceResourceData: {
               GroupOwnerSetting: {
-                AutoAddGroupOwner: false, // if set to true then, GroupOwner must be assigned
-                GroupOwner: null
+                AutoAddGroupOwner: true, // Automatically add OS group permissions of the Linux group that owns the resource
+                GroupOwner: null // ignored if AutoAddGroupOwner is true
               },
               SourcePath: null // 'STRING_VALUE'
             }
@@ -936,8 +933,8 @@ export default {
             LocalVolumeResourceData: {
               DestinationPath: null, // 'STRING_VALUE',
               GroupOwnerSetting: {
-                AutoAddGroupOwner: false, // if set to true then, GroupOwner must be assigned
-                GroupOwner: null
+                AutoAddGroupOwner: true, // Automatically add OS group permissions of the Linux group that owns the resource
+                GroupOwner: null // ignored if AutoAddGroupOwner is true
               },
               SourcePath: null // 'STRING_VALUE'
             }
@@ -1865,6 +1862,7 @@ export default {
       this.uploadEdge()
     },
     handleResource (newResource) {
+      console.log('handleResource')
       this.prepareEdgeDefinition()
       if (this.thing.EdgeDefinition.hasOwnProperty('resourceDefinition') === false) {
         this.thing.EdgeDefinition.resourceDefinition = this.initialResourceDefinition
@@ -1874,11 +1872,11 @@ export default {
       })
       this.thing.EdgeDefinition.resourceDefinition.Definition.Resources = newList
       this.thing.EdgeDefinition.resourceDefinition.Definition.Resources.push(newResource)
-      console.log('newResource: ', newResource.ResourceDataContainer.LocalVolumeResourceData.GroupOwnerSetting)
       this.thing.EdgeDefinition.resourceDefinition.CreationTimestamp = '0'
       this.uploadEdge()
     },
     confirmSetLocalDeviceResource (evt) {
+      // console.log('confirmSetLocalDeviceResource')
       if (this.ggLocalDeviceResource.Name !== null &&
             this.ggLocalDeviceResource.ResourceDataContainer.LocalDeviceResourceData.SourcePath !== null) {
         this.handleDeviceResourceSubmit()
@@ -1888,12 +1886,13 @@ export default {
       }
     },
     handleDeviceResourceSubmit () {
+      // console.log('handleDeviceResourceSubmit')
       this.ggLocalDeviceResource.Id = this.ggLocalDeviceResource.Name
       // The GroupOwner value is ignored if GroupOwnerSetting#AutoAddGroupOwner is true.
       if (this.ggLocalDeviceResource.ResourceDataContainer.LocalDeviceResourceData.GroupOwnerSetting.GroupOwner !== null) {
         this.ggLocalDeviceResource.ResourceDataContainer.LocalDeviceResourceData.GroupOwnerSetting.AutoAddGroupOwner = false
       } else {
-        this.gggLocalDeviceResource.ResourceDataContainer.LocalDeviceResourceData.GroupOwnerSetting.AutoAddGroupOwner = true
+        this.ggLocalDeviceResource.ResourceDataContainer.LocalDeviceResourceData.GroupOwnerSetting.AutoAddGroupOwner = true
         delete this.ggLocalDeviceResource.ResourceDataContainer.LocalDeviceResourceData.GroupOwnerSetting.GroupOwner
       }
       this.$refs.setLocalDeviceResourceModalRef.hide()
