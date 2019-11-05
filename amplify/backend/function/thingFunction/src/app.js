@@ -121,7 +121,7 @@ app.post('/edge', async function(req, res) {
       let edgeData = await edge.updateEdge(req.body.userId, req.body.certId, edgeDataInput, edgeDefinitionInput)
       let edgeDefinition = await edge.getEdgeDetail(edgeData)
       let edgeObject = {edgeData: edgeData, edgeDefinition: edgeDefinition}
-      console.log('result: ', edgeObject)
+      // console.log('result: ', edgeObject)
       res.json(edgeObject)
     } catch (err) {
       console.log(err, err.stack)
