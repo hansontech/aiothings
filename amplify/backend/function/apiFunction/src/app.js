@@ -254,7 +254,7 @@ app.post('/apis', async function(req, res) {
           console.log('level: ', level)
           console.log('pathParts level: ', pathParts.length)
           if (level === pathParts.length-1) { // if it is the end level of the path
-            await createLeafPath(apiObject.ApiName, pathFull, restApiId, resourceId, inputs.handler)
+            await createLeafPath(apiObject.ApiName, pathFull, apiObject.PathAuth[pathFull], restApiId, resourceId, inputs.handler)
           } else {
             // otherwise
             parentResourceId = resourceId
@@ -332,11 +332,11 @@ app.post('/apis', async function(req, res) {
     }
   }
   // createLeafPath - 
-  async function createLeafPath(apiName, pathFull, restApiId, resourceId, mservice) {
-    console.log('createLeafPath: ', pathFull)
+  async function createLeafPath(apiName, pathFull, pathAuth, restApiId, resourceId, mservice) {
+    console.log('createLeafPath: ', pathFull, pathAuth)
     try{
       for(let methodStr of ['ANY']){ // ['POST', 'GET', 'PUT', 'DELETE']){
-        let authType = apiObject.AuthorizationType
+        let authType = pathAuth
         switch (authType) {
           case 'NONE': 
             authType = 'NONE'
@@ -348,6 +348,7 @@ app.post('/apis', async function(req, res) {
             authType = 'CUSTOM'
             break
           default:
+            console.log('Error: invalid path auth type: ', pathAuth)
             break
         }
         let putMethodParas = {

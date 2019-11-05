@@ -13,7 +13,7 @@
               placeholder="Search ...">
             </b-form-input>
           </b-col>          
-          <b-col sm="auto" align="end">
+          <b-col sm="4" align="end">
             <b-button variant="info" @click="refreshThings()">Refresh</b-button>
             <b-button variant="success" @click="createThing()" v-b-popover.hover.bottom="'Create new IoT device'" >Create</b-button>
           </b-col>
@@ -38,25 +38,31 @@
       <b-row class="mt-2">
         <div class="at-scroll">
           <b-card-group columns>
+            <b-modal id="modalDeleteConfirm"
+                  hide-header 
+                  size="sm"
+                  @ok="deleteThing(deletingThingIndex)"
+                  >
+              <div class="text-center">
+                <h5>Delete the thing?</h5>
+              </div>                  
+            </b-modal>
           <!-- img-src="/static/photo-54.png" -->
            <b-card v-for="(thing) in filteredThings" :key="thing.ThingId"
-              tag="article"
-              class="mb-2 at-card">
-              <b-row style="height: 30px">
-                <b-col class="color-box" style="background-color: lightblue; height: 30px">
-                </b-col>
-              </b-row>
-              <b-row class="mt-2">
-                <b-col align="start">
+              header = " "
+              class="at-card-thing" 
+              >
+              <b-row align-v="center">
+                <b-col sm="10" align="start">
                   <h5 class="card-text">
                     {{thing.ThingName}}
                   </h5>
                 </b-col>
-                <b-col align="end">   
+                <b-col sm="2" align="end">   
                   <b-dropdown variant="secondary" class="mx-0" right >
                     <!-- VUE reference: https://vuejs.org/v2/guide/events.html -->
                     <b-dropdown-item @click.stop="showThingDetail(things.indexOf(thing))">Edit</b-dropdown-item>
-                    <b-dropdown-item @click.stop="deleteThing(things.indexOf(thing))" >Delete</b-dropdown-item>
+                    <b-dropdown-item v-b-modal.modalDeleteConfirm @click="deletingThingIndex=things.indexOf(thing)">Delete</b-dropdown-item>
                   </b-dropdown>
                 </b-col>
               </b-row>
@@ -100,7 +106,8 @@ export default {
       thingsMap: {'x': 1},
       testFlag: false,
       things: null,
-      isLoading: false
+      isLoading: false,
+      deletingThingIndex: -1
     }
   },
   computed: {
@@ -120,6 +127,9 @@ export default {
     },
     filteredThings () {
       let foundThings = this.things.filter(thing => {
+        if (thing.hasOwnProperty('ThingName') === false) {
+          return false
+        }
         return thing.ThingName.toLowerCase().includes(this.$parent.searchString.toLowerCase())
       })
       foundThings.sort(function (a, b) {
@@ -263,6 +273,11 @@ export default {
       }).catch(error => {
         console.log(error.response)
       })
+    },
+    showDeleteConfirm () {
+      console.log('showDeleteConfirm')
+      console.log('refs:', this.$refs)
+      this.$refs['modalConfirmRef'].show()
     }
   }
 }
@@ -280,14 +295,6 @@ export default {
   overflow-y: auto;
 }
 
-.at-card:hover {
-  /* background-color: red;
-     opacity: 0.5;
-  */
-  box-shadow : 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-  /* box-shadow: 1px -1px teal; */
-}
-
 div.at-bottombar {
   /* background-color : grey; */
   padding-bottom: 5px;
@@ -295,13 +302,8 @@ div.at-bottombar {
   border-bottom: 1px solid grey
 }
 
-.color-box {
-    width: 100%;
-    display: inline-block;
-    background-color: var(--color);
-    position: absolute;
-    right: 0px;
-    left: 0px;
-    top: 0px;
-}
+</style>
+
+<style scoped>
+
 </style>

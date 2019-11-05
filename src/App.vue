@@ -407,6 +407,74 @@ img.at-imageRound {
 }
 
 /*
+.color-box {
+    width: 100%;
+    display: inline-block;
+    background-color: var(--color);
+    position: absolute;
+    right: 0px;
+    left: 0px;
+    top: 0px;
+    bottom: 0px;
+}
+*/
+
+:root {
+    --color-thing: lightblue;
+    --color-mservice: gainsboro;
+    --color-api: MediumAquamarine;
+    --color-at-card-header: var(--color-thing, rgb(199, 174, 174));
+    --height-at-card-header: 30px;
+    --height-at-dynamic: 10px;
+    --color-at-dynamic: red;
+}
+
+.at-card-thing {
+  --color-at-card-header: var(--color-thing);
+}
+.at-card-mservice {
+  --color-at-card-header: var(--color-mservice);
+}
+.at-card-api {
+  --color-at-card-header: var(--color-api);
+}
+
+.at-card-thing .card-header {   /* multiple classes together */
+    background-color: var(--color-at-card-header);
+    height: var(--height-at-card-header);
+    padding: 0px 0px;
+    margin-bottom: 0; 
+    /* 
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 0;
+    background-color: #fff;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    */
+}
+
+.at-card-mservice .card-header {   /* multiple classes together */
+    background-color: var(--color-at-card-header);
+    height: var(--height-at-card-header);
+}
+
+.at-card-api .card-header {   /* multiple classes together */
+    background-color: var(--color-at-card-header);
+    height: var(--height-at-card-header);    
+}
+
+.at-card-thing-dynamic .card-header {   /* multiple classes together */
+    background-color: var(--color-at-dynamic);
+    height: var(--height-at-dynamic);    
+}
+
+.at-card:hover {
+  /* background-color: red;
+     opacity: 0.5;
+  */
+  box-shadow : 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  /* box-shadow: 1px -1px teal; */
+}
+/*
 .modal {
     display: block;
     overflow: hidden;

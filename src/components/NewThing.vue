@@ -45,10 +45,8 @@
     <div style="height: 200px; background-color: rgba(255,0,0,0.1);">
       <textarea class="at-border w-100 h-100" v-model="thingDesc" placeholder="thing's description"></textarea>
     </div>
-    <div>
-      <pre>
-
-      </pre>
+    <div class="mt-3">
+  
     </div>  
   </b-container>
 </template>

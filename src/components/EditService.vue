@@ -346,10 +346,12 @@ export default {
     },
     changeCodeEntry (codeEntryType) {
       console.log('change code entry: ', codeEntryType)
+      /*
       if (this.mservice.ServiceRuntime.includes('python') === false) {
         this.mservice.CodeEntryType = 'inline'
         this.showZipOnlySupportPython = true
       }
+      */
       this.$forceUpdate()
     },
     async updateService () {

@@ -63,20 +63,15 @@
             <div class="at-scroll">
               <b-card-group columns>
                 <b-card v-for="(service, index) in services" :key="service.ServiceName"
-                    img-top
-                    tag="article"
-                    class="mb-2 at-card">
-                    <b-row style="height: 30px">
-                      <b-col class="color-box" style="background-color: gainsboro; height: 30px">
-                      </b-col>
-                    </b-row>
-                    <b-row class="mt-2">
-                      <b-col>
-                        <p class="card-text">
+                    header = " "
+                    class="at-card-mservice">
+                    <b-row align-v="center">
+                      <b-col sm="10">
+                        <h5 class="card-text">
                           {{service.ServiceName}}
-                        </p>
+                        </h5>
                       </b-col>
-                      <b-col align="end">   
+                      <b-col sm="2" align="end">   
                        <b-dropdown variant="secondary" class="mx-0" right >
                            <!-- VUE reference: https://vuejs.org/v2/guide/events.html -->
                           <b-dropdown-item @click = "showServiceDetail(index)" >Edit</b-dropdown-item>
@@ -421,14 +416,6 @@ export default {
   overflow-y: auto;
 }
 
-.at-card:hover {
-  /* background-color: red;
-   opacity: 0.5;
-   */
-  box-shadow : 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-  /* box-shadow: 1px -1px teal; */
-}
-
 div.at-bottombar {
   /* background-color : grey; */
   padding-bottom: 5px;
@@ -445,14 +432,5 @@ div.at-bottombar {
   /* spinner indicator effect */
  }
 
-.color-box {
-    width: 100%;
-    display: inline-block;
-    background-color: var(--color);
-    position: absolute;
-    right: 0px;
-    left: 0px;
-    top: 0px;
-}
 
 </style>

@@ -114,6 +114,8 @@ app.post('/edge', async function(req, res) {
   // Add your code here
   // let event = req.apiGateway.event
   // console.log('event :', event)
+  const utility = require("utility")
+
   async function doUpdateEdge (req, edgeDataInput, edgeDefinitionInput) {
     try {
       let edgeData = await edge.updateEdge(req.body.userId, req.body.certId, edgeDataInput, edgeDefinitionInput)
@@ -126,7 +128,13 @@ app.post('/edge', async function(req, res) {
       res.status(400).json(err)
     }
   }
-  console.log('body: ', req.body)
+  // console.log('body: ', req.body)
+
+  let certs = await utility.dbGetCertinfoAsync(req.body.userId, req.body.certId)
+  if (certs === null || certs.length === 0) {
+      res.status(401).json({message: 'Cannot find the Thing object.'})
+      return
+  }
   if ((req.body.hasOwnProperty('edgeData') === false) || (req.body.edgeData.hasOwnProperty('ggGroup') === false)) {
     // means newly created from empty, need to create a group first
     console.log('start edge create')

@@ -155,19 +155,35 @@
               <b-tabs card>
                 <b-tab title="Microservices">
                   <b-modal id="addEdgeServiceModal" ref="addEdgeServiceModalRef" title="Select from microservices" class="my-modal">
-                    <b-list-group>
-                      <b-list-group-item v-for="(service, index) in unselectedMicroservices" :key="index" href="#" @click="confirmAddEdgeService(service)">
-                        {{service.ServiceName}}
-                      </b-list-group-item>    
-                    </b-list-group>
-                    <div v-if="favoriteServices !== null && favoriteServices.length > 0">
-                      From favorites:
-                      <b-list-group>
-                        <b-list-group-item v-for="(service) in favoriteServices" :key="service.ServiceName" href="#" @click="confirmAddEdgeService(service)">
-                          {{service.ServiceName}}
-                        </b-list-group-item>    
-                      </b-list-group>
-                    </div>
+                    <b-row>
+                      <b-col>
+                        <b-form-input class="at-border"
+                          type="text" 
+                          v-model="funcFilterString"
+                          required
+                          placeholder="Select filter ...">
+                        </b-form-input>
+                      </b-col>
+                    </b-row>
+                    <b-row class="mt-2">
+                      <b-col>
+                        <b-list-group>
+                          <b-list-group-item v-for="(service) in unselectedMicroservices" :key="service.ServiceName" href="#" @click="confirmAddEdgeService(service)">
+                            {{service.ServiceName}}
+                          </b-list-group-item>    
+                        </b-list-group>
+                      </b-col>
+                    </b-row>
+                    <b-row class="mt-1" v-if="unselectedFavorites !== null && unselectedFavorites.length > 0">
+                      <b-col>
+                        From favorites:
+                        <b-list-group>
+                          <b-list-group-item v-for="(service) in unselectedFavorites" :key="service.ServiceName" href="#" @click="confirmAddEdgeService(service)">
+                            {{service.ServiceName}}
+                          </b-list-group-item>    
+                        </b-list-group>
+                      </b-col>
+                    </b-row>
                 </b-modal> 
                 <b-modal @ok="confirmSetEdgeMicroservice(ggFunction)" id="setEdgeMicroserviceModal" ref="setEdgeMicroserviceModalRef" title="Set Edge Microservice" class="my-modal">
                   <b-container fluid>
@@ -207,7 +223,7 @@
                         <b-col sm="8">
                         <b-form-select v-model="ggFunctionResourceId" class="mb-3">
                             <option :value="null">Add resource</option>
-                            <option v-for="(edgeResource, index) in unselectedEdgeFunctionResources" :key="index" :value="edgeResource.Id">{{edgeResource.Id}}</option>
+                            <option v-for="(edgeResource) in unselectedEdgeFunctionResources" :key="edgeResource.Name" :value="edgeResource.Id">{{edgeResource.Id}}</option>
                           </b-form-select>
                         </b-col>
                       </b-row>
@@ -248,6 +264,14 @@
                   <b-col align="start">
                   </b-col>
                 </b-row>
+                <b-modal id="modalErrorMessage"
+                  :title="errorMessage.header"
+                  ok-only
+                  >
+                  <div class="text-left">
+                    {{errorMessage.message}}
+                  </div>                
+                </b-modal>
                 <b-row v-if="edgeFunctions.length === 0">
                   <b-col class="text-center mt-5" >
                     No microservices running on this edge .
@@ -256,19 +280,15 @@
                 <b-row class="mt-1" v-else>
                   <div class="at-scroll">
                     <b-card-group columns>
-                      <b-card v-for="(edgeFunction, index) in edgeFunctions" :key="index" class="at-card">
-                          <b-row style="height: 30px">
-                            <b-col class="color-box" style="background-color: gainsboro; height: 30px">
-                            </b-col>
-                          </b-row>
-                          <b-row class="mt-2">
-                            <b-col>
-                              <p class="card-text">
+                      <b-card v-for="(edgeFunction, index) in edgeFunctions" :key="edgeFunction.FunctionArn" header=" " class="at-card-mservice">
+                          <b-row align-v="center">
+                            <b-col sm="9">
+                              <h5>
                                 {{edgeFunctionArnToName(edgeFunction)}}
-                              </p>
+                              </h5>
                             </b-col>
-                            <b-col align="end">   
-                              <b-dropdown variant="secondary" class="mx-0" right >
+                            <b-col sm="3">   
+                              <b-dropdown variant="secondary" class="mx-0" right>
                                 <!-- VUE reference: https://vuejs.org/v2/guide/events.html -->
                                 <b-dropdown-item @click.stop="deleteFunctionFromEdge(index)" >Unselect</b-dropdown-item>
                                 <b-dropdown-item @click = "editFunctionDetail(edgeFunction)" >Edit</b-dropdown-item>
@@ -276,7 +296,7 @@
                             </b-col>
                           </b-row>
                           <b-row class="mt-2" v-if="edgeFunctionToService(edgeFunction) !== null" >
-                            <b-col>
+                            <b-col class="at-border">
                               {{edgeFunctionToService(edgeFunction).ServiceDesc}}
                             </b-col>
                           </b-row>
@@ -307,7 +327,7 @@
                           <b-row class="mt-1" v-if="edgeFunction.FunctionConfiguration.Environment.ResourceAccessPolicies.length > 0">
                             <b-col>
                               <b-list-group>
-                                <b-list-group-item v-for="(resource, index) in edgeFunction.FunctionConfiguration.Environment.ResourceAccessPolicies" :key="index" href="#">
+                                <b-list-group-item v-for="(resource) in edgeFunction.FunctionConfiguration.Environment.ResourceAccessPolicies" :key="resource.ResourceId" href="#">
                                   <b-row>
                                     <b-col sm="9" align="left">
                                       {{resource.ResourceId}}
@@ -501,14 +521,15 @@ inside the container that the function runs in.</p>
                 </b-row>
                 <b-row class="mt-1" v-else>
                   <div class="at-scroll">
-                    <b-card-group columns>
-                      <b-card v-for="(resource, index) in edgeResources" :key="index"
-                          class="at-card">
-                          <b-row >
-                            <b-col class="color-box" v-bind:style="{'background-color': resourceCboxColor(resource)}">
-                            </b-col>
-                          </b-row>
-                          <b-row class="mt-2">
+                    <b-card-group columns style="--color-at-background:red;">
+                      <!-- v-bind:style="{'--color-at-background':resourceCboxColor(resource)}" -->
+                                                <!-- style="--color-at-background:red; --height-at-dynamic: 60px;" -->
+
+                      <b-card v-for="(resource, index) in edgeResources" :key="resource.Name"                     
+                          header = " "
+                          v-bind:style="{'--color-at-dynamic':resourceCboxColor(resource), '--height-at-dynamic': '20px'}"   
+                          class="at-card-thing-dynamic">
+                          <b-row align-v="center">
                             <b-col align="start">
                               <p class="card-text">
                                 {{resource.Name}}
@@ -577,7 +598,7 @@ inside the container that the function runs in.</p>
                         <b-col sm="8">
                           <b-form-select v-model="ggRaspPiGpioConnector.Parameters['GpioMem-ResourceId']" class="mb-3">
                               <option :value="null">Please select a device resource</option>
-                              <option v-for="(resource, index) in edgeResources" :key="index" :value="resource.Name">{{resource.Name}}</option>
+                              <option v-for="(resource) in edgeResources" :key="resource.Name" :value="resource.Name">{{resource.Name}}</option>
                           </b-form-select>
                         </b-col>
                       </b-row>
@@ -632,7 +653,7 @@ inside the container that the function runs in.</p>
                         <b-col sm="8">
                           <b-form-select v-model="ggModbusConnector.Parameters['ModbusSerialPort-ResourceId']" class="mb-3">
                               <option :value="null">Please select a ML resource</option>
-                              <option v-for="(resource, index) in edgeResources" :key="index" :value="resource.Name">{{resource.Name}}</option>
+                              <option v-for="(resource) in edgeResources" :key="resource.Name" :value="resource.Name">{{resource.Name}}</option>
                           </b-form-select>
                         </b-col>
                       </b-row>
@@ -664,7 +685,7 @@ inside the container that the function runs in.</p>
                         <b-col sm="8">
                           <b-form-select v-model="ggMLConnector.Parameters.MLModelResourceId" class="mb-3">
                               <option :value="null">Please select a ML resource</option>
-                              <option v-for="(resource, index) in edgeResources" :key="index" :value="resource.Name">{{resource.Name}}</option>
+                              <option v-for="(resource) in edgeResources" :key="resource.Name" :value="resource.Name">{{resource.Name}}</option>
                           </b-form-select>
                         </b-col>
                       </b-row>
@@ -683,7 +704,7 @@ inside the container that the function runs in.</p>
                         <b-col sm="8">  
                           <b-form-select v-model="ggMLConnector.Parameters.LocalInferenceServiceName" class="mb-3">
                             <option :value="null">Select an inference microservice</option>
-                            <option v-for="(edgeFunction, index) in edgeFunctions" :key="index" :value="edgeFunctionArnToName(edgeFunction)">{{edgeFunctionArnToName(edgeFunction)}}</option>
+                            <option v-for="(edgeFunction) in edgeFunctions" :key="edgeFunction.FunctionArn" :value="edgeFunctionArnToName(edgeFunction)">{{edgeFunctionArnToName(edgeFunction)}}</option>
                           </b-form-select>
                         </b-col>
                       </b-row>
@@ -714,7 +735,7 @@ inside the container that the function runs in.</p>
                         <b-col sm="8">
                           <b-form-select v-model="ggMLConnector.Parameters.MLModelResourceId" class="mb-3">
                               <option :value="null">Please select a ML resource</option>
-                              <option v-for="(resource, index) in edgeResources" :key="index" :value="resource.Name">{{resource.Name}}</option>
+                              <option v-for="(resource) in edgeResources" :key="resource.Name" :value="resource.Name">{{resource.Name}}</option>
                           </b-form-select>
                         </b-col>
                       </b-row>
@@ -772,7 +793,7 @@ inside the container that the function runs in.</p>
                         <b-col sm="8">
                           <b-form-select v-model="ggMLConnector.Parameters.MLModelResourceId" class="mb-3">
                               <option :value="null">Please select a ML resource</option>
-                              <option v-for="(resource, index) in edgeResources" :key="index" :value="resource.Name">{{resource.Name}}</option>
+                              <option v-for="(resource) in edgeResources" :key="resource.Name" :value="resource.Name">{{resource.Name}}</option>
                           </b-form-select>
                         </b-col>
                       </b-row>
@@ -815,13 +836,10 @@ inside the container that the function runs in.</p>
                 <b-row class="mt-1" v-else>
                   <div class="at-scroll">
                     <b-card-group columns>
-                      <b-card v-for="(connector, index) in edgeConnectors" :key="index"
-                          class="at-card">
-                          <b-row >
-                            <b-col class="color-box" v-bind:style="{'background-color': connectorCboxColor(connector), 'height': '20px'}">
-                            </b-col>
-                          </b-row>
-                          <b-row class="mt-2" align-v="center">
+                      <b-card v-for="(connector, index) in edgeConnectors" :key="connector.Id"
+                          header = " "
+                          class="at-card-thing-dynamic" v-bind:style="{'--color-at-background':resourceCboxColor(connector)}">
+                          <b-row align-v="center">
                             <b-col>
                               <p class="card-text">
                                 {{connector.Id}}
@@ -885,8 +903,8 @@ sudo ./greengrassd start</code></pre>
         </b-row>
        </b-tab>
       </b-tabs>
-      <b-row>
-        <pre>  </pre>
+      <b-row class="mt-3">
+
       </b-row>
     </div>
   </b-container>
@@ -903,7 +921,10 @@ export default {
   props: ['thingIndex'], // VUE reference https://router.vuejs.org/guide/essentials/passing-props.html
   data: function () {
     return {
-      thing: null,
+      thing: {},
+      /* edgeResources: [], */
+      errorMessage: {header: '', message: ''},
+      funcFilterString: '',
       isChangedNotSaved: false,
       isDownloading: false,
       isEdgeUpdating: false,
@@ -1165,21 +1186,21 @@ export default {
   },
   computed: {
     edgeFunctions () {
-      if (this.thing.EdgeDefinition !== undefined && this.thing.EdgeDefinition.functionDefinition !== undefined) {
+      if (this.thing !== null && this.thing.EdgeDefinition !== undefined && this.thing.EdgeDefinition.functionDefinition !== undefined) {
         return this.thing.EdgeDefinition.functionDefinition.Definition.Functions
       } else {
         return []
       }
     },
     edgeConnectors () {
-      if (this.thing.EdgeDefinition !== undefined && this.thing.EdgeDefinition.connectorDefinition !== undefined) {
+      if (this.thing != null && this.thing.EdgeDefinition !== undefined && this.thing.EdgeDefinition.connectorDefinition !== undefined) {
         return this.thing.EdgeDefinition.connectorDefinition.Definition.Connectors
       } else {
         return []
       }
     },
     edgeResources () {
-      if (this.thing.hasOwnProperty('EdgeDefinition') && this.thing.EdgeDefinition.resourceDefinition !== undefined) {
+       if (this.thing !== null && this.thing.hasOwnProperty('EdgeDefinition') && this.thing.EdgeDefinition.resourceDefinition !== undefined) {
         return this.thing.EdgeDefinition.resourceDefinition.Definition.Resources
       } else {
         return []
@@ -1212,20 +1233,36 @@ export default {
       return unselectedList
     },
     unselectedMicroservices () {
-      let unselectedList = []
-      for (let microservice of this.services) {
-        let isFound = false
-        for (let edgeFunction of this.edgeFunctions) {
-          if (this.edgeFunctionArnToName(edgeFunction) === microservice.ServiceName) {
-            isFound = true
-            break
-          }
-        }
-        if (isFound === false) {
-          unselectedList.push(microservice)
-        }
+      let selectedSet = new Set()
+      for (let edgeFunction of this.edgeFunctions) {
+        selectedSet.add(this.edgeFunctionArnToName(edgeFunction).toLowerCase())
       }
-      return unselectedList
+      let unselectedServices = this.services.filter(service => {
+        let serviceName = service.ServiceName.toLowerCase()
+        let result = serviceName.includes(this.funcFilterString.toLowerCase()) &&
+                      (selectedSet.has(service.ServiceName.toLowerCase()) === false)
+        return result
+      })
+      unselectedServices.sort(function (a, b) {
+        return a.ServiceName.localeCompare(b.ServiceName)
+      })
+      return unselectedServices
+    },
+    unselectedFavorites () {
+      let selectedSet = new Set()
+      for (let edgeFunction of this.edgeFunctions) {
+        selectedSet.add(this.edgeFunctionArnToName(edgeFunction).toLowerCase())
+      }
+      let unselectedServices = this.favoriteServices.filter(service => {
+        let serviceName = service.ServiceName.toLowerCase()
+        let result = serviceName.includes(this.funcFilterString.toLowerCase()) &&
+                      (selectedSet.has(service.ServiceName.toLowerCase()) === false)
+        return result
+      })
+      unselectedServices.sort(function (a, b) {
+        return a.ServiceName.localeCompare(b.ServiceName)
+      })
+      return unselectedServices
     },
     ggMLResourceModelFileName () {
       let uri = this.ggMLResource.ResourceDataContainer.S3MachineLearningModelResourceData.S3Uri
@@ -1253,10 +1290,6 @@ export default {
     }
   },
   async created () {
-    let index = this.thingIndex
-    this.thing = this.$store.getters.things[index]
-    this.thingDesc = this.thing.ThingDesc
-    this.thingName = this.thing.ThingName
     this.ggMLConnector = this.initialGgMLConnector
     this.ggModbusConnector = this.initialGgModbusConnector
     this.ggRaspPiGpioConnector = this.initialGgRaspPiGpioConnector
@@ -1264,32 +1297,12 @@ export default {
     this.ggLocalDeviceResource = this.initialGgLocalDeviceResource
     this.ggLocalVolumeResource = this.initialGgLocalVolumeResource
     this.ggMLResource = this.initialGgS3MachineLearningResource
-    console.log('thing: ', this.thing)
-    if (this.thing.hasOwnProperty('EdgeData')) {
-      // this.thing.EdgeData
-      try {
-        let definitionData = await API.get('thingApi', '/edge/definition', {
-          'queryStringParameters': {
-            'edgeData': JSON.stringify(this.thing.EdgeData)
-          }
-        })
-        // console.log('definitionData: ', definitionData)
-        // console.log('result: ', definitionData.edgeDefinition)
-        if (definitionData.edgeDefinition === null) {
-          // this.$delete(this.thing, 'EdgeData')
-          this.$delete(this.thing, 'EdgeDefinition')
-        } else {
-          this.$set(this.thing, 'EdgeDefinition', definitionData.edgeDefinition)
-        }
-      } catch (err) {
-        console.log('def error: ', err)
-      }
-    }
-    console.log('edit thing: ', this.thing)
   },
   beforeDestroy () {
   },
   async mounted () {
+    await this.reloadThing()
+    console.log('edit thing: ', this.thing)
     this.services = this.$store.getters.mservices
     if (this.services === null) {
       await atHelper.reloadServices()
@@ -1310,6 +1323,14 @@ export default {
     thing: {
         handler: function () {
           this.$forceUpdate()
+          /*
+          console.log('computed: edgeResources evaluated')
+          if (this.thing !== null && this.thing.hasOwnProperty('EdgeDefinition') && this.thing.EdgeDefinition.resourceDefinition !== undefined) {
+            this.edgeResources = this.thing.EdgeDefinition.resourceDefinition.Definition.Resources
+          } else {
+            this.edgeResources = []
+          }
+          */
         },
         deep: true
     },
@@ -1349,6 +1370,32 @@ export default {
     }
    },
   methods: {
+    async reloadThing () {
+      let index = this.thingIndex
+      this.thing = this.$store.getters.things[index]
+      this.thingDesc = this.thing.ThingDesc
+      this.thingName = this.thing.ThingName
+      if (this.thing !== null && this.thing.hasOwnProperty('EdgeData')) {
+        // this.thing.EdgeData
+        try {
+          let definitionData = await API.get('thingApi', '/edge/definition', {
+            'queryStringParameters': {
+              'edgeData': JSON.stringify(this.thing.EdgeData)
+            }
+          })
+          // console.log('definitionData: ', definitionData)
+          // console.log('result: ', definitionData.edgeDefinition)
+          if (definitionData.edgeDefinition === null) {
+            // this.$delete(this.thing, 'EdgeData')
+            this.$delete(this.thing, 'EdgeDefinition')
+          } else {
+            this.$set(this.thing, 'EdgeDefinition', definitionData.edgeDefinition)
+          }
+        } catch (err) {
+          console.log('def error: ', err)
+        }
+      }
+    },
     mlResourceModelFileName (edgeResource) {
       let uri = edgeResource.ResourceDataContainer.S3MachineLearningModelResourceData.S3Uri
       if (uri !== null) {
@@ -1599,15 +1646,23 @@ export default {
           body.edgeData = this.thing.EdgeData
         }
         this.isEdgeUpdating = true
-        const result = await API.post('thingApi', '/edge', { body })
-        console.log('uploadEdge result: ', result)
-        if (result.edgeDefinition !== null && result.edgeData !== null) {
-          this.$set(this.thing, 'EdgeDefinition', result.edgeDefinition)
-          this.$set(this.thing, 'EdgeData', result.edgeData)
-          // update to current cached things array
-          let storedThings = this.$store.getters.things
-          storedThings[this.thingIndex] = this.thing
-          this.$store.commit('setThings', storedThings)
+        try {
+          const result = await API.post('thingApi', '/edge', { body })
+          console.log('uploadEdge result: ', result)
+          if (result.edgeDefinition !== null && result.edgeData !== null) {
+            this.$set(this.thing, 'EdgeDefinition', result.edgeDefinition)
+            this.$set(this.thing, 'EdgeData', result.edgeData)
+            // update to current cached things array
+            let storedThings = this.$store.getters.things
+            storedThings[this.thingIndex] = this.thing
+            this.$store.commit('setThings', storedThings)
+          }
+        } catch (err) {
+          console.log('uploadEdge error: ', err)
+          this.reloadThing() // recover from the error
+          this.errorMessage.header = err.message
+          this.errorMessage.message = err.response.data.message
+          this.$bvModal.show('modalErrorMessage')
         }
         this.isEdgeUpdating = false
         this.$forceUpdate()
@@ -2018,14 +2073,4 @@ export default {
   overflow-y: auto;
 }
 
-.color-box {
-    width: 100%;
-    height: 10px;
-    display: inline-block;
-    background-color: var(--color);
-    position: absolute;
-    right: 0px;
-    left: 0px;
-    top: 0px;
-}
 </style>

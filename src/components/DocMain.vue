@@ -517,16 +517,15 @@ When a new microservice is created, it will automatically subscribe to its input
 ##### Private and public (shared) microservices
 
 
-A private microservice can only be triggered by a message from the owner of the microservic, OR, from the system ('admin').
+A private microservice can only be triggered by messages from the **owner** of the microservice or the **system** (and 'admin').
 On the other hand, shared (public) microservices can also receive input messages from any other user.
 In either case, by default, microservices use the sender of the input messages as the sender of output messages.
-Optionally, a microservice is able to set the sender of the output message to its owner instead of the input message sender, by setting the API flag.
-If the input message is from the system, then, the microservice will attach it's owner user as the sender of its output message.
+For security reasons, if the input message comes from the system, the microservice will set the owner of the microservice as the sender of its output message.
 
-Again, all users can see and have access to the shared microservices. Conversely, private microservices are only available to their owners.
+All users can view and have access to the shared microservices. In contrast, private microservices are only available to their owners.
 
-**Shared** option can be set from the edit page of microservices.
-Then, other users find shared microservices by querying them from [Shared Solution](#DocSharedSolution).
+The **Shared** option can be set from the edit page of the microservice.
+Then, other users find them by querying the shared microservice from [Shared Solution](#DocSharedSolution).
 
 </vue-markdown> 
 

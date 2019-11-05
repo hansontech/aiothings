@@ -56,23 +56,29 @@
       <b-row class="mt-2">
         <div class="at-scroll">
           <b-card-group columns>
+            <b-modal id="modalDeleteConfirm"
+                  hide-header 
+                  size="sm"
+                  @ok="deleteService(deletingServiceIndex)"
+                  >
+              <div class="text-center">
+                <h5>Delete the microservice?</h5>
+              </div>                  
+            </b-modal>
            <!--  img-src="https://picsum.photos/600/300/?image=25" -->
            <!-- 
               img-src="/static/photo-27.png"
               img-top
            -->
            <b-card v-for="service in filteredServices" :key="service.ServiceName"
-              class="at-card"
+              header = " "
+              class="at-card-mservice"
            >
-              <b-row>
-                <b-col class="color-box" style="background-color: gainsboro; height: 30px">
-                </b-col>
-              </b-row>
-              <b-row class="mt-3">
+              <b-row align-v="center">
                 <b-col sm="10">
-                  <b class="card-text">
+                  <h5 class="card-text">
                     {{service.ServiceName}}
-                  </b>
+                  </h5>
                 </b-col>
                 <b-col sm="2" align="end">   
                   <b-dropdown :variant="service.hasOwnProperty('DeployMessage') ? (service.hasOwnProperty('IsDeployed') && service.IsDeployed === 'true' ? 'success' : 'Primary') : 'secondary'" class="mx-0" right >
@@ -82,7 +88,7 @@
                     <b-dropdown-item v-if="service.hasOwnProperty('UndeployMessage') && service.IsDeployed === 'true'" @click ="undeployService(service)" ><b>Undeploy</b></b-dropdown-item>
                     <b-dropdown-item @click ="showServiceDetail(services.indexOf(service))" >Edit</b-dropdown-item>
                     <b-dropdown-item @click ="copyService(services.indexOf(service))">Duplicate</b-dropdown-item>        
-                    <b-dropdown-item @click.stop="deleteService(services.indexOf(service))" >Delete</b-dropdown-item>
+                    <b-dropdown-item v-b-modal.modalDeleteConfirm @click="deletingServiceIndex=services.indexOf(service)" >Delete</b-dropdown-item>
                   </b-dropdown>
                 </b-col>
               </b-row>
@@ -137,7 +143,8 @@ export default {
       walkTreeLoading: false,
       isLoading: false,
       isExporting: false,
-      searchDeployableOnly: 'false'
+      searchDeployableOnly: 'false',
+      deletingServiceIndex: -1
     }
   },
   watch: {
@@ -515,16 +522,6 @@ div.at-bottombar {
 
 .at-bar {
   border-bottom: 1px solid green;
-}
-
-.color-box {
-    width: 100%;
-    display: inline-block;
-    background-color: var(--color);
-    position: absolute;
-    right: 0px;
-    left: 0px;
-    top: 0px;
 }
 
 .reverse {

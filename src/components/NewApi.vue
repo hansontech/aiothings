@@ -1,9 +1,8 @@
 <template>
-  <b-container>
-    <div>
-       <b-row align-v="center" style="border-bottom: 1px solid grey">
+  <b-container fluid>
+       <b-row align-v="center" style="border-bottom: 1px solid grey; padding-bottom: 5px; margin-bottom: 5px;">
           <b-col align="start">
-            <h3>New API</h3>
+            <h4>New REST API</h4>
           </b-col>
           <b-col sm="auto" align="end" >
             <b-button variant="success" @click="createApi()"
@@ -14,7 +13,7 @@
           </b-col>
       </b-row>
       <spinner v-if="isCreating === true" size="medium" />
-      <b-modal ref="createdNotifyModal" ok-only @ok="returnSuccess()" >
+      <b-modal ref="createdNotifyModal" hide-header ok-only @ok="returnSuccess()" >
                 New api has been created.
               <!-- <b-btn class="mt-3" variant="outline-danger" block @click="returnSuccess()">Ok</b-btn>
               --> 
@@ -50,11 +49,10 @@
           
         </b-col>
       </b-row>
-    </div>
-            <div class="mt-3">
-              <p class="h4">API Name</p>
-            </div>
-            <b-row>
+            <b-row align-v="center" class="mt-3">
+              <b-col sm="3">
+                <p class="h5">API Name</p>
+              </b-col>
                 <b-col md align="start">
                   <b-form-input class="at-border" v-model="api.ApiName" placeholder="API name"></b-form-input>
                 </b-col>
@@ -76,43 +74,54 @@
                   </b-collapse>
                 </b-col>
             </b-row>
-            <b-row class="mt-3" v-if="api.ApiName !== null && api.ApiName !== ''">
-                <b-col sm="3" align="end">
-                  <h5 id="popoverInvokeUrl"> Invoke URL <i class="fas fa-info-circle"></i></h5>
-                </b-col>
-                <b-col >
-                  <h6>https://api.aiothings.com/{{api.ApiName.toLowerCase()}}/{path}</h6>
-                </b-col>
-                <b-popover target="popoverInvokeUrl" triggers="hover focus">
-                    Call a REST API through HTTP methods (GET, POST..) with the URL address
-                </b-popover>
-            </b-row>
             <b-row>
               <b-col>
                 <div class="mt-3">
-                  <p class="h4">Description</p>
+                  <p class="h5">Description</p>
                 </div>
                 <div style="height: 100px; background-color: rgba(255,0,0,0.1);">
                   <textarea class="at-border w-100 h-100" v-model="api.Desc" placeholder="Api description"></textarea>
                 </div>
               </b-col>
             </b-row>
+            <b-row class="mt-3" v-if="api.ApiName !== null && api.ApiName !== ''">
+                <b-col sm="3" align="start" >
+                  <h5 id="popoverInvokeUrl"> Invoke URL <i class="fas fa-info-circle"></i></h5>
+                </b-col>
+                <b-col >
+                  <h6>https://api.aiothings.com/{{api.ApiName.toLowerCase()}}/{path}</h6>
+                </b-col>
+                <b-popover target="popoverInvokeUrl" triggers="hover focus">
+                    Call the REST API through HTTP methods (GET, POST..) with the URL address
+                </b-popover>
+            </b-row>
             <b-row class="mt-2" align-v="center">
               <b-container fluid>
-                     <form @submit.stop.prevent="handleNewPathSubmit">
-                      <b-row align-v="center">
-                        <b-col sm="3">
-                          <h4> Add Path </h4>
-                        </b-col>
-                        <b-col sm="7">
-                          <b-form-input v-model="newPath" type="text" placeholder="path1/path2/path3"></b-form-input>
-                        </b-col>
-                        <b-col align="start">
-                          <b-button @click="handleNewPathSubmit">Enter</b-button>
-                        </b-col>
-                      </b-row>
-                    </form>
+                <form @submit.stop.prevent="handleNewPathSubmit">
+                  <b-row align-v="center">
+                    <b-col sm="2">
+                      <h5>Add Path</h5>
+                    </b-col>
+                    <b-col sm="5">
+                      <b-form-input v-model="newPath" type="text" placeholder="path1/path2/path3"></b-form-input>
+                    </b-col>
+                    <b-col sm="3" id="popoverAuthOption"> 
+                      <b-form-select v-model="newPathAuth" :options="authOptions">
+                      </b-form-select>
+                    </b-col>
+                    <b-col sm="2" @click="handleNewPathSubmit" align="start">
+                      <b-button>Enter</b-button>
+                    </b-col>
+                  </b-row>
+                </form>
               </b-container>
+               <b-popover target="popoverAuthOption" triggers="hover focus">
+                    <template slot="title">Authorization Types</template>
+                    When <strong><span class="text-info">Auth Type</span></strong> is set, Cloud needs to verify the user through login procedure.
+                    <p>
+                    When <strong>Public</strong> is set, the API can be accessed without authentication.
+                    </p>
+              </b-popover>
             </b-row>
             <b-row v-if="api.Paths.length === 0">
                   <!--
@@ -123,53 +132,35 @@
                   -->
             </b-row>
             <b-row class="mt-1" align-v="center" v-else>
-                  <b-col align="end" sm="3">
-                    <h5> Paths </h5>
-                  </b-col>
-                  <b-col>
-                      <b-list-group>
-                        <b-list-group-item v-for="(path, index) in api.Paths" :key="index">
-                          <b-row>
-                            <b-col sm="9">
-                              {{path}}
-                            </b-col>
-                            <b-col sm="3" align="end">
-                              <b-button size="sm" @click="deletePath(index)">
-                                <i class="fas fa-trash-alt"></i>
-                              </b-button>
-                            </b-col>
-                          </b-row>
-                        </b-list-group-item>
-                      </b-list-group>
-                    </b-col>
-            </b-row>
-            <b-row class="mt-3" align-v="center">
-              <b-col sm="3">
-                  <h4 id="popoverAuthOption">Authorization <i class="fas fa-info-circle"></i></h4>
+              <b-col align="end" sm="3">
+                <h5> Paths </h5>
               </b-col>
-              <b-col sm="7"> 
-                <b-form-select v-model="api.AuthorizationType" class="mb-3">
-                  <option :value="'NONE'">Public access</option>
-                  <!-- <option :value="'AWS_IAM'">Authentication required</option> -->
-                  <option :value="'AUTH-SHARE'">Authenticated access</option>
-                  <option :value="'AUTH'">Owner access only</option>
-                   <!-- <option :value="'COGNITO_USER_POOLS'">OAuth 2.0</option> -->
-                </b-form-select>
+              <b-col>
+                <b-list-group>
+                  <b-list-group-item v-for="(path, index) in api.Paths" :key="index">
+                    <b-row>
+                      <b-col sm="6">
+                        {{path}}
+                      </b-col>
+                      <b-col sm="4" align="center">
+                        <h5><b-badge>{{authOption[api.PathAuth[path]]}}</b-badge></h5>
+                      </b-col>
+                      <b-col sm="2" align="end">
+                        <b-button size="sm" @click="deletePath(index)">
+                          <i class="fas fa-trash-alt"></i>
+                        </b-button>
+                      </b-col>
+                    </b-row>
+                  </b-list-group-item>
+                </b-list-group>
               </b-col>
-              <b-popover target="popoverAuthOption" triggers="hover focus">
-                    <template slot="title">Authorization Types</template>
-                    When <strong><span class="text-danger">Auth</span></strong> is set, Cloud verifies the caller's signature. The tokens building this signature are obtained from caller’s login procedure.
-                    <p>
-                    When <em><strong>None</strong></em> is set, the API does not need caller's authentication.
-                    </p>
-              </b-popover>
             </b-row>
-            <b-row class="mt-3" align-v="center">
-              <b-col sm="3">
-                <h4> Handler</h4>
+            <b-row class="mt-3 mb-3" align-v="center">
+              <b-col sm="2">
+                <h5> Handler</h5>
               </b-col>
               <b-col sm="7">  
-                <b-form-select v-model="apiService" class="mb-3">
+                <b-form-select v-model="apiService">
                   <option :value="null">
                     Select the handler microservice
                   </option>
@@ -177,6 +168,14 @@
                     {{mservice.ServiceName}}
                   </option>
                 </b-form-select>
+              </b-col>
+              <b-col sm="3">
+                <b-form-input
+                  type="text" 
+                  v-model="funcFilterString"
+                  required
+                  placeholder="Select filter ...">
+                </b-form-input>
               </b-col>
             </b-row>
   </b-container>
@@ -204,20 +203,24 @@ export default {
         Desc: '',
         ApiName: '',
         AuthorizationType: 'NONE', // NONE | AWS_IAM | COGNITO_USER_POOLS
-        Paths: []
+        Paths: [],
+        PathAuth: {}
       },
       newPath: null,
+      newPathAuth: 'NONE',
       showDescCannotEmptyAlert: false,
       showHandlerEmptyAlert: false,
       showPathsEmptyAlert: false,
       showApiNameIsUsedAlert: false,
       showCheckNameMessage: false,
       checkNameResultMessage: '',
-      runtimeOptions: {'nodejs': 'Node.js 8.10', 'nodejs6.10': 'Node.js 6.10', 'nodejs8.10': 'Node.js 8.10', 'python2.7': 'Python 2.7', 'python3.7': 'Python 3.7', 'python': 'Python 3.7'},
-      templateCode: {
-        nodejs: '',
-        python: ''
-      }
+      funcFilterString: '',
+      authOption: {'NONE': 'Public', 'AUTH-SHARE': 'Auth Share', 'AUTH': 'Auth Owner '},
+      authOptions: [
+          {value: 'NONE', text: 'Public access'},
+          {value: 'AUTH-SHARE', text: 'Authenticated access'},
+          {value: 'AUTH', text: 'Owner access only'}
+      ]
     }
   },
   computed: {
@@ -225,21 +228,15 @@ export default {
       if (this.mservices === null) {
         return null
       }
-      if (this.apiService === null) {
-        return this.mservices
-      }
-      let unselectedList = []
-      for (let mservice of this.mservices) {
-        let isFound = false
-        if (this.apiService !== null && (this.apiService.Name === mservice.ServiceName)) {
-          isFound = true
-        }
-        if (isFound === false) {
-          unselectedList.push(mservice)
-        }
-      }
-      console.log('unselected: ', unselectedList)
-      return unselectedList
+      let foundServices = this.mservices.filter(service => {
+        return (service.ServiceName.toLowerCase().includes(this.funcFilterString.toLowerCase()) ||
+                    (this.apiService === service)
+               )
+      })
+      foundServices.sort(function (a, b) {
+        return a.ServiceName.localeCompare(b.ServiceName)
+      })
+      return foundServices
     },
     codemirror () {
       return this.$refs.sourceEditor.codemirror
@@ -271,10 +268,12 @@ export default {
       console.log('path found: ', existingFound)
       if (existingFound === undefined || existingFound.length === 0) {
         this.api.Paths.push(this.newPath)
+        this.api.PathAuth[this.newPath] = this.newPathAuth
         console.log('Paths:', this.api.Paths)
       }
     },
     deletePath (index) {
+      delete this.api.PathAuth[this.api.Paths[index]]
       this.api.Paths.splice(index, 1)
     },
     setCmActive () {

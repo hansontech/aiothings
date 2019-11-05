@@ -223,7 +223,7 @@ let updateEdge = async (userId, certId, edgeData, edgeDefinition) => {
     return edgeData
   } catch (err) {
     console.log('updateEdge err: ', err)
-    return edgeData
+    throw err
   }
 };
 

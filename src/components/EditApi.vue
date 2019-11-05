@@ -48,7 +48,7 @@
       </b-row>
           <b-row align-v="center" class="mt-3">
             <b-col sm="3">
-              <p class="h4">API Name</p>
+              <p class="h5">API Name</p>
             </b-col>
             <b-col> 
               <b-list-group>
@@ -60,7 +60,7 @@
           </b-row>
           <b-row class="mt-3">
             <b-col>
-              <p class="h4">Description</p>
+              <p class="h5">Description</p>
               <div style="height: 100px; background-color: rgba(255,0,0,0.1);">
                 <textarea class="at-border w-100 h-100" v-model="api.Desc" placeholder="Api description"></textarea>
               </div>
@@ -74,47 +74,71 @@
                   <h6>https://api.aiothings.com/{{api.ApiName.toLowerCase()}}/{path}</h6>
                 </b-col>
                 <b-popover target="popoverInvokeUrl" triggers="hover focus">
-                    Call a REST API through HTTP methods (GET, POST..) with the URL address
+                    Call the REST API through HTTP methods (GET, POST..) with the URL address
                 </b-popover>
           </b-row>
           <b-row class="mt-2" align-v="center">
               <b-container fluid>
-                     <form @submit.stop.prevent="handleNewPathSubmit">
-                      <b-row align-v="center">
-                        <b-col sm="3">
-                          <h4> Add Path </h4>
-                        </b-col>
-                        <b-col sm="7">
-                          <b-form-input v-model="newPath" type="text" placeholder="path1/path2/path3"></b-form-input>
-                        </b-col>
-                        <b-col sm="2" align="end" class="pb-2" @click="handleNewPathSubmit" ><b-button>Enter</b-button></b-col>
-                      </b-row>
-                    </form>
+                  <form @submit.stop.prevent="handleNewPathSubmit">
+                    <b-row align-v="center">
+                      <b-col sm="2">
+                        <h5> Add Path </h5>
+                      </b-col>
+                      <b-col sm="5">
+                        <b-form-input v-model="newPath" type="text" placeholder="path1/path2/path3"></b-form-input>
+                      </b-col>
+                      <b-col sm="3" id="popoverAuthOption"> 
+                        <b-form-select v-model="newPathAuth" :options="authOptions">
+                        </b-form-select>
+                      </b-col>
+                      <b-col sm="2" @click="handleNewPathSubmit" align="start" >
+                        <b-button>Enter</b-button>
+                      </b-col>
+                    </b-row>
+                  </form>
               </b-container>
+              <b-popover target="popoverAuthOption" triggers="hover focus">
+                    <template slot="title">Authorization Types</template>
+                    When <strong><span class="text-info">Auth Type</span></strong> is set, Cloud needs to verify the user through login procedure.
+                    <p>
+                    When <strong>Public</strong> is set, the API can be accessed without authentication.
+                    </p>
+                <!--
+                    <template slot  ="title">Authorization Types</template>
+                    When <strong><span class="text-danger">Auth</span></strong> is set, Cloud verifies the caller's signature. The tokens building this signature are obtained from caller’s login procedure.
+                    <p>
+                    When <em><strong>Public</strong></em> is set, the API does not need caller's authentication.
+                    </p>
+                -->
+              </b-popover>
           </b-row>
           <b-row v-if="api.Paths.length === 0">
           </b-row>
           <b-row class="mt-1" align-v="center" v-else>
-                  <b-col align="end" sm="3">
-                    <h5> Paths </h5>
-                  </b-col>
-                  <b-col>
-                      <b-list-group>
-                        <b-list-group-item v-for="(path, index) in api.Paths" :key="index">
-                          <b-row>
-                            <b-col sm="9">
-                              {{path}}
-                            </b-col>
-                            <b-col sm="3" align="end">
-                              <b-button size="sm" @click="deletePath(index)">
-                                <i class="fas fa-trash-alt"></i>
-                              </b-button>
-                            </b-col>
-                          </b-row>
-                        </b-list-group-item>
-                      </b-list-group>
-                    </b-col>
+              <b-col align="end" sm="2">
+                <h5> Paths </h5>
+              </b-col>
+              <b-col>
+                <b-list-group>
+                  <b-list-group-item v-for="(path, index) in api.Paths" :key="index">
+                    <b-row>
+                      <b-col sm="6">
+                        {{path}}
+                      </b-col>
+                      <b-col sm="4" align="center">
+                        <h5><b-badge>{{authOption[api.PathAuth[path]]}}</b-badge></h5>
+                      </b-col>
+                      <b-col sm="2" align="end">
+                        <b-button size="sm" @click="deletePath(index)">
+                          <i class="fas fa-trash-alt"></i>
+                        </b-button>
+                      </b-col>
+                    </b-row>
+                  </b-list-group-item>
+                </b-list-group>
+              </b-col>
           </b-row>
+          <!--
           <b-row class="mt-3" align-v="center">
              <b-col sm="3">
                   <h4 id="popoverAuthOption">Authorization <i class="fas fa-info-circle"></i></h4>
@@ -122,34 +146,36 @@
               <b-col sm="7"> 
                 <b-form-select v-model="api.AuthorizationType" class="mb-3">
                   <option :value="'NONE'">Public access</option>
-                  <!-- <option :value="'AWS_IAM'">Authentication required</option> -->
+                  <option :value="'AWS_IAM'" :disabled="true">Authentication required</option>
                   <option :value="'AUTH-SHARE'">Authenticated access</option>
                   <option :value="'AUTH'">Owner access only</option>
-                  <!-- <option :value="'COGNITO_USER_POOLS'">OAuth 2.0</option> -->
+                  <option :value="'COGNITO_USER_POOLS'" :disabled="true">OAuth 2.0</option>
                 </b-form-select>
               </b-col>
-              <b-popover target="popoverAuthOption" triggers="hover focus">
-                    <template slot="title">Authorization Types</template>
-                    When <strong><span class="text-danger">Auth</span></strong> is set, Cloud verifies the caller's signature. The tokens building this signature are obtained from caller’s login procedure.
-                    <p>
-                    When <em><strong>None</strong></em> is set, the API does not need caller's authentication.
-                    </p>
-              </b-popover>
           </b-row>
-          <b-row class="mt-3" align-v="center">
-              <b-col sm="3">
-                <h4> Handler</h4>
-              </b-col>
-              <b-col sm="7">  
-                <b-form-select v-model="apiService" class="mb-3">
-                  <option :value="null">
-                    Select the handler microservice
-                  </option>
-                  <option v-for="(mservice, index) in mservices" :key="index" :value="mservice">
-                    {{mservice.ServiceName}}
-                  </option>
-                </b-form-select>
-              </b-col>
+          -->
+          <b-row class="mt-3 mb-3" align-v="center">
+            <b-col sm="2">
+              <h5> Handler</h5>
+            </b-col>
+            <b-col sm="7">  
+              <b-form-select v-model="apiService">
+                <option :value="null">
+                  Select the handler microservice
+                </option>
+                <option v-for="(mservice, index) in unselecetedMservices" :key="index" :value="mservice">
+                  {{mservice.ServiceName}}
+                </option>
+              </b-form-select>
+            </b-col>
+            <b-col sm="3">
+              <b-form-input 
+                type="text" 
+                v-model="funcFilterString"
+                required
+                placeholder="Select filter ...">
+              </b-form-input>
+            </b-col>
           </b-row>
   </b-container>
  </template>
@@ -167,6 +193,7 @@ export default {
       mservices: null,
       api: null,
       newPath: null,
+      newPathAuth: 'NONE',
       apiService: null,
       isChangedNotSaved: null,
       isUpdating: false,
@@ -175,29 +202,30 @@ export default {
       errorMsg: '',
       showDescCannotEmptyAlert: false,
       showHandlerEmptyAlert: false,
-      showPathsEmptyAlert: false
+      showPathsEmptyAlert: false,
+      funcFilterString: '',
+      authOption: {'NONE': 'Public', 'AUTH-SHARE': 'Auth Share', 'AUTH': 'Auth Owner '},
+      authOptions: [
+          {value: 'NONE', text: 'Public access'},
+          {value: 'AUTH-SHARE', text: 'Authenticated access'},
+          {value: 'AUTH', text: 'Owner access only'}
+      ]
     }
   },
   computed: {
-    unselecetedMservices () {
+     unselecetedMservices () {
       if (this.mservices === null) {
         return null
       }
-      if (this.api.Handler === null) {
-        return this.mservices
-      }
-      let unselectedList = []
-      for (let mservice of this.mservices) {
-        let isFound = false
-        if (this.api.Handler === mservice.ServiceName) {
-          isFound = true
-        }
-        if (isFound === false) {
-          unselectedList.push(mservice)
-        }
-      }
-      console.log('unselected: ', unselectedList)
-      return unselectedList
+      let foundServices = this.mservices.filter(service => {
+        return (service.ServiceName.toLowerCase().includes(this.funcFilterString.toLowerCase()) ||
+                    (this.apiService === service)
+               )
+      })
+      foundServices.sort(function (a, b) {
+        return a.ServiceName.localeCompare(b.ServiceName)
+      })
+      return foundServices
     },
     isShared (sharingStatus) {
       return (sharingStatus === 'true')
@@ -217,6 +245,13 @@ export default {
     // 20181112 this.api = Object.assign({}, this.$store.getters.apis[index])
     let apiStr = JSON.stringify(this.$store.getters.apis[index])
     this.api = JSON.parse(apiStr)
+    if (this.api.hasOwnProperty('PathAuth') === false) {
+      this.api.PathAuth = {}
+      for (let path of this.api.Paths) {
+        this.api.PathAuth[path] = this.api.AuthorizationType
+      }
+      console.log('pathAuth: ', this.api.PathAuth)
+    }
     console.log('edit api: ', this.api)
   },
   async mounted () {
@@ -254,10 +289,12 @@ export default {
       console.log('path found: ', existingFound)
       if (existingFound === undefined || existingFound.length === 0) {
         this.api.Paths.push(this.newPath)
+        this.api.PathAuth[this.newPath] = this.newPathAuth
         console.log('Paths:', this.api.Paths)
       }
     },
     deletePath (index) {
+      delete this.api.PathAuth[this.api.Paths[index]]
       this.api.Paths.splice(index, 1)
     },
     setCmActive () {

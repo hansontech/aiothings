@@ -28,6 +28,7 @@ exports.handler =  async function(event, context, callback) {
     }).promise()
     if (userData === null) {
       // callback('Error: Invalid token'); // Return a 500 Invalid token response
+      console.log('anonymous access is denied.')
       callback(null, generatePolicy('anonymous', 'Deny', event.methodArn));
     } else {
       let restApiId = event.methodArn.split(':')[5].split('/')[0]
@@ -57,6 +58,7 @@ exports.handler =  async function(event, context, callback) {
           action = 'Allow'
         }
       }
+      console.log('access is set to: ', action)
       callback(null, generatePolicy(userData.Username, action, event.methodArn))
     }
   } catch (e) {

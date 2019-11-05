@@ -192,9 +192,8 @@ let dbListCertinfo = ( userId, callback ) => {
 }
 
 // Get IoT cert info from Dynamodb
-let dbGetCertinfo = ( userId, iotcert, callback ) => {
-
-  var params = {
+let dbGetCertinfo = async ( userId, iotcert, callback ) => {
+  let params = {
     TableName: Device_TABLE_NAME,
     KeyConditionExpression: '#userid = :userid and #certid = :certid',
     // Projection of all fields as output
@@ -220,6 +219,29 @@ let dbGetCertinfo = ( userId, iotcert, callback ) => {
   });  
 }
 
+let dbGetCertinfoAsync = async (userId, iotcert) => {
+  var params = {
+    TableName: Device_TABLE_NAME,
+    KeyConditionExpression: '#userid = :userid and #certid = :certid',
+    // Projection of all fields as output
+    ExpressionAttributeNames:{
+        '#userid': 'UserId',
+        '#certid': 'CertId'
+    },
+    ExpressionAttributeValues: {
+        ':userid': userId,
+        ':certid': iotcert
+    }
+  };
+
+  try {
+    let data = await dynamoDb.query(params).promise()
+    return data.Items
+  } catch (err) {
+    console.log('getCertinfo: Unable to query. Error:', JSON.stringify(err, null, 2));
+    throw err
+  } 
+}
 // AWS IOT reference
 // Language examples
 // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Iot.html
@@ -658,6 +680,7 @@ module.exports = {
     dbListCertinfo,
     dbDeleteCertinfo,
     dbGetCertinfo,
+    dbGetCertinfoAsync,
     dbUpdateEdge,
     dbUpdateEdgeAsync,
     dbDeleteEdge,

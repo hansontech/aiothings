@@ -43,41 +43,48 @@
             </div>
             <div class="at-scroll">
               <b-card-group columns>
+                <b-modal id="modalDeleteConfirm"
+                      hide-header 
+                      size="sm"
+                      @ok="deleteApi(deletingApiIndex)"
+                      >
+                  <div class="text-center">
+                    <h5>Delete this API?</h5>
+                  </div>                  
+                </b-modal>
                 <b-card v-for="(api, index) in filteredApis" :key="index"
-                    class="mb-2 at-card">
-                    <b-row style="height: 30px">
-                      <b-col class="color-box" style="background-color: MediumAquamarine; height: 30px">
-                      </b-col>
-                    </b-row>
-                    <b-row class="mt-2">
-                      <b-col>
-                        <p class="card-text">
+                    header = " "
+                    class="at-card-api" 
+                >
+                    <b-row align-v="center">
+                      <b-col sm="10">
+                        <h5 class="card-text">
                           {{api.ApiName}}
-                        </p>
+                        </h5>
                       </b-col>
-                      <b-col align="end">   
+                      <b-col sm="2" align="end">   
                         <b-dropdown variant="secondary" class="mx-0" right >
                           <!-- VUE reference: https://vuejs.org/v2/guide/events.html -->
                           <b-dropdown-item @click = "showApiDetail(apis.indexOf(api))" >Edit</b-dropdown-item>
                           <b-dropdown-item @click = "copyApi(apis.indexOf(api))" >Copy</b-dropdown-item>
-                          <b-dropdown-item @click.stop="deleteApi(apis.indexOf(api))" >Delete</b-dropdown-item>
+                          <b-dropdown-item v-b-modal.modalDeleteConfirm @click="deletingApiIndex=apis.indexOf(api)" >Delete</b-dropdown-item>
                         </b-dropdown>
                       </b-col>
                     </b-row>
-                    <b-row class="ml-0 mt-2" style="border-bottom: 1px solid green; padding-bottom: 5px;">  
-                      <b-col>
+                    <b-row class="ml-0 mt-1">  
+                      <b-col class="at-border">
                         {{api.Desc}}
                       </b-col>
                     </b-row>
                     <b-row class="ml-0 mt-2" style="border-bottom: 1px solid green; padding-bottom: 5px;">  
                       <b-col>
-                        {{api.Handler}}
+                        <h5><b-badge variant="info">{{api.Handler}}</b-badge></h5>
                       </b-col>
                     </b-row>
                     <b-row class="ml-0 mt-2">
                       <b-col>  
                         <b-list-group>
-                          <b-list-group-item v-for="(path, index) in api.Paths" v-b-popover.hover.bottom="'https://api.aiothings.com/' + api.ApiName.toLowerCase() + '/' + path.toLowerCase()" :key="index">
+                          <b-list-group-item style="white-space: nowrap; overflow:hidden; text-overflow: ellipsis;" v-for="(path, index) in api.Paths" v-b-popover.hover.bottom="'https://api.aiothings.com/' + api.ApiName.toLowerCase() + '/' + path.toLowerCase()" :key="index">
                             <code>{{path}}</code>
                           </b-list-group-item>
                         </b-list-group>
@@ -107,7 +114,8 @@ export default {
       isApiActionRunning: false,
       isApiReloading: false,
       timeLeftBeforeActionComplete: 0,
-      apiActionTimer: null
+      apiActionTimer: null,
+      deletingApiIndex: -1
     }
   },
   computed: {
@@ -246,16 +254,6 @@ div.at-bottombar {
   padding-bottom: 5px;
   margin-bottom: 5px;
   border-bottom: 1px solid grey
-}
-
-.color-box {
-    width: 100%;
-    display: inline-block;
-    background-color: var(--color);
-    position: absolute;
-    right: 0px;
-    left: 0px;
-    top: 0px;
 }
 
 </style>

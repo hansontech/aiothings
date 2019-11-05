@@ -26,20 +26,15 @@
             <div class="at-scroll">
               <b-card-group columns>
                 <b-card v-for="(service, index) in favoriteServices" :key="service.ServiceName"
-                    img-top
-                    tag="article"
-                    class="mb-2 at-card">
-                    <b-row style="height: 30px">
-                      <b-col class="color-box" style="background-color: gainsboro; height: 30px">
-                      </b-col>
-                    </b-row>
-                    <b-row class="mt-2">
-                      <b-col>
-                        <p class="card-text">
+                    header = " "
+                    class="at-card-mservice">
+                    <b-row align-v="center">
+                      <b-col sm="10">
+                        <h5>
                           {{service.ServiceName}}
-                        </p>
+                        </h5>
                       </b-col>
-                      <b-col align="end">   
+                      <b-col sm="2" align="end">   
                         <b-dropdown variant="secondary" class="mx-0" right >
                           <!-- VUE reference: https://vuejs.org/v2/guide/events.html -->
                           <b-dropdown-item @click.stop="deleteFavorite(index)" >Unfavourite</b-dropdown-item>
@@ -179,13 +174,4 @@ div.at-bottombar {
   border-bottom: 1px solid grey
 }
 
-.color-box {
-    width: 100%;
-    display: inline-block;
-    background-color: var(--color);
-    position: absolute;
-    right: 0px;
-    left: 0px;
-    top: 0px;
-}
 </style>
