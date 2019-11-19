@@ -174,7 +174,7 @@ export default {
         })
         console.log('result: ', result)
       } catch (e) {
-        console.log('error: ', e)
+        console.log('test api error: ', e)
       }
     },
     createApi () {

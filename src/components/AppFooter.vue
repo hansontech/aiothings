@@ -37,7 +37,7 @@
         <social-sharing url="https://www.aiothings.com/"
                       title="The AI + IoT playground"
                       description="Intuitive and Fast AI + IoT application development environment"
-                      quote="AIoT is a progressive framework for building serverless IoT + AI application."
+                      quote="AIoThings is a framework for building serverless cloud application."
                       hashtags="AI, IoT, Node-RED, AWS"
                       twitter-user="vuejs"
                       inline-template>

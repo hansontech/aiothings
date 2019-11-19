@@ -11,22 +11,13 @@
   specific language governing permissions and limitations under the License.
 */
 
-import config from './config.json'
 import awsexports from '../aws-exports'
 
 export default {
-  awsIotHost: config.AwsIotHost,
-  awsRegion: config.AwsRegion,
-  awsMserviceBucket: 'aiot-bucket',
-  awsGreengrassBucket: 'aiot-bucket',
-  awsCognitoDomain: 'aiothings1026.auth.ap-southeast-2.amazoncognito.com',
+  awsIotHost: "a3vgppxo7lddg8-ats.iot.ap-southeast-2.amazonaws.com",
+  awsRegion: awsexports.aws_project_region,
+  awsGreengrassBucket: awsexports.aws_user_files_s3_bucket, // 'aiot-bucket',
   awsCognitoUserPoolId: awsexports.aws_user_pools_id,
   awsCognitoUserPoolAppClientId: awsexports.aws_user_pools_web_client_id,
   amplifyEnvironment: awsexports.aws_content_delivery_bucket.substring(awsexports.aws_content_delivery_bucket.lastIndexOf('-')),
-  awsCognitoIdentityPoolId: config.IdentityPoolId,
-  awsApiGatewayInvokeUrl: config.AwsApiGatewayInvokeUrl,
-  socialFacebookAppId: config.FacebookAppId,
-  socialGoogleClientId: config.GoogleAppId,
-  logLevel: config.LogLevel,
-  mqttDebugLevel: config.MqttDebugLevel,
 };

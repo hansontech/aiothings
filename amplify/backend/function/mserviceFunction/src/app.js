@@ -9,6 +9,7 @@ See the License for the specific language governing permissions and limitations 
 var express = require('express')
 var bodyParser = require('body-parser')
 var awsServerlessExpressMiddleware = require('aws-serverless-express/middleware')
+var util = require('util')
 
 // declare a new express app
 var app = express()
@@ -362,9 +363,94 @@ app.get('/favorite-mservices', function(req, res) {
   }
 });
 
+
 /****************************
 * Example post method *
 ****************************/
+
+app.post('/logging', async function(req, res) {
+  // Add your code here
+  let inputs = req.body
+  console.log('logging: ', inputs);
+  let lambda = new aws.Lambda();
+  let cloudWatchLogs = new aws.CloudWatchLogs()
+  if (inputs.enableLogging === true) {
+    try {
+      // let logGroupName = '/aws/lambda/' + inputs.serviceName
+      // console.log('logGroupName: ', logGroupName)
+      /*
+      let filteredData = await cloudWatchLogs.filterLogEvents(
+        inputs.filterParameter
+      ).promise()
+      // console.log('filteredData: ', filteredData)
+      res.json(filteredData);   
+      */
+      // --  for logs subscription purpose 2019/11/11, may need to relocate to other place
+      await lambda.removePermission({
+        FunctionName: inputs.loggerName, 
+        StatementId: inputs.loggerName + '_log_invoke_' + inputs.serviceName,
+      }).promise().catch(function (err) { 
+        console.log('deletePermission log: warning: ', err); // an error occurred
+      })
+      await lambda.addPermission({
+        Action: "lambda:InvokeFunction", 
+        FunctionName: inputs.loggerName, 
+        Principal: "logs." + config.region + ".amazonaws.com",
+        StatementId: inputs.loggerName + '_log_invoke_' + inputs.serviceName,
+        SourceArn: 'arn:aws:logs:' + config.region + ':' + config.awsAccountId + ':log-group:/aws/lambda/' + inputs.serviceName + ':*'
+      }).promise().catch( function (err) { 
+        console.log('addPermission log: warning: ', err); // an error occurred
+      })
+      console.log('start put subscription')
+      // -- in order to bypass the impact ever using Dashbird service
+      // -- they use the region name as their filter name for each log group
+      await cloudWatchLogs.deleteSubscriptionFilter({
+        logGroupName: inputs.queryParameter.logGroupName,
+        filterName: config.region
+      }).promise().catch(function (err) { 
+      })
+      await cloudWatchLogs.putSubscriptionFilter({
+        logGroupName: inputs.queryParameter.logGroupName,
+        filterName: 'filter_' + inputs.serviceName,
+        filterPattern: '',
+        destinationArn: 'arn:aws:lambda:' + config.region + ':' + config.awsAccountId + ':function:' + inputs.loggerName
+      }).promise()
+      console.log('start query')
+      let queryStartData = await cloudWatchLogs.startQuery(
+        inputs.queryParameter
+      ).promise()
+      const sleep = util.promisify(setTimeout)
+      do {
+        await sleep(1000)
+        let queryResult = await cloudWatchLogs.getQueryResults({
+          queryId: queryStartData.queryId
+        }).promise()
+        console.log('status: ', queryResult.status)
+        if (queryResult.status === 'Running' || queryResult.status === 'Scheduled') {
+          continue
+        } else if (queryResult.status === 'Complete') {
+          res.json(queryResult)
+        } else {
+          res.json({error: 'The result is '+ queryResult.status})
+        }
+        break
+      } while(true)
+    } catch (err) {
+      // console.log('logging: ', err)
+      res.json({error: err})
+    }
+  } else {
+    try {
+      await cloudWatchLogs.deleteSubscriptionFilter({
+        logGroupName: inputs.queryParameter.logGroupName,
+        filterName: 'filter_' + inputs.serviceName,
+      }).promise()
+    } catch (err) {
+      console.log('delete Subs error: ', err)
+    }
+    res.json({success: 'disabled'});   
+  }
+});
 
 app.post('/favorites', function(req, res) {
   // Add your code here
@@ -406,14 +492,30 @@ app.post('/mservices', async function(req, res) {
   } catch(e) {
     throw e;
   }
-  
-  var s3 = new aws.S3({params: {Bucket: config.mserviceS3bucketName}, region: config.region});
+  let s3 = new aws.S3()
+  let statusData = null
+  try { // taking chance to check and add for public access 
+    // let s3 = new aws.S3({params: {Bucket: config.mserviceS3bucketName}, region: config.region}); 
+    statusData = await s3.getBucketPolicyStatus({
+      Bucket: config.mserviceS3bucketName /* required */
+    }).promise()
+  } catch (err) {
+    console.error('add bucket public error: ', err)
+  }
+  if (statusData === null || (statusData !== null && statusData.IsPublic === false)) {
+    console.log('set bucket/public/share to public ')
+    await s3.putBucketPolicy({
+      Bucket: config.mserviceS3bucketName, 
+      Policy: "{\"Version\": \"2012-10-17\", \"Statement\": [{ \"Sid\": \"allowPublicRead\",\"Effect\": \"Allow\",\"Principal\": {\"AWS\": \"*\"}, \"Action\": \"s3:GetObject\", \"Resource\": \"arn:aws:s3:::" +  config.mserviceS3bucketName + "/public/share/*\" } ]}"
+    }).promise().catch(err => {
+      console.error('putBucketPolicy error: ', err)
+    })
+  }
   // Write code string to a handler file
   if (inputs.hasOwnProperty('CodeEntryType') && inputs.CodeEntryType === 'zip') {
     // if the source is from a zip file
     // then, copy it to /tmp folder, and unzip it.
     try {
-      let s3 = new aws.S3();
       let objData = await s3.getObject({
         Bucket: config.mserviceS3bucketName,
         Key: 'public/' + inputs.CodeFileName,
@@ -803,6 +905,7 @@ app.post('/mservices', async function(req, res) {
     lambda.getFunction(params, async function(err, data) {
        if (err) console.log(err); // an error occurred
        else {
+          // --
           var addPermissionParams = {
             Action: "lambda:InvokeFunction", 
             FunctionName: functionName, 

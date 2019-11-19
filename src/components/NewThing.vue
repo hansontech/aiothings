@@ -115,8 +115,10 @@ export default {
 </script>
 
 <style>
+/*
 .at-border {
   border: 1px solid #a78;
   padding: 5px;
 }
+*/
 </style>

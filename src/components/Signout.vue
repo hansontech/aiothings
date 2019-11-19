@@ -9,19 +9,12 @@
 </template>
 
 <script>
+import { eventBus } from '../main'
 export default {
-  /* beforeCreate () {
-    Amplify.configure(awsmobile)
-    Amplify.configure({
-      Auth: {
-        oauth: oauth
-      }
-    })
-  }, */
-
   created () {
     var curUrl = window.location.href
     console.log('signout is called: ', curUrl)
+    eventBus.$emit('logout')
     this.$router.replace({name: 'home'})
   }
 }

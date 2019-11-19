@@ -80,6 +80,7 @@ export default {
             { 'text': 'App Connectors', data: { 'link': 'DocAppConnector' } },
             { 'text': 'Shared Solutions', data: { 'link': 'DocSharedSolution' } },
             { 'text': 'Console', data: { 'link': 'DocConsole' } },
+            { 'text': 'Running Log', data: { 'link': 'DocLog' } },
             { 'text': 'IoT Data Access',
                   data: { 'link': 'DocIotData' }
             }

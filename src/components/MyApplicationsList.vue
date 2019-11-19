@@ -89,10 +89,27 @@
                     <b-dropdown-item @click ="showServiceDetail(services.indexOf(service))" >Edit</b-dropdown-item>
                     <b-dropdown-item @click ="copyService(services.indexOf(service))">Duplicate</b-dropdown-item>        
                     <b-dropdown-item v-b-modal.modalDeleteConfirm @click="deletingServiceIndex=services.indexOf(service)" >Delete</b-dropdown-item>
+                    <b-dropdown-divider></b-dropdown-divider>
+                    <b-dropdown-item v-b-popover.hover.bottom="'Runtime logs with realtime updates'" @click ="showServiceLog(service)" >
+                      <b-row>
+                        <b-col>
+                          Logs
+                        </b-col>
+                        <b-col align="end">
+                          <!-- v-bind:value="(servicesLogging.hasOwnProperty(service.ServiceName) && servicesLogging[service.ServiceName].enabled) ? servicesLogging[service.ServiceName].enabled : false" -->
+                          <b-form-checkbox
+                            v-model="servicesLoggingCheckbox[service.ServiceName]"
+                            value="true"
+                            unchecked-value="false"
+                          >
+                          </b-form-checkbox>
+                        </b-col>
+                      </b-row>
+                    </b-dropdown-item>
                   </b-dropdown>
                 </b-col>
               </b-row>
-              <b-row class="ml-0 mt-1"> 
+              <b-row class="ml-0 mt-1">
                 <b-col class="at-border" style="white-space: pre-wrap;">{{truncatedString( service.ServiceDesc, 256 )}}</b-col>
                 <!--
                 <p class="card-text">
@@ -110,6 +127,38 @@
                   Output: <code>{{service.OutputMessageTopic}}</code>
                 </p>
               </b-row>
+              <b-row class="mt-1" v-if="isLogLoading.hasOwnProperty(service.ServiceName) && isLogLoading[service.ServiceName] === true">
+                <b-col><spinner size="small" /></b-col>
+              </b-row>
+              <b-row v-if="servicesLogging.hasOwnProperty(service.ServiceName) && servicesLogging[service.ServiceName].enabled === true && (serviceEvents(service.ServiceName).length > 0)">
+                <b-col>
+                  <b-row class="mt-2" align-v="center">
+                    <b-col align="start">
+                      Log:
+                    </b-col>
+                    <b-col align="end">
+                      <b-button variant="light" @click="reloadLogging(service)"><i class="fas fa-sync" style='font-size:12px'></i></b-button>
+                    </b-col>
+                  </b-row>
+                  <b-row class="at-border mt-1">
+                    <b-col style="overflow-x: scroll; overflow-y: scroll; white-space: nowrap; display: inline-block; height:150px; width:90%">
+                      <b-row v-for="(event, index) in serviceEvents(service.ServiceName)" :key="index">
+                        <b-col><small>{{(new Date(event.timestamp)).toLocaleDateString('En', { month: 'numeric', day: 'numeric' })}}&nbsp;{{(new Date(event.timestamp)).toLocaleTimeString()}}:&nbsp;</small><small>{{event.message}}</small></b-col>
+                        <!-- {{(new Date(event.timestamp)).toLocaleTimeString()}} -->
+                      </b-row>
+                    </b-col>
+                  </b-row>
+                </b-col>
+              </b-row> 
+              <!-- 
+              <b-row v-if="servicesLogging.hasOwnProperty(service.ServiceName) && servicesLogging[service.ServiceName].enabled === true" class="ml-0">  
+                <b-col>
+                  <div>
+                    <b-table striped hover :items="servicesLogging[service.ServiceName].data.events"></b-table>
+                  </div>
+                </b-col>
+              </b-row>
+              -->
             </b-card>
           </b-card-group>
         </div>
@@ -124,6 +173,7 @@ import store from '../store'
 import { API, PubSub } from 'aws-amplify'
 import MQTTPattern from 'mqtt-pattern'
 import JSON5 from 'json5'
+import { eventBus } from '../main'
 
 export default {
   components: {
@@ -142,9 +192,11 @@ export default {
       testResult: '',
       walkTreeLoading: false,
       isLoading: false,
+      isLogLoading: {},
       isExporting: false,
       searchDeployableOnly: 'false',
-      deletingServiceIndex: -1
+      deletingServiceIndex: -1,
+      servicesLoggingCheckbox: []
     }
   },
   watch: {
@@ -162,6 +214,10 @@ export default {
     }
   },
   computed: {
+    servicesLogging () {
+      let sl = this.$parent.$parent.$parent.servicesLogging
+      return sl
+    },
     filteredServices () {
       let foundServices = this.services.filter(service => {
         return service.ServiceName.toLowerCase().includes(this.$parent.searchString.toLowerCase()) &&
@@ -190,8 +246,37 @@ export default {
       await this.reloadServices()
     }
     // console.log('MyApplicationList mounted')
+    eventBus.$on('newLoggingOutput', this.onNewLoggingOutput)
   },
   methods: {
+    /*
+    servicesLoggingCheckbox (service) {
+      try {
+        let flag = this.servicesLogging[service.ServiceName].enabled
+        if (flag !== undefined) {
+          return flag
+        }
+        return false
+      } catch (err) {
+        return false
+      }
+    },
+    */
+    onNewLoggingOutput () {
+      // console.log('logging update')
+      this.$forceUpdate()
+    },
+    serviceEvents (serviceName) {
+      try {
+        let events = this.servicesLogging[serviceName].events
+        if (events === undefined) {
+          return []
+        }
+        return events
+      } catch (err) {
+        return []
+      }
+    },
     truncatedString (textStr, length) {
       return (textStr.length < (length)) ? textStr : (textStr.substring(0, length - 4) + '...')
     },
@@ -276,6 +361,76 @@ export default {
     },
     showServiceDetail (index) {
       this.$router.push({name: 'editService', params: { serviceIndex: index, serviceSource: this.services }})
+    },
+    async showServiceLog (service) {
+      try {
+        this.servicesLogging[service.ServiceName].enabled = !(this.servicesLogging[service.ServiceName].enabled)
+      } catch (err) {
+        this.servicesLogging[service.ServiceName] = {enabled: true}
+      }
+      this.servicesLoggingCheckbox[service.ServiceName] = this.servicesLogging[service.ServiceName].enabled
+      await this.reloadLogging(service)
+    },
+    async reloadLogging (service) {
+      this.isLogLoading[service.ServiceName] = true
+      this.$forceUpdate()
+      let currentTime = new Date().getTime() / 1000 // in seconds
+      let startTime = currentTime - (30 * 24 * 60 * 60) // one month before
+      let logGroupName = '/aws/lambda/' + service.ServiceName
+      let queryString = 'fields @timestamp, @message | sort @timestamp desc'
+      const result = await API.post('mserviceApi', '/logging', { body: {
+        /*
+        filterParameter: {
+          logGroupName: logGroupName,
+          // endTime: 'NUMBER_VALUE',
+          // filterPattern: 'STRING_VALUE',
+          // interleaved: true || false,
+          limit: 10
+          // logStreamNamePrefix: 'STRING_VALUE',
+          // nextToken: 'STRING_VALUE',
+          // startTime: 'NUMBER_VALUE'
+        },
+        */
+        queryParameter: {
+          endTime: currentTime, /* required */
+          queryString: queryString, /* required */
+          startTime: startTime, /* required */
+          limit: 20,
+          logGroupName: logGroupName
+        },
+        serviceName: service.ServiceName,
+        loggerName: 'aiotLogReceiver',
+        enableLogging: this.servicesLogging[service.ServiceName].enabled
+      }})
+      // console.log('logging: result: ', result)
+      if (result.hasOwnProperty('error')) {
+        console.log('logging error:', result.error)
+      } else if (this.servicesLogging[service.ServiceName].enabled) {
+        let queryEvents = result.results
+        let logEvents = []
+        for (let queryEvent of queryEvents) {
+          let logEvent = {}
+          for (let fieldValuePair of queryEvent) {
+            logEvent[fieldValuePair.field.replace('@', '')] = fieldValuePair.value
+          }
+          for (let event of logEvents) {
+            // the result events have, strangely, string format timestamp occationally.
+            // as the string timestamps are lack of 'Z', we add 'Z' to it to comply to OTC time format.
+            try {
+              // console.log('time: ', event.timestamp)
+              event.timestamp = new Date(event.timestamp.replace(' ', 'T') + 'Z').getTime()
+              // console.log('time: to:', event.timestamp)
+            } catch (err) {
+              // continue
+            }
+          }
+          logEvents.push(logEvent)
+        }
+        console.log('logging: events: ', logEvents)
+        this.servicesLogging[service.ServiceName].events = logEvents
+      }
+      this.isLogLoading[service.ServiceName] = false
+      this.$forceUpdate()
     },
     copyService (index) {
       console.log('copyService to: ', this.services[index])

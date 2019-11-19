@@ -2,7 +2,9 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
 import Vuex from 'vuex'
+import underscore from 'vue-underscore'
 import App from './App'
+import Root from './Root'
 import AppFooter from './components/AppFooter'
 import Sidebar from './components/Sidebar'
 import DocSidebar from './components/DocSidebar'
@@ -28,7 +30,7 @@ import Spinner from 'vue-simple-spinner'
 import SocialSharing from 'vue-social-sharing'
 import VueStripeCheckout from 'vue-stripe-checkout'
 import { library, dom } from '@fortawesome/fontawesome-svg-core'
-import { faCoffee, faHeart, faTrashAlt, faPhone, faEnvelope, faInfoCircle, faInfo, faCube } from '@fortawesome/free-solid-svg-icons'
+import { faCoffee, faHeart, faTrashAlt, faPhone, faEnvelope, faInfoCircle, faInfo, faCube, faSync } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faGithub, faSlack, faFacebookF, faFacebook, faLinkedin, faTwitter, faGooglePlus, faLine, faWeibo, faWeixin } from '@fortawesome/free-brands-svg-icons'
 // https://fontawesome.com/icons?d=gallery
@@ -166,7 +168,7 @@ Vue.use(LiquorTree)
 // window.LOG_LEVEL = 'DEBUG'
 // Amplify.Logger.LOG_LEVEL = 'DEBUG'
 
-library.add(faCoffee, faHeart, faTrashAlt, faPhone, faEnvelope, faInfoCircle, faInfo, faCube)
+library.add(faCoffee, faHeart, faTrashAlt, faPhone, faEnvelope, faInfoCircle, faInfo, faCube, faSync)
 library.add(faGithub, faSlack, faFacebook, faFacebookF, faLinkedin, faTwitter, faGooglePlus, faLine, faWeibo, faWeixin)
 
 // require more codemirror resource...
@@ -203,61 +205,6 @@ awsmobile2.aws_cloud_logic_custom.push({
 Amplify.configure(awsmobile2)
 API.configure(awsmobile2)
 
-/*
-const oauth = {
-  // Domain name
-  domain: config.awsCognitoDomain,
-  // Authorized scopes
-  scope: ['profile', 'openid', 'aws.cognito.signin.user.admin'],
-
-  // Callback URL
-  redirectSignIn: hostUrl + '/callback',
-  // Sign out URL
-  redirectSignOut: hostUrl + '/signout',
-
-  // 'code' for Authorization code grant,
-  // 'token' for Implicit grant
-  responseType: 'code',
-
-  // optional, for Cognito hosted ui specified options
-  options: {
-      // Indicates if the data collection is enabled to support Cognito advanced security features. By default, this flag is set to true.
-      AdvancedSecurityDataCollectionFlag: true
-  }
-}
-*/
-// 0528 remarked, to reflect new settings Auth.configure({ oauth: oauth })
-
-// Amplify.configure({
-  // Auth: {
-      // other configurations...
-      /*
-      identityPoolId: 'ap-southeast-2:00294c49-1629-49e7-88d7-4720566c1377',
-      // REQUIRED - Amazon Cognito Identity Pool ID
-      region: 'ap-southeast-2', // REQUIRED - Amazon Cognito Region
-      userPoolId: 'ap-southeast-2_lL7aXmrN3',
-      // OPTIONAL - Amazon Cognito User Pool ID
-      userPoolWebClientId: 'plnvmu6sfd30444ggvknv4vq9',
-      // OPTIONAL - Amazon Cognito Web Client ID
-      */
-      // ....
-      // oauth: oauth
-  // },
-  // PubSub: {
-    // This was not in the examples and I wonder if I can omit it
-    // uuidv4() is from https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript#answer-2117523
-   // clientId: uuidv4()
-  // }
-// })
-/*
-function uuidv4 () {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    let r = Math.random() * 16 | 0
-    let v = c === 'x' ? r : (r & 0x3 | 0x8)
-    return v.toString(16)
-  })
-}
-*/
 // AWS IoT reference about protocol
 // https://docs.aws.amazon.com/iot/latest/developerguide/protocols.html
 // Important 2018/9/16
@@ -270,7 +217,7 @@ function uuidv4 () {
 // https://aws-amplify.github.io/amplify-js/api/classes/authclass.html#currentcredentials
 // https://aws-amplify.github.io/
 
-// Apply plugin with configuration
+// Apply plugin with configuration, need to manually update them
 Amplify.addPluggable(new AWSIoTProvider({
   aws_pubsub_region: config.awsRegion,
   aws_pubsub_endpoint: 'wss://' + config.awsIotHost + '/mqtt'
@@ -377,6 +324,8 @@ async function listenHandler (data) {
   // console.log('A new auth event has happened: ', data.payload.data.username + ' has ' + data.payload.event)
 }
 
+export var eventBus = new Vue({})
+
 async function onAuthEvent (payload) {
   console.log('event:', payload.event)
   if (payload.event === 'cognitoHostedUI') {
@@ -395,7 +344,10 @@ async function onAuthEvent (payload) {
     const identityId = credentials._identityId
     await atHelper.allowLoginIdentityUseIoT(identityId)
     // console.log('jump to mythings')
+    eventBus.$emit('login')
     router.replace({ name: 'myapps' })
+  } else if (payload.event === 'signOut') {
+    eventBus.$emit('logout')
   }
 }
 
@@ -403,12 +355,13 @@ Vue.component('at-sidebar', Sidebar)
 Vue.component('doc-sidebar', DocSidebar)
 Vue.component('spinner', Spinner)
 Vue.component('at-footer', AppFooter)
-export var eventBus = new Vue({})
+Vue.use(underscore)
 
 Vue.component('at-whitepaper', atWhitepaper)
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */
+/*
 new Vue({
   el: '#app',
   router,
@@ -417,9 +370,25 @@ new Vue({
   cmPyOption,
   template: '<App/>',
   data: {
-    message: 'Hello Vue!'
+    message: 'Hello AIoThings!'
   },
   components: {
     App
+  }
+})
+*/
+Vue.component('App', App)
+new Vue({
+  el: '#app',
+  router,
+  store,
+  cmJsOption,
+  cmPyOption,
+  template: '<Root/>',
+  data: {
+    message: 'Hello AIoThings!'
+  },
+  components: {
+    Root
   }
 })

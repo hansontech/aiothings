@@ -43,6 +43,7 @@
     "multicast-dns": "^7.2.0",
     "net": "^1.0.2",
     "npm": "^6.4.1",
+    "pako": "^1.0.10",
     "react": "^16.5.1",
     "tls": "0.0.1",
     "vue": "^2.6.10",
@@ -56,6 +57,7 @@
     "vue-simple-spinner": "^1.2.8",
     "vue-social-sharing": "^2.3.3",
     "vue-stripe-checkout": "^1.2.6",
+    "vue-underscore": "^0.1.4",
     "vuex": "^3.0.1",
     "vuex-localstorage": "^1.0.0"
   },

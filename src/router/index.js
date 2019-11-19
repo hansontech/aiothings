@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Hello from '@/components/Hello'
-import UserLogin from '@/components/UserLogin'
+// import UserLogin from '@/components/UserLogin'
 import Home from '@/components/Home'
 import User from '@/components/User'
 import MyThings from '@/components/MyThings'
@@ -31,6 +30,7 @@ import AboutUs from '@/components/AboutUs'
 import MyThingsList from '@/components/MyThingsList'
 import Thing from '@/components/Thing'
 import Profile from '@/components/Profile'
+// import Dashboard from '@/components/Dashboard'
 import Callback from '@/components/Callback'
 import ErrorMsg from '@/components/ErrorMsg'
 import store from '../store'
@@ -45,11 +45,6 @@ const router = new VueRouter({
   mode: 'history',
   routes: [
     {
-      path: '/hello',
-      name: 'Hello',
-      component: Hello
-    },
-    {
       path: '/profile',
       name: 'profile',
       component: Profile,
@@ -57,11 +52,6 @@ const router = new VueRouter({
         title: 'User profile',
         auth: true
       }
-    },
-    {
-      path: '/user-login/:option',
-      name: 'UserLogin',
-      component: UserLogin
     },
     {
       path: '/home',
@@ -175,6 +165,17 @@ const router = new VueRouter({
         }
       ]
     },
+    /*
+    {
+      path: '/dashboard/:userid',
+      component: Dashboard,
+      props: true,
+      meta: {
+        title: 'Dashboard',
+        auth: true
+      }
+    },
+    */
     {
       path: '/user',
       component: User,

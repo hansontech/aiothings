@@ -1,19 +1,20 @@
 {
     "paths": [
         {
-            "name": "/checkname",
+            "name": "/logging",
             "lambdaFunction": "mserviceFunction",
             "privacy": {
                 "protected": true,
-                "auth": "rw",
-                "unauth": "rw"
-            }
-        },
-        {
-            "name": "/favorites",
-            "lambdaFunction": "mserviceFunction",
-            "privacy": {
-                "open": true
+                "auth": [
+                    "/POST",
+                    "/GET",
+                    "/PUT",
+                    "/PATCH",
+                    "/DELETE"
+                ],
+                "unauth": [
+                    "/GET"
+                ]
             }
         },
         {
@@ -21,8 +22,20 @@
             "lambdaFunction": "mserviceFunction",
             "privacy": {
                 "protected": true,
-                "auth": "rw",
-                "unauth": "rw"
+                "auth": [
+                    "/POST",
+                    "/GET",
+                    "/PUT",
+                    "/PATCH",
+                    "/DELETE"
+                ],
+                "unauth": [
+                    "/POST",
+                    "/GET",
+                    "/PUT",
+                    "/PATCH",
+                    "/DELETE"
+                ]
             }
         },
         {
@@ -30,8 +43,34 @@
             "lambdaFunction": "mserviceFunction",
             "privacy": {
                 "protected": true,
-                "auth": "rw",
-                "unauth": "rw"
+                "auth": [
+                    "/POST",
+                    "/GET",
+                    "/PUT",
+                    "/PATCH",
+                    "/DELETE"
+                ],
+                "unauth": [
+                    "/POST",
+                    "/GET",
+                    "/PUT",
+                    "/PATCH",
+                    "/DELETE"
+                ]
+            }
+        },
+        {
+            "name": "/favorites",
+            "lambdaFunction": "mserviceFunction",
+            "privacy": {
+                "private": true,
+                "auth": [
+                    "/POST",
+                    "/GET",
+                    "/PUT",
+                    "/PATCH",
+                    "/DELETE"
+                ]
             }
         },
         {
@@ -39,8 +78,41 @@
             "lambdaFunction": "mserviceFunction",
             "privacy": {
                 "protected": true,
-                "auth": "rw",
-                "unauth": "rw"
+                "auth": [
+                    "/POST",
+                    "/GET",
+                    "/PUT",
+                    "/PATCH",
+                    "/DELETE"
+                ],
+                "unauth": [
+                    "/POST",
+                    "/GET",
+                    "/PUT",
+                    "/PATCH",
+                    "/DELETE"
+                ]
+            }
+        },
+        {
+            "name": "/checkname",
+            "lambdaFunction": "mserviceFunction",
+            "privacy": {
+                "protected": true,
+                "auth": [
+                    "/POST",
+                    "/GET",
+                    "/PUT",
+                    "/PATCH",
+                    "/DELETE"
+                ],
+                "unauth": [
+                    "/POST",
+                    "/GET",
+                    "/PUT",
+                    "/PATCH",
+                    "/DELETE"
+                ]
             }
         }
     ],
@@ -52,8 +124,8 @@
         }
     ],
     "privacy": {
-        "auth": 4,
-        "unauth": 4,
+        "auth": 6,
+        "unauth": 5,
         "authRoleName": "aiothings-20190217141129-authRole",
         "unAuthRoleName": "aiothings-20190217141129-unauthRole"
     },
@@ -67,5 +139,5 @@
             ]
         }
     ],
-    "uuid": "a5dbd5ed"
+    "uuid": "d7889dbc"
 }

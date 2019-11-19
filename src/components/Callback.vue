@@ -115,16 +115,6 @@ export default {
     */
     var curUrl = window.location.href
     console.log('callback is called: ', curUrl)
-      /*
-      identityPoolId: 'ap-southeast-2:00294c49-1629-49e7-88d7-4720566c1377',
-      // REQUIRED - Amazon Cognito Identity Pool ID
-      region: 'ap-southeast-2', // REQUIRED - Amazon Cognito Region
-      userPoolId: 'ap-southeast-2_lL7aXmrN3',
-      // OPTIONAL - Amazon Cognito User Pool ID
-      userPoolWebClientId: 'plnvmu6sfd30444ggvknv4vq9', // '7bsh3bbbl4onns8h4d6ceof3kd',
-      // OPTIONAL - Amazon Cognito Web Client ID
-      // ....
-      */
     /*
     Auth.configure({
       oauth: Auth.configure().oauth

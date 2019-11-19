@@ -43,16 +43,29 @@ export default {
       state.consoleOutputs = consoleOutputs
     },
     setConsoleInput: (state, consoleInput) => {
-      if (consoleInput.hasOwnProperty('topic')) {
-        state.consoleInputTopic = consoleInput.topic
-        // console.log('write topic: ', consoleInput.topic)
-      }
-      if (consoleInput.hasOwnProperty('body')) {
-        state.consoleInputBody = consoleInput.body
-        // console.log('write body: ', consoleInput.body)
+      if (consoleInput === null) {
+        state.consoleInputTopic = null
+        state.consoleInputBody = null
+      } else {
+        if (consoleInput.hasOwnProperty('topic')) {
+          state.consoleInputTopic = consoleInput.topic
+          // console.log('write topic: ', consoleInput.topic)
+        }
+        if (consoleInput.hasOwnProperty('body')) {
+          state.consoleInputBody = consoleInput.body
+          // console.log('write body: ', consoleInput.body)
+        }
       }
     }
   },
   actions: {
+    resetLoadedUsageCaches: function (context) {
+      context.commit('setSearchArea', null)
+      context.commit('setSearchText', null)
+      context.commit('setSearchKeywords', null)
+      context.commit('setQueriedSolutions', null)
+      context.commit('setConsoleOutputs', null)
+      context.commit('setConsoleInput', null)
+    }
   }
 }

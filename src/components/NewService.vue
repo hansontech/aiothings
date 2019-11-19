@@ -113,7 +113,7 @@
                 label-for="inputHorizontal">
             <b-form-input v-model="mservice.DeployMessage" :placeholder="deployMessageFormat" id="inputHorizontal"></b-form-input>
             </b-form-group>
-                       <b-form-group
+              <b-form-group
                 :label-cols="3"
                 breakpoint="md"
                 label-size="lg"
@@ -248,6 +248,7 @@ export default {
       zipFile: null,
       isCreating: false,
       isZipDownloading: false,
+      isChangedNotSaved: null,
       mservice: {
         UserId: this.$store.getters.username,
         ServiceDesc: 'This is a sample microservice',
@@ -327,10 +328,15 @@ export default {
     // this.$refs.sourceEditor.editor.focus()
   },
   methods: {
+    onCodeChangeHandler (cmObject, changeObject) {
+        // console.log('content changed: ', cmObject, changeObject)
+        this.isChangedNotSaved = true
+    },
     setCmActive () {
       console.log('setCmActive')
       var that = this
       let cm = that.codemirror
+      cm.on('change', this.onCodeChangeHandler.bind(this))
       let runtime = this.mservice.ServiceRuntime
       // https://jshint.com/docs/options/
       if (runtime !== null && runtime.toLowerCase().includes('python')) {
@@ -389,7 +395,7 @@ export default {
           this.mservice.ServiceCode = tempCode
           this.templateCode[this.mservice.ServiceRuntime] = tempCode
         } catch (e) {
-          console.log('error: ', e)
+          console.log('update service template error: ', e)
         }
       }
     },
@@ -539,11 +545,12 @@ export default {
 </script>
 
 <style>
+/*
 .at-border {
   border: 1px solid #a78;
   padding: 5px;
 }
-
+*/
 .CodeMirror {
   border: 1px solid #a78;
   padding: 5px;

@@ -173,15 +173,6 @@
 				}
 			}
 		},
-		"functioniftttFunction": {
-			"Type": "AWS::CloudFormation::Stack",
-			"Properties": {
-				"TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/iftttFunction-cloudformation-template.json",
-				"Parameters": {
-					"env": "prod"
-				}
-			}
-		},
 		"functionthingFunction": {
 			"Type": "AWS::CloudFormation::Stack",
 			"Properties": {
@@ -232,33 +223,6 @@
 			"Properties": {
 				"TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/apiAuthorizerFunction-cloudformation-template.json",
 				"Parameters": {
-					"env": "prod"
-				}
-			}
-		},
-		"apiiftttApi": {
-			"Type": "AWS::CloudFormation::Stack",
-			"Properties": {
-				"TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/api/iftttApi-cloudformation-template.json",
-				"Parameters": {
-					"authRoleName": {
-						"Ref": "AuthRoleName"
-					},
-					"unauthRoleName": {
-						"Ref": "UnauthRoleName"
-					},
-					"functioniftttFunctionName": {
-						"Fn::GetAtt": [
-							"functioniftttFunction",
-							"Outputs.Name"
-						]
-					},
-					"functioniftttFunctionArn": {
-						"Fn::GetAtt": [
-							"functioniftttFunction",
-							"Outputs.Arn"
-						]
-					},
 					"env": "prod"
 				}
 			}

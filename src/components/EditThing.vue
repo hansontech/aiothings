@@ -1399,7 +1399,7 @@ export default {
     mlResourceModelFileName (edgeResource) {
       let uri = edgeResource.ResourceDataContainer.S3MachineLearningModelResourceData.S3Uri
       if (uri !== null) {
-        let fileNameFilter = uri.split(config.awsGreengrassBucket + '-prod/public/' + this.thing.UserId + '_')
+        let fileNameFilter = uri.split(config.awsGreengrassBucket + '/public/' + this.thing.UserId + '_')
         // console.log('file names: ', fileNameFilter)
         let fileName = fileNameFilter[1] // uri.split(config.awsGreengrassBucket + '/public/' + this.thing.UserId + '_')[1]
         return fileName
@@ -1732,7 +1732,7 @@ export default {
       let reader = new window.FileReader() // if window is not used it says File READER is not defined
       let userId = this.thing.UserId
       let that = this
-      that.ggMLResource.ResourceDataContainer.S3MachineLearningModelResourceData.S3Uri = 's3://' + config.awsGreengrassBucket + '-prod/public/' + userId + '_' + file.name
+      that.ggMLResource.ResourceDataContainer.S3MachineLearningModelResourceData.S3Uri = 's3://' + config.awsGreengrassBucket + '/public/' + userId + '_' + file.name
       reader.onload = function (event) {
          // dispatch fileAttached to state UI postEditor with event.target.result as read dataURL
         let content = event.target.result

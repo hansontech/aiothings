@@ -9,7 +9,8 @@
 export default {
   data: function () {
     return {
-      searchString: ''
+      searchString: '',
+      servicesLogging: {}
     }
   },
   watch: {
@@ -18,11 +19,17 @@ export default {
         this.$parent.searchString.mservice = newS
         // console.log('MyApplications set: ', this.$parent.searchString.mservice)
       }
+    },
+    servicesLogging: {
+      handler: function (newValue) {
+        this.$parent.servicesLogging = newValue
+      }
     }
   },
   mounted () {
     // console.log('MyApplications get: ', this.$parent.searchString.mservice)
     this.searchString = this.$parent.searchString.mservice
+    this.servicesLogging = this.$parent.servicesLogging
   }
 }
 </script>

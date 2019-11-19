@@ -64,11 +64,32 @@ def storePutObject(objectName, data):
     except Exception as err:
         print(err)
 
+def storageGet(objectName):
+    resultData = None
+    try:
+        client = boto3.client('s3')
+        data = client.get_object(Bucket = os.environ['S3_BUCKET'], Key = objectName)
+        resultData = data['Body'].read()
+        # print('get object: ', resultData)
+    except Exception as err:
+        print('object error: ', err)
+        resultData = None
+    return  resultData
+
+def storagePut(objectName, data):
+    try:
+        client = boto3.client('s3')
+        client.put_object(Bucket = os.environ['S3_BUCKET'], Key = objectName, Body = data)
+    except Exception as err:
+        print(err)
+
 def consoleOutput(outputMessage):
     global inputEvent
     # event = inputEvent
+    outputData = {}
+    outputData['message'] = outputMessage
     client = boto3.client('iot-data') # os.environ['IOT_ENDPOINT']
-    dataString = json.dumps(outputMessage, separators=(',',':')) # compact, counterpart loads
+    dataString = json.dumps(outputData, separators=(',',':')) # compact, counterpart loads
     sendTo = senderId
     if senderId == 'admin' or senderId == 'system':
         sendTo = os.environ['OWNER_ID']

@@ -20,7 +20,7 @@
             <b-container style="padding: 10px 0px 10px 5px; height: 100%;">
               <div id="consoleOutputContainer" class="at-scroll">
                   <p style="line-height: 1.1; margin-top:0em; margin-bottom:5px; " v-for="(output, index) in consoleOutputs" :key="index">
-                    <small><b>{{output.date}}</b>:</small> {{output.body}}
+                    <small><b>{{output.date}}</b>:<b>{{output.fromService}}</b></small>: {{output.body}}
                   </p>     
               </div>
             </b-container>
@@ -85,12 +85,7 @@ export default {
         topic: '',
         body: ''
       },
-      incomingMessage: {
-        topic: '',
-        body: null
-      },
-      consoleOutputs: [],
-      consoleSub: null
+      consoleOutputs: []
     }
   },
   computed: {
@@ -116,33 +111,8 @@ export default {
     this.inputMessage.body = this.$store.getters.consoleInputBody
     eventBus.$on('newConsoleOutput', this.onNewConsoleOutput)
      this.consoleOutputs = this.$store.getters.consoleOutputs
-     console.log('console outputs: ', this.consoleOutputs)
-
-     let subscribeConsoleOutputTopic = 'aiot/' + this.$store.getters.username + '/+/console/output'
-     console.log('subscribe topic: ', subscribeConsoleOutputTopic)
-     this.consoleSub = PubSub.subscribe(subscribeConsoleOutputTopic).subscribe({
-          next: data => {
-              console.log('console output:', data)
-              this.consoleOutputs = this.$store.getters.consoleOutputs
-              this.incomingMessage.date = (new Date().toLocaleTimeString())
-              this.incomingMessage.body = data.value
-              let newMessage = Object.assign({}, this.incomingMessage)
-              if (this.consoleOutputs === null) {
-                this.consoleOutputs = []
-              }
-              this.consoleOutputs.push(newMessage)
-              this.$store.commit('setConsoleOutputs', this.consoleOutputs)
-              eventBus.$emit('newConsoleOutput')
-          },
-          error: error => console.error('error: ', error),
-          close: () => console.log('Done')
-      })
-      this.consoleSub.unsubscribe()
   },
   beforeDestroy () {
-    // Unsubscribe client connected
-    // Unsubscribe client disconnected
-    // this.consoleSub.unsubscribe()
   },
   methods: {
     scrollToEnd () {
@@ -196,12 +166,12 @@ div.at-bottombar {
 .CodeMirror pre.CodeMirror-placeholder {
   color: #999;
 }
-
+/*
 .at-border {
   border: 1px solid #a78;
   padding: 5px;
 }
-
+*/
 div.at-scroll {
   /* height : 500px ; */
   overflow-y: scroll; /* auto */

@@ -30,21 +30,6 @@ export default {
     // Launch hosted UI
     window.location.assign(url)
   },
-  /*
-  authenticateData: function () {
-    var authData = {
-      ClientId: config.awsCognitoUserPoolAppClientId, // Your client id here
-      AppWebDomain: process.env.AWS_COGNITO_USER_POOL_DOMAIN,
-      TokenScopesArray: ['profile', 'openid'],
-      RedirectUriSignIn: window.location.protocol + '//' + window.location.host + '/callback',
-      RedirectUriSignOut: window.location.protocol + '//' + window.location.host + '/signout',
-      IdentityProvider: `cognito-idp.${config.awsRegion}.amazonaws.com/${config.awsCognitoUserPoolId}`, // e.g. 'Facebook',
-      UserPoolId: config.awsCognitoUserPoolId, // Your user pool id here
-      AdvancedSecurityDataCollectionFlag: true // e.g. true
-      // Storage: '<TODO the storage object>' // OPTIONAL e.g. new CookieStorage(), to use the specified storage provided
-    }
-    return authData
-  }, */
   authenticateOld: function (provider) {
     var domain = process.env.AWS_COGNITO_USER_POOL_DOMAIN
     var clientId = process.env.AWS_COGNITO_CLIENT_ID

@@ -1,44 +1,6 @@
 <template>
   <!-- <div class="container-fluid mt-4"> -->
-  <div style="margin-left:5px; margin-top:5px">
-    <!--
-    <h2>{{routeName}}</h2>
-    
-    <ul class="nav nav-pills flex-column at-sidebar">
-        <li><router-link to="/user/myapps">myapps</router-link></li>
-        <li><router-link to="/user/mythings">mythings</router-link></li>
-        <li><router-link to="/user/myfavorites">myfavorites</router-link></li>
-        <li><router-link to="/user/recommended">recommended</router-link></li>
-    </ul>
-    -->
-    <!--
-    <nav vertical>
-      <b-link  to="/myapps">myapps</b-link>
-      <router-link to="/user">user</router-link>
-      <router-link to="/myfavorites">myfavorites</router-link>
-      <router-link to="/recommended">recommended</router-link>
-    </nav> 
-    <b-nav vertical pills>
-      <b-nav-item><b-link to="/myapps">myapps</b-link></b-nav-item>
-      <b-nav-item><b-link to="/user">user</b-link></b-nav-item>
-      <b-nav-item><b-link to="/myfavorites">myfavorites</b-link></b-nav-item>
-      <b-nav-item><b-link to="/recommended">recommended</b-link></b-nav-item>
-    </b-nav> 
-    <b-list-group>
-      <b-list-group-item><b-link to="/myapps">myapps</b-link></b-list-group-item>
-      <b-list-group-item><b-link to="/user">user</b-link></b-list-group-item>
-      <b-list-group-item><b-link to="/myfavorites">myfavorites</b-link></b-list-group-item>
-      <b-list-group-item><b-link to="/recommended">recommended</b-link></b-list-group-item>
-    </b-list-group>  
-    <b-button-group vertical>
-      <b-button  class="btn btn-primary" :pressed="routeName=='myapps'" @click="toMyApps()">My applications</b-button>
-      <b-button :pressed="routeName==='user'" @click="toUser()">User</b-button>
-      <b-button :pressed="routeName==='mythings'" @click="toMyThings()">My IoT devices</b-button>
-      <b-button :pressed="routeName==='myfavorites'" @click="toMyFavorites()">My favorites</b-button>
-      <b-button :pressed="routeName==='recommended'" @click="toRecommended()">Recommended</b-button>
-    </b-button-group>
-    
-    -->    
+  <div style="margin-left:5px; margin-top:5px">  
     <div >
     <!-- <p>{{$route.path}}</p> -->
     <b-button-group vertical class="at-sidebar-button" style="width:100%">
@@ -100,7 +62,6 @@
 import { API } from 'aws-amplify'
 import { eventBus } from '../main'
 // import { Auth } from 'aws-amplify'
-// import * as apiGateway from '../lib/api-gateway'
 // import jwt from 'jwt-decode'
 // import FileSaver from 'file-saver'
 import atHelper from '../aiot-helper'
@@ -173,10 +134,8 @@ export default {
   },
   methods: {
     async downloadConfig () {
-      let res = await fetch('/static/aws-exports.js')
-      // let data = await res.text()
-      let blob = await res.blob()
-      await atHelper.downloadBinaryFile('aws-exports.js', blob)
+      await atHelper.downloadUrlToLocal('/static/aws-exports.js', 'aws-exports.js')
+      await atHelper.downloadUrlToLocal('/static/awsconfiguration.json', 'awsconfiguration.json')
     },
     toQuit () {
       eventBus.$emit('pageBack')
@@ -222,7 +181,8 @@ export default {
       this.$router.replace('/user/recommended')
     },
     toSolutions () {
-      this.$router.replace({name: 'solutions'})
+      // this.$router.replace({name: 'solutions'})
+      this.$router.replace('/solutions')
     },
     toDocs () {
       this.$router.push({name: 'docs'})

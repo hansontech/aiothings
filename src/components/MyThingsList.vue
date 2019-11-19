@@ -85,9 +85,7 @@
 <script>
 // import { API, Auth } from 'aws-amplify'
 import atHelper from '../aiot-helper'
-// import * as IoT from '../lib/aws-iot'
 import { API, PubSub } from 'aws-amplify'
-
 // AWS Amplify API reference
 // https://aws-amplify.github.io/amplify-js/media/api_guide.html
 
@@ -206,7 +204,6 @@ export default {
       } // for loop
   },
   mounted () {
-    // console.log('MyThingList: ', this.$parent.searchString)
   },
   beforeDestroy () {
     // Unsubscribe client connected
@@ -284,12 +281,12 @@ export default {
 </script>
 
 <style>
-
+/*
 .at-border {
   border: 1px solid #a78;
   padding: 5px;
 }
-
+*/
 .at-scroll {
   /* height : 500px ; */
   overflow-y: auto;

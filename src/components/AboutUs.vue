@@ -1,4 +1,6 @@
 <template>
+<div>
+  <App/>
   <b-container> 
     <div style="min-height: 500px">
 <b-row class="mt-4">
@@ -45,8 +47,9 @@ In this way, AIoThings users will be able to connect to each other and each othe
   </div> 
     </div>
   </b-container>
+  <at-footer/>
+</div>
 </template>
-
 <script>
 
 import VueMarkdown from 'vue-markdown'

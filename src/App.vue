@@ -1,14 +1,5 @@
 <template>
-  <div id="app" >
-    <!--
-    <header>
-      <span>Vue.js PWA</span>
-    </header>
-    <main>
-      <img src="./assets/logo.png" alt="Vue.js PWA">
-      <router-view></router-view>
-    </main>
-    -->
+  <div id="app2" >
     <!-- for fixed-top  https://mdbootstrap.com/docs/vue/utilities/position/ --> 
     <b-navbar toggleable="md" type="dark" variant="dark" class="fixed-top">
       <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
@@ -18,15 +9,6 @@
       <b-collapse is-nav id="nav_collapse">
         <!-- Right aligned nav items -->
         <b-navbar-nav> <!-- v-if="isAuthenticated" -->
-          <!--
-          <b-nav-form>
-              <b-form-select id="solutionQuery"
-                v-model="selected"
-                :options="options" disabled>
-              </b-form-select>
-          </b-nav-form>
-          &ensp;
-          -->
           <b-nav-text>&ensp;Solutions&ensp;</b-nav-text>
           <b-nav-form>
             <b-form-input v-model="searchText" type="text" placeholder="Search keywords.."/>
@@ -36,34 +18,13 @@
             <b-button type="button" v-b-popover.hover.bottomleft="'Search from the shared resources'" @click="searchSolutions()">Search</b-button>
           </b-nav-form>
         </b-navbar-nav>
-        <!--
-        <b-navbar-nav class="ml-auto">
-          &ensp;&ensp;
-          <b-nav-form>
-            <b-button variant="primary" type="button" @click="goSolutions()">Resources</b-button>
-          </b-nav-form>
-        </b-navbar-nav>
-        -->
         <b-navbar-nav class="ml-auto">
           <b-nav-item center @click="gotoShop()"><i class="fas fa-cube"></i>&ensp;Shop</b-nav-item>
         </b-navbar-nav>
         <b-navbar-nav class="ml-auto">
           <b-nav-item @click="gotoDocuments()"><i class="fas fa-info"></i>&ensp;Docs</b-nav-item>
           &ensp;
-          <!--
-          <b-nav-item-dropdown id="langDropDown" :text="currentLang" right>
-            <b-dropdown-item href="#" @click="changeLanguage('EN')">{{languages['EN']}}</b-dropdown-item>
-            <b-dropdown-item href="#" @click="changeLanguage('CN')" disabled>{{languages['CN']}}</b-dropdown-item>
-            <b-dropdown-item href="#" @click="changeLanguage('JP')" disabled>{{languages['JP']}}</b-dropdown-item>
-            <b-dropdown-item href="#" @click="changeLanguage('KR')" disabled>{{languages['KR']}}</b-dropdown-item>
-          </b-nav-item-dropdown>
-          -->
           <b-nav-item v-if="!isAuthenticated" @click="authenticate()">Log in / Sign up</b-nav-item>
-          <!--
-          <b-nav-item v-if="isAuthenticated" @click="signout()">Log out</b-nav-item>
-          <b-nav-item to="/user-login/login" v-if="!isUserLoggedIn">Log in / Sign up</b-nav-item>
-          <b-nav-item href="#" @click.prevent="logout" v-else>Log out</b-nav-item>
-          -->
           <b-nav-item-dropdown right v-if="isAuthenticated">
             <!-- Using button-content slot -->
             <template slot="button-content">
@@ -83,39 +44,23 @@
       <!-- must reserve more space for header, TODO -->
       <pre style="background-color: white; border: 0px; padding: 0px;"> 
       </pre>
-      <router-view></router-view>
+      <!-- <router-view></router-view>  -->
     </div>
-     <at-footer v-if="isDocumentPath" class="modal__footer"/>
+    <!-- <at-footer v-if="isDocumentPath" class="modal__footer"/> -->
  </div> 
 </template>
 
 <script>
 
 import { eventBus } from './main'
-// import auth from './services/auth'
 import { Auth, API } from 'aws-amplify'
 import atHelper from './aiot-helper'
-
-// Helpers
-/* import {
-  loadFbSdk,
-  getFbLoginStatus,
-  getFbUserData,
-  fbLogout
-} from './helpers/facebook-helpers.js' */
 
 export default {
   name: 'app',
   data () {
     return {
       isVisible: false,
-      fbData: {
-        facebookAppId: '265383824068284',
-        facebookVersion: 'v3.1',
-        personalID: null,
-        email: null,
-        name: null
-      },
       isUserLoggedIn: false,
       currentLang: 'English',
       languages: {'EN': 'English', 'CN': '中文', 'JP': '日本語', 'KR': '한국어'},
@@ -156,8 +101,6 @@ export default {
     }
   },
   created () {
-    console.log('App.vue created')
-    // console.log('profile: ', this.profile)
     for (let i in this.options) {
       this.searchKeywordsMap[this.options[i].value] = this.options[i].keyword
     }
@@ -166,27 +109,6 @@ export default {
     console.log('App.vue mounted')
     this.selected = this.$store.getters.searchArea
     this.searchText = this.$store.getters.searchText
-    /* loadFbSdk(this.fbData.facebookAppId, this.fbData.facebookVersion)
-      .then(response => {
-        console.log('fb loadFbSdk completed')
-        getFbLoginStatus().then(response => {
-          console.log(response)
-          let loginStatus = response.status
-          console.log(loginStatus)
-          if (loginStatus === 'connected') {
-            getFbUserData().then(userInformation => {
-              this.fbData.personalID = userInformation.id
-              this.fbData.email = userInformation.email
-              this.fbData.name = userInformation.name
-              this.isUserLoggedIn = true
-              console.log(this.fbData.name)
-            })
-          }
-        })
-      })
-      .catch(function (err) {
-        console.log(err)
-      }) */
 
     eventBus.$on('login', () => {
       this.isUserLoggedIn = true
@@ -214,8 +136,6 @@ export default {
         }
         // cognito username is uniquely assigned even for federated logins
         let username = this.$store.getters.profile['cognito:username']
-        // username = this.$store.getters.profile
-        console.log('username: ', username)
         return username
       } catch (e) {
         return ' '
@@ -228,7 +148,6 @@ export default {
       try {
         // facebook profile case
         let picJson = JSON.parse(this.$store.getters.profile.picture)
-        // console.log('url: ', picJson.data.url)
         return picJson.data.url
       } catch (e) {
         // google profile case
@@ -239,36 +158,19 @@ export default {
   },
   methods: {
     async searchSolutions () {
-      /*
-      let result = await API.get('solutionApi', '/solutions', {
-          'queryStringParameters': {
-            SolutionId: 'smart-greenhouse-iot'
-          }
-      })
-      console.log('seach result: ', result)
-      */
-
       let solutionCategory = this.selected
       if (solutionCategory === null) {
         solutionCategory = ''
       }
-      console.log('search: ', this.selected, ':', this.searchText)
       let queryResult = await API.get('solutionApi', '/solutions', {
           'queryStringParameters': {
             SolutionCategory: solutionCategory,
             SearchText: this.searchText
           }
       })
-      console.log('seach result: ', queryResult)
-      // if (queryResult.length > 0) {
       this.$store.commit('setQueriedSolutions', queryResult)
-      console.log('searchText : ', this.searchText)
-
       this.$router.push({name: 'queriedSolutions'})
-      console.log('searchSolutions')
       eventBus.$emit('pageRefresh')
-      //, params: { queryString: this.searchText }
-      // }
     },
     goSolutions () {
       this.$router.push({name: 'queriedSolutions'})
@@ -310,58 +212,15 @@ export default {
         })
       })
       .catch(err => console.log(err))
-      /*
-      const currentUser = Auth.userPool.getCurrentUser()
-      if (currentUser != null) {
-          currentUser.signOut()
-      }
-      this.$store.dispatch('signout').then(() => {
-        this.$router.push({ name: 'home' })
-      })
-      */
     },
     login: function () {
       console.log('login')
-      /*
-      this.$auth.login({ email, password }).then(function () {
-        // Execute application logic after successful login
-      })
-      */
     },
     logout: function () {
-      /* fbLogout().then(response => {
-        console.log(response)
-        this.isUserLoggedIn = false
-      }).catch(function (err) {
-        console.log(err)
-      }) */
     },
     register: function () {
       console.log('Sign up')
-      /*
-      this.$auth.register({ name, email, password }).then(function () {
-        // Execute application logic after successful registration
-      })
-      */
-    },
-    getFbUserData () {
-      window.FB.api('/me', 'GET', { fields: 'id,name,email' },
-        userInformation => {
-          this.fbData.personalID = userInformation.id
-          this.fbData.email = userInformation.email
-          this.fbData.name = userInformation.name
-          console.log(this.fbData.name)
-        }
-      )
     }
-    /* ,
-    userHasPhoto () {
-      console.log('going to userHasPhoto: ')
-      let result = atHelper.userHasPhoto()
-      console.log('userHasPhoto: ', result)
-      return result
-    }
-    */
   }
 }
 </script>
@@ -406,19 +265,6 @@ img.at-imageRound {
     border-radius: 50%;
 }
 
-/*
-.color-box {
-    width: 100%;
-    display: inline-block;
-    background-color: var(--color);
-    position: absolute;
-    right: 0px;
-    left: 0px;
-    top: 0px;
-    bottom: 0px;
-}
-*/
-
 :root {
     --color-thing: lightblue;
     --color-mservice: gainsboro;
@@ -427,6 +273,11 @@ img.at-imageRound {
     --height-at-card-header: 30px;
     --height-at-dynamic: 10px;
     --color-at-dynamic: red;
+}
+
+.at-border {
+  border: 1px solid #a78;
+  padding: 5px;
 }
 
 .at-card-thing {
@@ -444,12 +295,6 @@ img.at-imageRound {
     height: var(--height-at-card-header);
     padding: 0px 0px;
     margin-bottom: 0; 
-    /* 
-    padding: 0.75rem 1.25rem;
-    margin-bottom: 0;
-    background-color: #fff;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
-    */
 }
 
 .at-card-mservice .card-header {   /* multiple classes together */
@@ -474,32 +319,4 @@ img.at-imageRound {
   box-shadow : 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   /* box-shadow: 1px -1px teal; */
 }
-/*
-.modal {
-    display: block;
-    overflow: hidden;
-    height: 100%;
-    min-height: 100%; 
-    left: 0;
-    position: relative; 
-    width: 100%;
-}
-.modal.open {
-   display: block;
-}
-.modal__content {
-    bottom: 100px;
-    top: 100px;
-    padding-top: 100px
-}
-.modal__footer {
-    bottom: 0;
-}
-*/
-
-/*
-div {
-    outline-color:cornflowerblue
-}
-*/
 </style>

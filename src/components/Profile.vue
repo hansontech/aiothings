@@ -1,5 +1,7 @@
 <template>
-  <b-container> 
+  <div> 
+   <App></App>
+   <b-container>
    <div style="min-height: 500px">
     <b-row align-v="center" class="mt-2 at-bottombar">
       <h4>Account Information</h4>
@@ -34,24 +36,40 @@
       <b-col> Created since: </b-col>
       <b-col sm="7"> {{createdDate}} </b-col> 
     </b-row>
-    <b-row v-if="registeredFrom == 'email' && showedChangePassword === false" align-v="center" class="mt-2 at-bottombar">
+    <b-row v-if="registeredFrom == 'email'" align-v="center" class="mt-2 at-bottombar">
       <b-col> Password: </b-col>
       <b-col sm="7"> 
-        <b-button variant="info"  v-b-toggle.collapseChangePassword @click="changePasswordErrorMessage = ''; inputNewPassword = ''; inputOldPassword = ''; inputNewPasswordAgain = ''; showedChangePassword = !showedChangePassword">Change</b-button> 
+        <b-button variant="info"  v-b-toggle.collapseChangePassword @click="changePasswordErrorMessage = '';inputNewPassword = ''; inputOldPassword = ''; inputNewPasswordAgain = '';">Change</b-button> 
       </b-col> 
     </b-row>
     <b-collapse id="collapseChangePassword" class="mt-2">
-     <b-row v-if="registeredFrom == 'email'" align-v="center" class="mt-2 at-bottombar">
+     <b-row align-v="center" class="mt-2 at-bottombar">
       <b-col> Password: </b-col>
       <b-col sm="7">
+        <!--
+        <b-modal ref="changePasswordErrorModal">
+           <b-badge variant="danger">
+            {{changePasswordErrorMessage}}
+            </b-badge>
+        </b-modal>
+        -->
         <b-row v-if="changePasswordErrorMessage != ''">
           <b-col>
             <b-badge variant="danger">
-            {{changePasswordErrorMessage}}
+              <b-row align-v="center">
+                <b-col col="11">
+                  {{changePasswordErrorMessage}}
+                </b-col>
+                <b-col col="1">
+                  <b-button variant="warning" @click="changePasswordErrorMessage = ''">
+                    OK
+                  </b-button>
+                </b-col>
+              </b-row>
             </b-badge>
           </b-col>
         </b-row>   
-        <b-row>
+        <b-row class="mt-2" style="font-size: smaller;">
           <b-col>
             <b-form-group
               id="fieldset-1"
@@ -86,7 +104,7 @@
             <b-row>
               <b-col>
                 <b-button variant="info" @click="changePassword();">Update</b-button> 
-                <b-button variant="info" v-b-toggle.collapseChangePassword @click="showedChangePassword = !showedChangePassword">Cancel</b-button> 
+                <b-button variant="info" v-b-toggle.collapseChangePassword>Cancel</b-button> 
               </b-col>
             </b-row>
           </b-col>
@@ -144,7 +162,9 @@
     </b-row>
     -->
    </div>
-  </b-container>
+   </b-container>
+   <at-footer/>
+  </div>
 </template>
 
 
@@ -164,7 +184,6 @@ export default {
       description: 'Disc',
       currency: 'AUD',
       amount: 4.9,
-      showedChangePassword: false,
       inputNewPassword: '',
       inputNewPasswordAgain: '',
       inputOldPassword: '',
@@ -284,10 +303,12 @@ export default {
     changePassword () {
       if (this.inputNewPassword.length === 0 || this.inputNewPassword.length === 0) {
         this.changePasswordErrorMessage = 'Password cannot be zero length.'
+        this.$refs.changePasswordErrorModal.show()
         return
       }
       if (this.inputNewPassword !== this.inputNewPasswordAgain) {
         this.changePasswordErrorMessage = 'New passwords are not consistant.'
+        this.$refs.changePasswordErrorModal.show()
         return
       }
       Auth.currentAuthenticatedUser()
@@ -297,11 +318,11 @@ export default {
       })
       .then(data => {
         console.log('data: ', data)
-        this.showedChangePassword = !this.showedChangePassword
         this.$root.$emit('bv::toggle::collapse', 'collapseChangePassword')
       })
       .catch(err => {
         this.changePasswordErrorMessage = err.message
+        this.$refs.changePasswordErrorModal.show()
         console.log('err: ', err.message)
       })
     },

@@ -25,11 +25,6 @@ const awsmobile = {
     "aws_user_files_s3_bucket_region": "ap-southeast-2",
     "aws_cloud_logic_custom": [
         {
-            "name": "iftttApi",
-            "endpoint": "https://8t2ojrvn3c.execute-api.ap-southeast-2.amazonaws.com/prod",
-            "region": "ap-southeast-2"
-        },
-        {
             "name": "thingApi",
             "endpoint": "https://vx1xuy1ns4.execute-api.ap-southeast-2.amazonaws.com/prod",
             "region": "ap-southeast-2"

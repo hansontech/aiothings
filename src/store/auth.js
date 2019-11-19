@@ -58,8 +58,11 @@ export default {
     },
     profileUpdate: function (context, payload) {
       if (context.getters.username !== payload['cognito:username']) {
+        console.log('reset all cached buffers')
         context.dispatch('resetLoadedMserviceCaches')
         context.dispatch('resetLoadedThingsCaches')
+        context.dispatch('resetLoadedApisCaches')
+        context.dispatch('resetLoadedUsageCaches')
       }
       context.commit('setProfile', payload)
       context.commit('setAuthenticated', true)

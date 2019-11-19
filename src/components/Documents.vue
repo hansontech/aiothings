@@ -1,6 +1,7 @@
 <template>
+<div> 
+  <App/>
   <b-container>
-    
         <!-- https://www.codeply.com/go/p2pModdHxc/bootstrap-independent-scrolling-columns -->
         <!--
           <div class="row">
@@ -19,39 +20,21 @@
         <div id="docMain" class="page">
             <router-view/>
         </div>
-
-    
   </b-container>
+</div>
 </template>
 
 <script>
-// import Sidebar from './Sidebar'
-// import { Auth } from 'aws-amplify'
-// import * as apiGateway from '../lib/api-gateway'
-// import jwt from 'jwt-decode'
-
-import { PubSub } from 'aws-amplify'
-import { eventBus } from '../main'
 
 export default {
-  /*
-  components: {
-    sidebar: Sidebar
-  }, */
-  name: 'user',
+  name: 'documents',
   data: function () {
     return {
       activeMenu: 'app',
       response: 'unknown',
       guess: 123,
       what: 0,
-      loading: false,
-      inputMessage: {
-        date: 0,
-        body: null
-      },
-      consoleOutputs: [],
-      consoleSub: null
+      loading: false
     }
   },
   computed: {
@@ -70,29 +53,8 @@ export default {
     }
   },
   created () {
-    // Subscribe
-    let subscribeConsoleOutputTopic = 'aiot/' + this.$store.getters.username + '/+/console/output'
-
-    console.log('subscribe topic: ', subscribeConsoleOutputTopic)
-    this.consoleSub = PubSub.subscribe(subscribeConsoleOutputTopic).subscribe({
-          next: data => {
-              console.log('console output:', data)
-              this.consoleOutputs = this.$store.getters.consoleOutputs
-              this.inputMessage.date = (new Date().toLocaleTimeString())
-              this.inputMessage.body = data.value
-              let newMessage = Object.assign({}, this.inputMessage)
-              if (this.consoleOutputs === null) {
-                this.consoleOutputs = []
-              }
-              this.consoleOutputs.push(newMessage)
-              this.$store.commit('setConsoleOutputs', this.consoleOutputs)
-              eventBus.$emit('newConsoleOutput')
-          },
-          error: error => console.error('error: ', error)
-    })
   },
   beforeDestroy () {
-    this.consoleSub.unsubscribe()
   },
   methods: {
 

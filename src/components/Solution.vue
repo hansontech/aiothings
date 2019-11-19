@@ -1,4 +1,6 @@
 <template>
+<div> 
+  <App/>
   <b-container fluid >
     <div>
       <!-- <b-alert :show="loading" variant="info">Loading...</b-alert> -->
@@ -12,6 +14,8 @@
       </b-row>
     </div>
   </b-container>
+  <at-footer/>
+</div>
 </template>
 
 <script>

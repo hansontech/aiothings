@@ -35,7 +35,66 @@ let storePutObject = async (objectName, data) => {
       console.log('aiotStorePut:', err);
     }
 }
-  
+
+let storageFind = async (objectName) => {
+    let s3 = new AWS.S3();
+    let params = {
+        Bucket:  environment.S3_BUCKET,
+        Key: objectName
+    };
+    let data = null;
+    try {
+    	data = await s3.headObject(params).promise();
+    } catch (err) {
+        console.log('storageFind:', err);
+        return null
+    }
+    return data;
+};
+
+let storageGet = async (objectName) => {
+    let s3 = new AWS.S3();
+    let params = {
+        Bucket:  environment.S3_BUCKET,
+        Key: objectName
+    };
+    let data = null;
+    try {
+    	data = await s3.getObject(params).promise();
+    } catch (err) {
+        console.log('storageGet:', err);
+        return null
+    }
+    return data.Body;
+};
+
+let storagePut = async (objectName, data) => {
+    let s3 = new AWS.S3();
+    let params = {
+      Bucket: environment.S3_BUCKET,
+      Key: objectName,
+      Body: Buffer.from(data)
+    };
+    try {
+      await s3.putObject(params).promise()
+    } catch (err) {
+      console.log('storagePut:', err);
+    }
+}
+
+let storageDelete= async (objectName) => {
+    let s3 = new AWS.S3();
+    let params = {
+      Bucket: environment.S3_BUCKET,
+      Key: objectName,
+    };
+    try {
+      await s3.deleteObject(params).promise()
+    } catch (err) {
+      console.log('storageDelete:', err);
+    }
+}
+
 let messageQueueSend = async (queueName, messageData) => {
     let sqs = new AWS.SQS();
     console.log('messageData: ', messageData)
@@ -235,7 +294,7 @@ let updateIntervals = async (intervalsObj) => {
 
 let consoleOutput = async (outputMessage) => {
     var event = inputEvent;
-    let dataString = JSON.stringify(outputMessage);
+    let dataString = JSON.stringify({message: outputMessage});
     var iotdata = new AWS.IotData({endpoint: environment.IOT_ENDPOINT});
     let sendTo = senderId
     // Send to the ms' owner if the ms is running by system
@@ -284,8 +343,13 @@ module.exports = {
   setInput,
   storeGetObject,
   storePutObject,
+  storageGet,
+  storagePut,
+  storageFind,
+  storageDelete,
   messageQueueSend,
   clearInterval,
   setInterval,
-  getIntervals
+  getIntervals,
+  updateIntervals
 };

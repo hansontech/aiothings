@@ -154,7 +154,6 @@
 import { API } from 'aws-amplify'
 import atHelper from '../aiot-helper'
 import { eventBus } from '../main'
-// import * as IoT from '../lib/aws-iot'
 // import { API, PubSub } from 'aws-amplify'
 
 // AWS Amplify API reference

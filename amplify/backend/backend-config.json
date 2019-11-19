@@ -18,12 +18,6 @@
 		}
 	},
 	"function": {
-		"iftttFunction": {
-			"service": "Lambda",
-			"providerPlugin": "awscloudformation",
-			"build": true,
-			"dependsOn": []
-		},
 		"thingFunction": {
 			"service": "Lambda",
 			"providerPlugin": "awscloudformation",
@@ -62,20 +56,6 @@
 		}
 	},
 	"api": {
-		"iftttApi": {
-			"service": "API Gateway",
-			"providerPlugin": "awscloudformation",
-			"dependsOn": [
-				{
-					"category": "function",
-					"resourceName": "iftttFunction",
-					"attributes": [
-						"Name",
-						"Arn"
-					]
-				}
-			]
-		},
 		"thingApi": {
 			"service": "API Gateway",
 			"providerPlugin": "awscloudformation",

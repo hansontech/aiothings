@@ -8,7 +8,7 @@
         <b-col sm="auto" align="end" >
           <b-button v-if="!isShowEdit" variant="info" @click="exportService(mservice)" v-b-popover.hover.bottom="'Export the microservice to a local file'">Export</b-button> 
           <b-button variant="success" :disabled="mservice.UserId !== $store.getters.username" @click="updateService()">Update</b-button>
-          <b-button variant="dark" @click="backHome()">Return</b-button>
+          <b-button variant="dark" @click="backHome()">Return<sub><b-badge class="ml-1" variant="warning" v-if="isChangedNotSaved">&nbsp;</b-badge></sub></b-button>
           <b-modal id="modalReturnConfirm"
              ref="modalReturnConfirmRef"
              title="Discard changes and return?" 
@@ -36,7 +36,7 @@
               <p class="h5">Description</p>
             </div>
             <div style="height: 100px; background-color: rgba(255,0,0,0.1);">
-              <textarea class="at-border w-100 h-100" v-model="mservice.ServiceDesc" placeholder="Service description"></textarea>
+              <textarea class="at-border w-100 h-100" v-model.lazy="mservice.ServiceDesc" placeholder="Service description"></textarea>
             </div>
             <b-form-group
                   label-cols-sm="3"
@@ -100,7 +100,7 @@
           </b-row>
           <b-row v-if="mservice.CodeEntryType === 'inline'">
             <spinner v-if="isSourceLoading === true" size="medium" />
-            <codemirror v-else class="mt-2 w-100 h-100" v-bind:class="languageType" v-model="mservice.ServiceCode" ref="sourceEditor" placeholder="Microservice code" :lintOptions="{}">
+            <codemirror id="sourceEditor" v-else class="mt-2 w-100 h-100" v-bind:class="languageType" v-model="mservice.ServiceCode" ref="sourceEditor" placeholder="Microservice code" :lintOptions="{}">
             </codemirror>
           </b-row>
           <div v-else-if="mservice.CodeEntryType === 'zip'">
@@ -195,7 +195,7 @@ export default {
       isUpdating: false,
       isZipDownloading: false,
       isSourceLoading: false,
-      serviceDesc: '',
+      mserviceBackup: null,
       isShowEdit: false,
       showZipOnlySupportPython: false,
       showInvalidCodeHandlerAlert: false,
@@ -246,7 +246,6 @@ export default {
         this.mservice['CodeHandler'] = 'main.handler'
       }
     }
-    this.serviceDesc = this.mservice.ServiceDesc
     if (this.mservice.InputMicroservice === '+') {
       this.inputMicroservice = ''
     } else {
@@ -259,13 +258,25 @@ export default {
   beforeDestroy () {
   },
   watch: {
-    serviceDesc: function (newDesc, oldDesc) {
-      if (newDesc !== oldDesc && this.isChangedNotSaved !== null) {
-        this.isChangedNotSaved = true
-      }
+    isChangedNotSaved: function () {
+      console.log('var changed')
     },
-    mservice: function () {
-      console.log('mservice changed')
+    mservice: {
+      handler: function (newService) {
+        if (this.mserviceBackup !== null) {
+          let isEqual = this.$_.isEqual(
+            this.$_.omit(this.mserviceBackup, ['ServiceCode']),
+            this.$_.omit(newService, ['ServiceCode']))
+          // console.log('mservices : ', this.mserviceBackup, newService)
+          // console.log('mservice changed: ', isEqual)
+          if (isEqual === false && this.isChangedNotSaved !== true) {
+            this.isChangedNotSaved = true
+            // this.$forceUpdate()
+          }
+        }
+        this.mserviceBackup = this.$_.clone(newService)
+      },
+      deep: true
     },
     zipFile: function (newValue, oldValue) {
       if (newValue !== oldValue && (newValue !== '' && newValue !== null)) {
@@ -296,6 +307,10 @@ export default {
     exportService (ms) {
       atHelper.exportService(ms, false) // false means no need to load source code
     },
+    onCodeChangeHandler (cmObject, changeObject) {
+        // console.log('content changed: ', cmObject, changeObject)
+        this.isChangedNotSaved = true
+    },
     setCmActive () {
       console.log('setCmActive: ')
       if (typeof this.$refs.sourceEditor === 'undefined') {
@@ -303,6 +318,7 @@ export default {
       }
       // var that = this
       let cm = this.codemirror
+      cm.on('change', this.onCodeChangeHandler.bind(this))
       let runtime = this.mservice.ServiceRuntime
       if (runtime !== null && runtime.toLowerCase().includes('python')) {
         cm.setOption('indentWithTabs', true)
@@ -476,11 +492,12 @@ export default {
 </script>
 
 <style>
+/*
 .at-border {
   border: 1px solid #a78;
   padding: 5px;
 }
-
+*/
 .CodeMirror {
   border: 1px solid #a78;
   padding: 5px;

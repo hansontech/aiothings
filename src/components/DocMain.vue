@@ -716,7 +716,31 @@ Any messages with the topic format of +/{user id}/console/output will be display
 User can use [consoleOutput](#DocNodejsConsoleOutput) API to output debug messages during the execution of microservices. In this case, {user id} will be automatically added ahead of the 'console/output' topic.
 
 
+</vue-markdown>
+<vue-markdown id="DocLog">
+### Running Log
+
+Developers or system operators may want to know the runtime status of each microservice.
+For example, a microservice can use console output (such as console.log(..) in JavaScript) to display it's internal states.
+
+The AIoThings UI has the ability to retrieve the logging information.
+
+In the Microservices window, you can enable the Running Log option to display the runtime logs for each microservice.
+When this option is enabled, it will also update the log in real time.
+
+
 </vue-markdown> 
+<b-row>
+  <b-col>
+    <b-img style="padding:20px;" src="/static/running-log-ui-2.png" fluid align=center />
+  </b-col>
+   <b-col>
+    <b-img style="padding:20px;" src="/static/running-log-ui.png" fluid align=center />
+  </b-col>
+</b-row> 
+&nbsp;
+&nbsp;
+&nbsp;
 <vue-markdown id="DocIotData">
 
 ### IoT Data Access

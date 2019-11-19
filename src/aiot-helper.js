@@ -8,6 +8,12 @@ import store from './store'
 import config from './config'
 
 export default {
+  async downloadUrlToLocal (url, fileName) {
+    let res = await fetch(url)
+    // let data = await res.text()
+    let blob = await res.blob()
+    await this.downloadBinaryFile(fileName, blob)
+  },
   async downloadBinaryFile (fileName, fileDataBlob) {
     FileSaver.saveAs(fileDataBlob, fileName);
   },

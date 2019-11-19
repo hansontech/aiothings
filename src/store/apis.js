@@ -12,6 +12,9 @@ export default {
     }
   },
   actions: {
+    resetLoadedApisCaches: function (context) {
+      context.commit('setApis', null)
+    },
     replaceApi: function (context, newApi) {
       let apis = context.getters.apis
       let newList = apis.map(ms => {

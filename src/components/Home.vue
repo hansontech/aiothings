@@ -1,4 +1,6 @@
 <template>
+<div> 
+  <App/>
   <b-container fluid style="padding-right: 0px; padding-left: 0px; margin-top:-15px; margin-left:0px; margin-right:0px"> 
     <div class="bgimg" style="height: 250px;">
       <b-row align-v="end" class="h-50">
@@ -199,6 +201,8 @@
       </b-row>
     </div>
   </b-container>
+  <at-footer/>
+</div>
 </template>
 
 <script>

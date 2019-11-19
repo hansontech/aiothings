@@ -1,4 +1,6 @@
 <template>
+<div> 
+  <App/>
   <b-container>
   <div>
 <font color="white"><vue-markdown id="ShopBegin" style="background-color: darkcyan; padding-left: 20px">
@@ -145,6 +147,8 @@ This product is being deployed to greenhouse environment for smart farming purpo
 
 </div>
   </b-container>
+  <at-footer/>
+</div>
 </template>
 
 <script>
