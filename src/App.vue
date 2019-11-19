@@ -206,7 +206,7 @@ export default {
     signout () {
       Auth.signOut()
       .then(data => {
-        console.log('signed out: ', data)
+        console.log('signed out: ')
         this.$store.dispatch('signout').then(() => {
           this.$router.push({ name: 'home' })
         })

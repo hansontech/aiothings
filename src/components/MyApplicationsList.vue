@@ -75,7 +75,8 @@
               class="at-card-mservice"
            >
               <b-row align-v="center">
-                <b-col sm="10">
+                <!-- for unexplainable reason, need set cols to 9 -->
+                <b-col sm="9">
                   <h5 class="card-text">
                     {{service.ServiceName}}
                   </h5>
@@ -464,7 +465,7 @@ export default {
         const result = await API.post('mserviceApi', '/mservices', { body })
         console.log('updateService: result: ', result)
         if (result.hasOwnProperty('success')) {
-          this.$store.dispatch('replaceMservice', mservice)
+          this.$store.dispatch('replaceMservice', {replacingService: mservice, services: this.mservices})
         }
         this.isLoading = false
     },

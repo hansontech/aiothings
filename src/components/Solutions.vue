@@ -66,7 +66,8 @@
                     header = " "
                     class="at-card-mservice">
                     <b-row align-v="center">
-                      <b-col sm="10">
+                      <!-- for unexplainable reason, need set cols to 9 -->
+                      <b-col sm="9">
                         <h5 class="card-text">
                           {{service.ServiceName}}
                         </h5>
@@ -79,14 +80,13 @@
                         </b-dropdown>
                       </b-col>
                     </b-row>
-                    <b-row align-v="center">
-                      <b-col>
+                    <b-row class="mt-2" >
+                      <b-col sm="10">
                         <b-button size="sm" variant="light" v-b-popover.hover.bottomright="'Owner'" @click="loadUser(service.UserId)"><em>{{getUsername(service.UserId)}}</em></b-button>
                       </b-col>
-                      <b-col align="end" class="mt-2" v-if="$store.getters.isAuthenticated"> 
+                      <b-col sm="2" align="end" v-if="$store.getters.isAuthenticated"> 
                           <input id="toggle" v-b-popover.hover.bottom="'Set as favorite'"  @click="toggleSelect(service.ServiceName, index)" type="checkbox" v-model="favoriteServices[service.ServiceName]" class="check_box"><label for="toggle"></label>
                       </b-col>
-                      &ensp;
                     </b-row>                    
                     <b-row class="ml-0 mt-1 at-bar" style="border-bottom: 1px solid green;">  
                       <p class="card-text">

@@ -231,14 +231,15 @@ export default {
     console.log('EditSource beforeCreate')
   },
   created () {
-    console.log('EditSource created')
+    console.log('EditSource created: ')
     let index = this.serviceIndex
     // https://scotch.io/bar-talk/copying-objects-in-javascript
     // only shallow copying, is enough
     // 20181112 this.mservice = Object.assign({}, this.$store.getters.mservices[index])
     // this.mservice = Object.assign({}, this.serviceSource[index])
-    let mserviceStr = JSON.stringify(this.$store.getters.mservices[index])
+    let mserviceStr = JSON.stringify(this.serviceSource[index])
     this.mservice = JSON.parse(mserviceStr)
+    console.log('mservice: ', this.mservice)
     if (this.mservice.hasOwnProperty('CodeEntryType') === false) {
       this.mservice['CodeEntryType'] = 'inline'
       this.mservice['CodeFileName'] = ' '
@@ -251,6 +252,7 @@ export default {
     } else {
       this.inputMicroservice = this.mservice.InputMicroservice
     }
+    console.log('before loadSource')
     this.loadSource()
   },
   mounted () {
@@ -402,7 +404,7 @@ export default {
           let newMservice = result.microservice.Attributes
           newMservice.ServiceCode = this.mservice.ServiceCode
           this.mservice = newMservice
-          this.$store.dispatch('replaceMservice', this.mservice)
+          this.$store.dispatch('replaceMservice', {replacingService: this.mservice, services: this.serviceSource})
         }
         this.isChangedNotSaved = false
         this.isUpdating = false

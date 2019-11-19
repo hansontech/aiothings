@@ -48,14 +48,12 @@ export default {
       context.commit('setFavoriteMservices', null)
       context.commit('setFavoriteMserviceList', null)
     },
-    replaceMservice: function (context, newMs) {
-      let mservices = context.getters.mservices
-      /*
-      mservices = mservices.filter(function (ms, index, err) {
-        return (ms.ServiceName !== newMs.ServiceName)
-      })
-      mservices.push(newMs)
-      */
+    replaceMservice: function (context, newData) {
+      // only one parameter is allowed for actions.?
+      let newMs = newData.replacingService
+      let mservices = newData.services
+      console.log('replaceM mservices: ', mservices)
+      console.log('replaceM mservices: ', context)
       let newList = mservices.map(ms => {
         if (ms.ServiceName !== newMs.ServiceName) {
           return ms
@@ -65,8 +63,11 @@ export default {
           return modifiedService
         }
       })
-      mservices = newList
-      context.commit('setMservices', mservices)
+      if (context.getters.mservices === mservices) {
+        context.commit('setMservices', newList)
+      } else if (context.getters.sharedMservices === mservices) {
+        context.commit('setSharedMservices', newList)
+      }
     }
   }
 }
