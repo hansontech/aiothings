@@ -45,7 +45,7 @@ export default {
       console.log('onLogin')
       this.logoutClean()
       // Subscribe
-      let subscribeConsoleOutputTopic = 'aiot/' + this.$store.getters.username + '/+/console/output'
+      let subscribeConsoleOutputTopic = 'aiot/' + this.$store.getters.userId + '/+/console/output'
       this.consoleSub = PubSub.subscribe(subscribeConsoleOutputTopic).subscribe({
           next: data => {
               // console.log('console output:', data)
@@ -130,6 +130,7 @@ export default {
 <style>
 body {
   margin: 0;
+  font-family: "Arial"; /* sans-serif; */
 }
 
 #app {
@@ -263,4 +264,42 @@ div {
     outline-color:cornflowerblue
 }
 */
+
+.at-bottombar {
+  /* background-color : grey; */
+  padding-bottom: 5px;
+  margin-bottom: 5px;
+  border-bottom: 1px solid grey
+}
+
+.at-border {
+  border: 1px solid #a78;
+  padding: 5px;
+}
+
+.at-desc-display {
+  border: 1px solid lightgrey;
+  padding: 5px;
+  overflow-y: scroll;
+  white-space: no-wrap;  /* pre-wrap */
+  display: inline-block;
+  max-height: 150px;
+  min-height: 100px;
+  width: 100%;
+}
+
+.at-desc-edit {
+  padding: 5px;
+  height: 150px;
+  width: 100%;
+}
+
+.CodeMirror {
+  border: 1px solid #a78;
+  padding: 5px;
+}
+.CodeMirror pre.CodeMirror-placeholder {
+  color: #999;
+}
+
 </style>

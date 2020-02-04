@@ -5,7 +5,8 @@ var environment = {"DynamoDB_TABLE_NAME":"atThingTable","REGION":"ap-southeast-2
 var config = {
     DynamoDB_TABLE_NAME: environment.DynamoDB_TABLE_NAME,
     DYNAMODB_TABLE_REGION: environment.REGION,
-    region: environment.REGION
+    region: environment.REGION,
+    aiotIotActionRole: 'arn:aws:iam::414327512415:role/aiot-iot-default'
 };
 
 

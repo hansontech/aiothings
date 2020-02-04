@@ -9,7 +9,7 @@ let storeGetObject = async (objectName) => {
     let s3 = new AWS.S3();
     let params = {
         Bucket:  environment.S3_BUCKET,
-        Key: 'private/' + objectName
+        Key: 'private/' + environment.OWNER_ID + '/' + objectName
     };
     let data = null;
     try {
@@ -26,7 +26,7 @@ let storePutObject = async (objectName, data) => {
     let dataString = JSON.stringify(data)
     let params = {
       Bucket: environment.S3_BUCKET,
-      Key: 'private/' + objectName,
+      Key: 'private/' + environment.OWNER_ID + '/' + objectName,
       Body: dataString
     };
     try {
@@ -151,7 +151,7 @@ let messagePublishWithTopic = async (topic, messageData) => {
     var params = {
         topic: 'aiot/' + theSenderId + '/' + environment.MSERVICE_NAME + '/' + topic,
         payload: dataString,
-        qos: 0
+        qos: 1
         };
     try {
         await iotdata.publish(params).promise();
@@ -182,7 +182,7 @@ let messagePublish = async (messageData, forceToSender) => {
     var params = {
         topic: 'aiot/' + theSenderId + '/' + environment.MSERVICE_NAME + '/' + environment.OUTPUT_MESSAGE_TOPIC,
         payload: dataString,
-        qos: 0
+        qos: 1
         };
     try {
         await iotdata.publish(params).promise();
@@ -304,7 +304,7 @@ let consoleOutput = async (outputMessage) => {
     var params = {
         topic: 'aiot/' + sendTo + '/' + environment.MSERVICE_NAME + '/' + 'console/output',
         payload: dataString,
-        qos: 0
+        qos: 1
         };
     try {
         await iotdata.publish(params).promise();

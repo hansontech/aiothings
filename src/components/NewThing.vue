@@ -1,7 +1,7 @@
 <template>
-  <b-container fluid>
+  <div>
     <div>
-       <b-row align-v="center" style="border-bottom: 1px solid grey">
+       <b-row align-v="center" class="at-bottombar">
           <b-col align="start">
             <h3>New IoT Device</h3>
           </b-col>
@@ -39,16 +39,31 @@
     <div>
       <b-form-input class="at-border" v-model="thingNameTag" placeholder="thing's name"></b-form-input>
     </div>
+    <b-row class="mt-3" align-v="center">
+      <b-col><h5>Description</h5></b-col>
+      <b-col v-if="isEditDesc">
+          <small>Markdown script...</small>
+      </b-col>
+      <b-col align="end">
+          <b-form-radio-group v-model="isEditDesc">
+            <b-form-radio :value="false">Display</b-form-radio>
+            <b-form-radio :value="true">Edit</b-form-radio>
+          </b-form-radio-group>
+      </b-col>
+    </b-row>
+    <b-row v-if="isEditDesc">
+      <b-col> 
+        <textarea class="at-desc-edit" v-model="thingDesc" placeholder="thing's description. (Can be a markdown text)"></textarea>
+      </b-col>
+    </b-row>
+    <b-row v-else>
+        <b-col>
+          <vue-markdown class="at-desc-display">{{thingDesc}}</vue-markdown>
+        </b-col>
+    </b-row> 
     <div class="mt-3">
-      <p class="h4">Description</p>
-    </div>
-    <div style="height: 200px; background-color: rgba(255,0,0,0.1);">
-      <textarea class="at-border w-100 h-100" v-model="thingDesc" placeholder="thing's description"></textarea>
-    </div>
-    <div class="mt-3">
-  
     </div>  
-  </b-container>
+  </div>
 </template>
 
 <script>
@@ -69,7 +84,8 @@ export default {
       loading: false,
       thingDesc: '',
       thingNameTag: '',
-      showDescCannotEmptyAlert: false
+      showDescCannotEmptyAlert: false,
+      isEditDesc: true
     }
   },
   computed: {},
@@ -82,7 +98,7 @@ export default {
         this.showDescCannotEmptyAlert = true
         return
       }
-      const userId = this.$store.getters.username
+      const userId = this.$store.getters.userId
       const desc = this.thingDesc
       const thingNameTag = this.thingNameTag
       if (userId !== null) {
@@ -115,10 +131,4 @@ export default {
 </script>
 
 <style>
-/*
-.at-border {
-  border: 1px solid #a78;
-  padding: 5px;
-}
-*/
 </style>

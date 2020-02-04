@@ -1,17 +1,18 @@
 <template>
   <b-container fluid>
-      <b-row align-v="center" style="border-bottom: 1px solid grey; padding-bottom: 5px; margin-bottom: 5px;">
+      <b-row align-v="center" class="at-bottombar">
         <b-col align="start">
             <h4>Edit REST API </h4>
         </b-col>
         <b-col sm="auto" align="end" >
-          <b-button variant="success" :disabled="api.UserId !== $store.getters.username" @click="updateApi()">Update</b-button>
+          <b-button variant="success" :disabled="api.UserId !== $store.getters.userId" @click="updateApi()">Update</b-button>
           <b-button variant="dark" @click="backHome()">Return</b-button>
           <b-modal id="modalReturnConfirm"
              ref="modalReturnConfirmRef"
-             title="Discard changes and return?" 
+             hide-header
              @ok="returnDiscardChangesOk"
              @cancel="returnCancel">
+             Discard changes and return?
           </b-modal>
         </b-col>
       </b-row>
@@ -58,14 +59,28 @@
               </b-list-group>
             </b-col>
           </b-row>
-          <b-row class="mt-3">
-            <b-col>
-              <p class="h5">Description</p>
-              <div style="height: 100px; background-color: rgba(255,0,0,0.1);">
-                <textarea class="at-border w-100 h-100" v-model="api.Desc" placeholder="Api description"></textarea>
-              </div>
+          <b-row class="mt-3" align-v="center">
+            <b-col><h5>Description</h5></b-col>
+            <b-col v-if="isEditDesc">
+                <small>Markdown script...</small>
+            </b-col>
+            <b-col align="end">
+                <b-form-radio-group v-model="isEditDesc">
+                  <b-form-radio :value="false">Display</b-form-radio>
+                  <b-form-radio :value="true">Edit</b-form-radio>
+                </b-form-radio-group>
             </b-col>
           </b-row>
+          <b-row v-if="isEditDesc">
+            <b-col> 
+              <textarea class="at-desc-edit" v-model="api.Desc" placeholder="Api description. (Can be a markdown text)"></textarea>
+            </b-col>
+          </b-row>
+          <b-row v-else>
+              <b-col>
+                <vue-markdown class="at-desc-display">{{api.Desc}}</vue-markdown>
+              </b-col>
+          </b-row>           
           <b-row class="mt-3" v-if="api.ApiName !== null && api.ApiName !== ''">
                 <b-col sm="3" align="start" >
                   <h5 id="popoverInvokeUrl"> Invoke URL <i class="fas fa-info-circle"></i></h5>
@@ -197,6 +212,7 @@ export default {
       apiService: null,
       isChangedNotSaved: null,
       isUpdating: false,
+      isEditDesc: false,
       apiDesc: '',
       isShowEdit: false,
       errorMsg: '',
@@ -355,27 +371,5 @@ export default {
 </script>
 
 <style>
-/*
-.at-border {
-  border: 1px solid #a78;
-  padding: 5px;
-}
-*/
-.CodeMirror {
-  border: 1px solid #a78;
-  padding: 5px;
-}
-.CodeMirror pre.CodeMirror-placeholder {
-  color: #999;
-}
-
-div.at-bottombar {
-  /* background-color : grey; */
-  padding-bottom: 5px;
-  margin-bottom: 5px;
-  border-bottom: 1px solid grey
-}
-
 .btn:hover { outline: 0 !important }
-
 </style>

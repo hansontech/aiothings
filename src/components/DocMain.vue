@@ -21,7 +21,7 @@ AIoThings is built on AWS.
 AIoThings is an open-source project and it's [source code](https://github.com/hansontech/aiothings) is also available for public access.
 
 ***We also provide professional services for custom engineering projects.***
-***Please contact us at service@hanson-tech.com***
+***Please contact us at service@aiothings.com***
 </vue-markdown> 
 <vue-markdown id="DocGetStarted" class="mt-4"> 
 ### Get Started
@@ -145,7 +145,7 @@ Node-RED nodes can send or receive data to/from AIoThings microservices through 
                   <b-col sm="3"><span class="text-primary">MQTT broker (server)</span></b-col>
                   <b-col>
                     <b-row>
-                      <b-col><code>b-a3vgppxo7lddg8-ats.iot.ap-southeast-2.amazonaws.com</code></b-col>
+                      <b-col><code>a3vgppxo7lddg8-ats.iot.ap-southeast-2.amazonaws.com</code></b-col>
                     </b-row>
                     <b-row>
                       <b-col>Or, <code><em>iot.aiothings.com</em></code><br/></b-col>
@@ -219,7 +219,7 @@ Following table shows the differences at a glace between these two SoC and the m
   <table style="width:100%">
     <tr>
       <th>ESP8266 (ESP-12)</th>
-      <th>ESP32 (ESP-WEOOM32)</th> 
+      <th>ESP32 (ESP-WROOM32)</th> 
     </tr>
     <tr>
       <td>80-160 MHz</td>
@@ -338,18 +338,53 @@ The article [AWS IoT on Mongoose OS (Part 1 & 2)](https://aws.amazon.com/blogs/a
 
 </vue-markdown> 
 
+<vue-markdown id="DocFreeRTOS">
+### FreeRTOS and Amazon FreeRTOS
+
+**FreeRTOS** is recognized as an option for lightweight real-time operating systems.
+**Amazon FreeRTOS** enhances the FreeRTOS kernel with additional libraries for connectivity, security, and over-the-air (OTA) updates provided with AWS IoT services.
+
+Since AIoThings uses AWS IoT to serve IoT devices, it also supports **FreeRTOS** with simple configuration.
+</vue-markdown>
+<b-img style="padding:20px;" src="/static/AmazonFreeRTOS-arch.png" fluid align=center />
+<vue-markdown>
+In fact, Amazon FreeRTOS provides a wrapper layer for FreeRTOS functionality, and the definition can be found on [AWS IoT Device SDK C](https://docs.aws.amazon.com/freertos/latest/lib-ref/c-sdk/main/index.html).
+Amazon FreeRTOS software package also includes demo examples that accelerate development.
+
+The qualified devices for Amazon FreeRTOS are listed on the [AWS Partner Device Catalog](https://devices.amazonaws.com/search?page=1&sv=freertos). And the following is an example list of supported platforms:
+* ATECC608a Zero Touch Provisioning Kit for AWS IoT
+* Cypress CYW943907AEVAL1F Development Kit
+* Cypress CYW954907AEVAL1F Development Kit
+* Espressif ESP32-DevKitC
+* Espressif ESP-WROVER-KIT
+* Infineon XMC4800 IoT Connectivity Kit
+* Marvell MW320 AWS IoT Starter Kit
+* Marvell MW322 AWS IoT Starter Kit
+* MediaTek MT7697Hx Development Kit
+* Microchip Curiosity PIC32MZEF Bundle
+* Nordic nRF52840-DK
+* NXP LPC54018 IoT Module
+* OPTIGA Trust X Security Solution
+* Renesas RX65N RSK IoT Module
+* STMicroelectronicsSTM32L4 Discovery Kit IoT Node
+* Texas Instruments CC3220SF-LAUNCHXL
+* Microsoft Windows 7 or later, with at least a dual core and a hard-wired Ethernet connection
+* Xilinx Avnet MicroZed Industrial IoT Kit
+
+</vue-markdown>
+
 <vue-markdown id="DocThingEdge">
 ### Edge computing
 
-IoT Device (also called IoT Object) can be solely a Thing device or function as an Edge device too. 
-Edge device, by AIoThings definition, is able to interact with AIoThings cloud to deploy user's Microservices.
-This feature is especially crucial for the automation of edge computing details, such as machine learning inferences functions running over edge devices to reduce traffics sending to the cloud and mitigate cloud computing loadings.
-However, in order to achieve this goal, Edge devices have to run an extra agent software to receive commands from the cloud.
-AWS IoT Greengrass Core software is the agent software, and AIoThings Edge device implementation is highly related to AWS Greengrass, although we did our best to reduce the complexity for user's easy understanding.
+IoT Devices (also called IoT Object) can be solely a Thing device or function as an Edge device. 
+Edge devices, by AIoThings definition, are able to run user's microservices locally.
+This feature is especially crucial for the edge computing, such as machine learning inferences functions, to reduce communication traffics to clouds and mitigate cloud computing loadings.
+In order to achieve this goal, edge devices have to run extra agent software to receive service deployment commands from the cloud.
+AWS IoT Greengrass Core software is the agent software AIoThings is leveraging.
 
 With the Edge Setting tab of AIoThings IoT Device window, users can define three types of items deploying to this Edge device.
 1. **Microservice**: Similar to other microservices, users create and edit microservices being deployed to Edge deviecs. However, they have several differences comparing to ones running on cloud, including that they use AWS Greengrass Core SDK APIs instead of AIoThings SDK or AWS SDK to pusbish and receive messages. 
-2. **Resource**: Local resources, such as files and directories of lcoal file system and device resources accessible through /dev from Unix systems. 
+2. **Resource**: Local resources, such as files and directories of lcoal file system and device resources accessible through /dev from Unix systems.
 3. **Connector**: Prebuilt modules that help accelerate the development lifecycle for common edge scenarios. They make it easier to interact with local infrastructure, device protocols, AWS, and other cloud services. With connectors, you can spend less time learning new protocols and APIs and more time focusing on the logic that matters to your business.
 
 </vue-markdown>
@@ -470,6 +505,23 @@ Please note that, this function imports AWS's **Greengrass SDK** from the statem
 AIoThings only allow messages complying to its message header format to be receivable from its cloud microservices. The message header format is: **'aiot/{Sender's User Id}/{Sender's Microservice Name}/'**
 
 </vue-markdown>
+<vue-markdown id="DocThingProvisioning">
+### Just-in-time provisioning
+
+For an IoT device manufacturer, it requires to provision a lot of devices in a secure and scalable manner connecting to the cloud, rather than manually creating a thing object and thing certificates.
+The just-in-time provisioning allows devices registering to AIoThings without requiring human intervention.
+
+As we mentioned previously, the communication between IoT devices and AIoThings cloud is secured by TLS. And it needs PKI (Public Key Infrastructure) certificates to authenticate each other, in two ways, during MQTT connections.
+
+First of all, AIoThings users (manufacturers) need to register a series of device serial numbers to database tables and then assigning a set of certificates to the serial numbers.
+Next, the serial number will be uniquely assigned to each of the provisioning devices.
+Device provisioning API is the REST API, either through system provides or through user defines, that receives a pair of user-ID and serial number as the request, and responses with the information required for secured MQTT connections, including certificates.
+Lastly, the provisioned device now has enough data to set up a secured MQTT connection with AIoThings.
+
+And the entire process is carefully guarded to prevent man-in-the-middle attacks. For example, data returned from the provisioning REST API should be signed with the user's signature.
+
+</vue-markdown>
+<b-img style="padding:30px;" src="/static/jit-provisioning.png" fluid align=center />
 
 <vue-markdown class="chapterSpace" id="DocMicroservice">
 
@@ -498,7 +550,7 @@ exports.handler = async (event, context) => {
     aiot.setInput(event);
     // Add your code here
     await aiot.consoleOutput('console display:' + process.env.MSERVICE_NAME); // display from console
-    await aiot.messagePublish({data: 'payload'}); // must be a JSON
+    await aiot.messagePublish({data: event.data}); // must be a JSON, forward data as output message
 };
 ```
 
@@ -678,17 +730,70 @@ A REST API can be accessed through the URL address with the form of
 
 AIoThings defines a set of REST API available for users to access, for exameple [IoT Data](#DocIotDataRestApi).
 </vue-markdown> 
+<vue-markdown id="DocAppAuth">
+### Application Authentication
+
+When users' Internet applications want to use AIoThings REST APIs that require user authentication, AIoThings needs go through OAuth - an open standard protocol, every time to grant the application and the user.
+After the whole authentication process completed, eventually applications will receive access tokens that is required to be added to the headers of REST API requests.
+
+As the first step of OAuth authentication, users need to register their applications here in AIoThings console with a pair of Application Client ID and Client Secret keys. Later then, the OAuth requests from applications will use these client keys as their HTTP parameters to request for the tokens.
+ 
+
+</vue-markdown>
 <vue-markdown id="DocAppConnector">
 ### App Connectors
 
-App Connectors are the interfaces AIoThings has prepared for developers to connect to external 3rd party services and mobile/home applications easily.
-It utilizes popular application connectivity platforms (IFTTT and Zapier) for this purpose.
+App Connectors are the interfaces AIoThings has prepared for developers to connect to external 3rd party services.
+Two examples are the popular application connectivity platforms IFTTT and Zapier.
 
-An App Connector defines a couple of message types that allow developers create / send / receive data to the target external services, such as Amazon Alexa, Facebook Messenger and Google Assistant. 
-It is also possible for a developer to create his/her own App Connector, using the REST API and other AIoThings functions.
+An App Connector defines a couple of message types that allow developers create / send / receive data to external services, such as Amazon Alexa, Facebook Messenger or Google Assistant. 
+Developers are able to create their own App Connectors using a combination of REST API, microservice and message queue features.
 
 
-</vue-markdown> <vue-markdown id="DocSharedSolution">
+</vue-markdown>
+<vue-markdown id="DocAppConnectorIFTTT">
+#### IFTTT Service
+
+AIoThings has implemented a pair of IFTTT action and trigger in IFTTT to publish messages to and subscribe messages from AIoThings cloud.
+* **Publish a message** is the action name. 
+* **A message was published** is the trigger name.
+
+Users, then, include these action and trigger in IFTTT Applets to complete their tasks. For example, an Applet can be defined as IF {user said a keyword to Alexa} THEN {publish a message to AIoThings} or IF {a message was published in AIoThings} THEN {send a message to user's Messenger account}.
+
+**Publish a message** has two action fields: message topic and message body that IFTTT Applets are responsible to fill in.
+* Message topic complies to AIoThings message topic format (MQTT).
+* Message body includes payload parts of messages in a JSON form.
+
+The trigger **A message was published** subscribes AIoThings messages with a topic. When the messages published, it forwards them attaching some extra information together to IFTTT. The information is called IFTTT trigger ingredients, and Applets will use these ingredients from their following actions.
+* CreatedAt: Date and time event was Created.
+* MessageJson: Message data in JSON form.
+* MessageReadable: Message data in readable formats convenient to some actions such as email or messenger.
+
+In order to minimize the traffic between AIoThings and IFTTT when running triggers and actions, message topics are limited to ifttt/input/... for action **Publish a message** and ifttt/output/... for trigger **A message was published**. Topics not compliant to those two formasts will be ignored without further processing.
+
+</vue-markdown>
+<vue-markdown id="DocAppConnectorZapier">
+#### Zapier Integration
+
+In a nutshell, Zapier performs the similar task as IFTTT. It defines Zapier Integrations similar to IFTTT Services, and an Integration includes Triggers and Actions. Finally, a Zap is similar to IFTTT Applet to connect a trigger event to a series of actions.
+
+AIoThings also have implemented the Zapier Integration and the pair of trigger and action.
+* **Publish a message** is the action name.
+* **A message was published** is the trigger name.
+
+Similar to IFTTT case, **Publish a message** action defines two input fields.
+* **Message Topic** is the message topic starts with zapier/input/... 
+* **Message Body** is the JSON formatted message data.
+
+The trigger **A message was published** subscribes AIoThings messages with a topic. When the messages published, it forwards them to Zapier. Zaps will use their data fields for their following actions.
+* CreatedAt: Date and time event was Created.
+* MessageJson: Message data in JSON form.
+* MessageReadable: Message data in readable formats convenient to some actions such as email or messenger.
+
+In order to minimize the traffic overhead between AIoThings and Zapier, message topics are limited to zapier/input/... for the action **Publish a message** and zapier/output/... for the trigger **A message was published**. Topics not compliant to those two formats will be ignored without further processing.
+
+</vue-markdown>
+<vue-markdown id="DocSharedSolution">
 ### Shared Solutions
 
 The Shared Solution Window shows microservices that are shared by other users.
@@ -745,7 +850,7 @@ When this option is enabled, it will also update the log in real time.
 
 ### IoT Data Access
 
-Typical IoT data is in the form of { Device ID, Timestamp, Data }. This means that the device creates and sends data at a specific time.
+Typically an IoT data tuple is in the form of { Device ID, Timestamp, Data }. This means that the device thing has created data at the specific time.
 User's data access is available by sending messages with the message topic ***aiot_iotdata/query***.
 The system will reply the query result as separate messages with the topic of ***aiot_iotdata/response*** from its microservice ***aiotIotDataQuery***.
 
@@ -755,6 +860,9 @@ await aiot.messagePublish('aiot_iotdata/query', {
     ThingId:    'XYZ'，  // required
     StartTime:  12345678，
     EndTime:    12456789
+    ScanForward: true,   // default is true
+    LimitPerReturn: 100,  // maximum numbers of items returned
+    Session: { ... }  // JSON 
 })
 ```
 
@@ -763,6 +871,12 @@ If StartTime and EndTime are not specified, then the system will do the query fr
 If the query has only StartTime specified, it will bring as much as possible the data allowed for a query from the start time.
 
 If the query has only EndTime specified, it will bring as much as possible the data allowed for a query until the end time.
+
+If the ScanForward is defined, it optionally decide the time order (True means ascending or False for descending) of queries.
+
+LimitPerReturn sets the maximum number of items that can be returned from the query. As the limitation of message size, users are responsible to define this value avoiding possible errors from too large of the message size.
+
+The Session, itself can be a JSON,  will be returned as a part of the response data, and is used to check if the response data is from the corresponding request. Alternatively, SessionName is also available to use with String type for this purpose.
 
 The query response is in the form of
 ```QueryResponse
@@ -775,12 +889,13 @@ The query response is in the form of
     },
     ...
   },
-  ContinueTime: 12567890 // Optional
+  ContinueTime: 12567890, // Optional
+  SessionName: 'Text'
 }
 ```
 The ContinueTime field only appears if there is more data left in the last query.
 
-The ContinueTime field can be used as the StartTime (or EndTime) for conesecutive query requests. It is the responsibility of the user to send a new request to obtain the successive query result.
+The ContinueTime field can be used as the StartTime (or EndTime) for conesecutive query requests. It is the responsibility of the user to send addtional requests for obtaining successive query results.
 
 #### Write to IoT Database
 
@@ -795,7 +910,7 @@ and the payload is included as a JSON with "data" as the key.
         "ThingId": "XYZ",
         "DataList": [
           {
-            "TimeStamp": 1560406698331,
+            "TimeStamp": 1560406698331, // Optional
             "Data": {
               "light": "off"
             }
@@ -804,7 +919,9 @@ and the payload is included as a JSON with "data" as the key.
       }
     }
 ```
-The system will attach a time stamp and save them together with data to the IoT database.
+If without Timestamp field included, the system will attach the time it received the request as the timestamp and together with data into the IoT database.
+
+Messages have the payload size limit of 128KB. The system rejects publish requests larger than this size.
 
 </vue-markdown> 
 <vue-markdown id="DocIotDataRestApi">
@@ -816,7 +933,7 @@ User's IoT data is accessible from the system provided REST API
   https://api.aiothings.com/iotdata
 ```
 
-This API reqires the authroization. Users need to sign in to use this REST API.
+This API requires authorization. Users need to sign in to use this REST API.
 It supports HTTP GET method with the query strings equivalent to the message topic ***aiot_iotdata/query*** we introduced earlier.
 ```QueryRequest
   {
@@ -1143,6 +1260,10 @@ export default {
     */
   },
   methods: {
+    touchMoveHandler () {
+      console.log('touch move')
+      this.checkDocLocation()
+    },
     offsetAnchor () {
       console.log('offsetAnchor')
       if (location.hash.length !== 0) {
@@ -1150,7 +1271,10 @@ export default {
       }
     },
     handleWheel (event) {
-      // console.log('wheel: ')
+      this.checkDocLocation()
+    },
+    checkDocLocation () {
+      console.log('wheel: ')
       // let that = this
       // let currentDocElement = null
       for (let el of this.idDocs) {
@@ -1173,7 +1297,7 @@ export default {
       }
     },
     handleScroll () {
-      // console.log('scroll: ', window.pageYOffset)
+      console.log('scroll: ', window.pageYOffset)
       let that = this
       let currentDocElement = null
       Array.prototype.forEach.call(this.idDocs, function (el, i) {
@@ -1183,7 +1307,7 @@ export default {
           if (that.activeId !== el.id) {
             that.activeId = el.id
             if (!currentDocElement || (currentDocElement && currentDocElement.offsetTop > el.offsetTop)) {
-              // console.log('el: ', el.id)
+              console.log('el: ', el.id)
               currentDocElement = el
               eventBus.$emit('changeDocId', that.activeId)
             }
@@ -1222,6 +1346,12 @@ export default {
   mounted () {
     this.idDocs = document.querySelectorAll('[id]')
     // console.log('idDocs: ', this.idDocs)
+    // for mobile touch screen devices
+    if ('ontouchstart' in window) {
+      window.addEventListener('touchstart', this.touchMoveHandler)
+      window.addEventListener('touchmove', this.touchMoveHandler)
+      window.addEventListener('touchend', this.touchMoveHandler)
+    }
   },
   destroyed () {
     // document.removeEventListener('scroll', this.handleScroll)

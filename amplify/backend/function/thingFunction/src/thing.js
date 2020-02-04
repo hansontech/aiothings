@@ -65,7 +65,7 @@ let deleteThing = (userId, certId, thingId, context, callback) => {
 
 let updateThing = (userId, certId, thingNameTag, thingId, desc, context, callback) => {
   // After the verification is complete, you can apply for a certificate for the device.
-  applyModel.updateThingCert(userId, certId, thingId, (err) => {
+  applyModel.updateThingCert(userId, certId, thingId, thingNameTag, (err) => {
     if (err) callback(null, 'updateThing: updateThingCert: error: '+err);
     applyModel.dbUpdateCertinfo(userId, certId, thingNameTag, desc, (err, data) => {
       if (err) callback(null, 'updateThing: dbUpdateCertinfo: error: '+err);    

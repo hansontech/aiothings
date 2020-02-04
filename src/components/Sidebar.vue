@@ -1,43 +1,71 @@
 <template>
   <!-- <div class="container-fluid mt-4"> -->
-  <div style="margin-left:5px; margin-top:5px">  
-    <div >
-    <!-- <p>{{$route.path}}</p> -->
-    <b-button-group vertical class="at-sidebar-button" style="width:100%">
-      <b-button size=" " :variant="reachRoute('mythings','')" @click="toMyThings()" :disabled="!isLoggedIn" >My IoT Devices</b-button>
-      <b-button size=" " :variant="reachRoute('myapps')" @click="toMyApps()" :disabled="!isLoggedIn">My &#181;Services</b-button>
-      <b-button size=" " :variant="reachRoute('myapis')" @click="toMyApis()" :disabled="!isLoggedIn">My REST APIs </b-button>
-      <!-- &#160&#160&#160&#160&#160 -->
-      <b-button size=" " :variant="reachRoute('myfavorites')" @click="toMyFavorites()" :disabled="!isLoggedIn">My Favorites</b-button>
-      <!-- <b-button :variant="reachRoute('recommended')" @click="toRecommended()">Recommended</b-button> -->
-      <b-button v-if="isBackButtonNeed" :variant="reachRoute('recommended')" @click="toQuit()">Quit</b-button>
-    </b-button-group> 
+  <div style="margin-left:0px; margin-top:5px">  
+    <div id="normalSizeScreen">
+      <!-- <p>{{$route.path}}</p> -->
+      <b-button-group vertical class="at-sidebar-button" style="width:100%">
+        <!-- :disabled="!isLoggedIn" -->
+        <b-button size=" " :variant="reachRoute('mythings','')" @click="toMyThings()">IoT Devices</b-button>
+        <b-button size=" " :variant="reachRoute('mymicroservices')" @click="toMyMicroservices()">Microservices</b-button> <!-- My &#181;Services -->
+        <b-button size=" " :variant="reachRoute('myapis')" @click="toMyApis()">REST APIs </b-button>
+        <b-button size=" " :variant="reachRoute('myapplications')" @click="toMyApps()">Applications </b-button>
+        <!-- &#160&#160&#160&#160&#160 -->
+        <b-button size=" " :variant="reachRoute('myfavorites')" v-b-popover.hover.bottom="'Shared services marked favorite'" @click="toMyFavorites()">Favorites</b-button>
+        <!-- <b-button :variant="reachRoute('recommended')" @click="toRecommended()">Recommended</b-button> -->
+        <b-button v-if="isBackButtonNeed" :variant="reachRoute('recommended')" @click="toQuit()">Quit</b-button>
+      </b-button-group> 
 
-    <b-button-group vertical class="at-sidebar-button" style="width:100%">
-      <b-button size=" " v-b-popover.hover.bottom="'Shared microservices and Node-RED flows'" :variant="reachRoute('solutions')" @click="toSolutions()">Shared Solutions</b-button>
-    </b-button-group>  
+      <b-button-group vertical class="at-sidebar-button" style="width:100%">
+        <b-button size=" " v-b-popover.hover.bottom="'Shared microservices and Node-RED flows'" :variant="reachRoute('solutions')" @click="toSolutions()">Shared Solutions</b-button>
+      </b-button-group>  
 
-    <p></p>
-    <b-button-group vertical class="at-sidebar-button" style="width:100%">
-      <b-button size=" " v-b-popover.hover.bottom="'Console IO from/to services'" :variant="reachRoute('myconsole')" @click="toMyConsole()" :disabled="!isLoggedIn">My Console</b-button>
-    </b-button-group> 
-    <b-button-group vertical class="at-sidebar-button" style="width:100%">
-      <b-button size=" " variant="info" v-b-popover.hover.bottom="'Download App configuration files'" @click="downloadConfig()">App Config</b-button>
-    </b-button-group>
-    <p></p>
-    <b-button-group vertical class="at-sidebar-button" style="width:100%">
-      <b-button size=" " :variant="reachRoute('docs')" @click="toDocs()">Docs</b-button>
-    </b-button-group> 
+      <p></p>
+      <b-button-group vertical class="at-sidebar-button" style="width:100%">
+        <b-button size=" " :variant="reachRoute('mydashboard')" @click="toMyDashboard()">Dashboard</b-button>
+        <b-button size=" " v-b-popover.hover.bottom="'Console input output for test'" :variant="reachRoute('myconsole')" @click="toMyConsole()">Test Console</b-button>
+      </b-button-group> 
+      <!-- Depreciated, not recommended anymore 2019/12/22 -->
+      <b-button-group vertical class="at-sidebar-button" style="width:100%">
+        <b-button size=" " variant="info" v-b-popover.hover.bottom="'Download App configuration files'" v-b-modal.modalDownloadConfigConfirm>Configuration</b-button>
+      </b-button-group>
+      <b-modal id="modalDownloadConfigConfirm"
+            hide-header 
+            size="sm"
+            @ok="downloadConfig()"
+            >
+        <div class="text-center">
+          <h6>Download AIoThings configuration files for web and mobile software development?</h6>
+        </div>                  
+      </b-modal>
+      <p></p>
+      <b-button-group vertical class="at-sidebar-button" style="width:100%">
+        <b-button size=" " :variant="reachRoute('docs')" @click="toDocs()">Docs</b-button>
+      </b-button-group> 
     </div>
-    <!-- 
-    <b-button-group vertical>
-      <b-button :pressed="activeMenu=='app'" @click="activeMenu='app', toMyApps()">My applications</b-button>
-      <b-button :pressed="activeMenu=='user'" @click="activeMenu='user', toUser()">My applications</b-button>
-      <b-button :pressed="activeMenu=='iot'" @click="activeMenu='iot', toMyThings()">My IoT devices</b-button>
-      <b-button :pressed="activeMenu=='fav'" @click="activeMenu='fav', toMyFavorites()">My favorite solutions</b-button>
-      <b-button :pressed="activeMenu=='rec'" @click="activeMenu='rec', toRecommended()">Recommendations</b-button>
-    </b-button-group>  
-    -->  
+    <!--
+    <div id="smallSizeScreen">
+      <b-row>
+        <b-col>
+          <b-dropdown text="Functions" variant="secondary" class="m-2" style="width:100%;">
+            <b-dropdown-item size=" " :active="reachRoute('mythings','') === 'primary'" @click="toMyThings()">IoT Devices</b-dropdown-item>
+            <b-dropdown-item size=" " :active="reachRoute('mymicroservices') === 'primary'" @click="toMyMicroservices()">Microservices</b-dropdown-item>
+            <b-dropdown-item size=" " :active="reachRoute('myapis') === 'primary'" @click="toMyApis()">REST APIs </b-dropdown-item>
+            <b-dropdown-item size=" " :active="reachRoute('myapplications') === 'primary'" @click="toMyApps()">Applications </b-dropdown-item>
+            <b-dropdown-item size=" " :active="reachRoute('myfavorites') === 'primary'" v-b-popover.hover.bottom="'Shared services marked favorite'" @click="toMyFavorites()">Favorites</b-dropdown-item>
+            <b-dropdown-item v-if="isBackButtonNeed" :active="reachRoute('recommended') === 'primary'" @click="toQuit()">Quit</b-dropdown-item>
+            <b-dropdown-divider />
+            <b-dropdown-item size=" " v-b-popover.hover.bottom="'Shared microservices and Node-RED flows'" :active="reachRoute('solutions') === 'primary'" @click="toSolutions()">Shared Solutions</b-dropdown-item>
+            <b-dropdown-divider />      
+            <b-dropdown-item size=" " :active="reachRoute('mydashboard') === 'primary'" @click="toMyDashboard()">Dashboard</b-dropdown-item>
+            <b-dropdown-item size=" " v-b-popover.hover.bottom="'Console input output for test'" :active="reachRoute('myconsole') === 'primary'" @click="toMyConsole()">Test Console</b-dropdown-item>
+            <b-dropdown-divider />
+            <b-dropdown-item size=" " :active="reachRoute('docs') === 'primary'" @click="toDocs()">Docs</b-dropdown-item>
+
+          </b-dropdown>
+        </b-col>
+      </b-row> 
+    </div>
+    -->
     <!--
       <b-form @submit.prevent="onSubmit">
         <b-form-group id="exampleInputGroup1"
@@ -155,7 +183,10 @@ export default {
       }
       return 'warning'
     },
-    async toMyApps () {
+    toMyApps () {
+      this.$router.replace('/user/myapplications')
+    },
+    async toMyMicroservices () {
       /*
       console.log('to my IoT')
       const username = 'denniskung123'
@@ -163,10 +194,13 @@ export default {
       const result = await API.post('thingApi', '/things', { body })
       console.log('result: ', result)
       */
-      this.$router.replace('/user/myapps')
+      this.$router.replace('/user/mymicroservices')
     },
     async toMyApis () {
       this.$router.replace('/user/myapis')
+    },
+    async toMyDashboard () {
+      this.$router.replace('/user/mydashboard')
     },
     toMyThings () {
       this.$router.replace('/user/mythings')
@@ -245,6 +279,28 @@ export default {
 }
 </script>
 
+<style scoped>
+@media only screen and (max-width: 600px) {
+  #smallSizeScreen div {
+    visibility: visible;
+  }
+  #normalSizeScreen div {
+    visibility: hidden;
+    height: 0px;
+    display: none;
+  }
+}
+@media only screen and (min-width: 600px) {
+  #smallSizeScreen div {
+    visibility: hidden;
+    height: 0px;
+    display: none;
+  }
+  #normalSizeScreen div {
+    visibility: visible;
+  }
+}
+</style>
 <style>
 /*
 .at-sidebar b-link.router-link-exact-active {

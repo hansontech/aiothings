@@ -1,15 +1,19 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-// import UserLogin from '@/components/UserLogin'
+import Signup from '@/components/Signup'
 import Home from '@/components/Home'
 import User from '@/components/User'
 import MyThings from '@/components/MyThings'
 import NewThing from '@/components/NewThing'
 import EditThing from '@/components/EditThing'
+import ThingStatus from '@/components/ThingStatus'
 import MyFavorites from '@/components/MyFavorites'
+import MyDashboard from '@/components/MyDashboard'
 import MyConsole from '@/components/MyConsole'
-import MyApplications from '@/components/MyApplications'
-import MyApplicationsList from '@/components/MyApplicationsList'
+import MyAuthApplications from '@/components/MyAuthApplications'
+import MyAuthApplicationsList from '@/components/MyAuthApplicationsList'
+import MyMicroservices from '@/components/MyApplications'
+import MyMicroservicesList from '@/components/MyApplicationsList'
 import NewService from '@/components/NewService'
 import EditService from '@/components/EditService'
 import MyApis from '@/components/MyApis'
@@ -44,6 +48,15 @@ Vue.use(VueRouter)
 const router = new VueRouter({
   mode: 'history',
   routes: [
+    {
+      path: '/signup',
+      name: 'signup',
+      component: Signup,
+      meta: {
+        title: 'User sign up',
+        auth: false
+      }
+    },
     {
       path: '/profile',
       name: 'profile',
@@ -230,6 +243,16 @@ const router = new VueRouter({
               }
             },
             {
+              path: 'thing_status/:thingIndex',
+              name: 'thing_status',
+              component: ThingStatus,
+              props: true,
+              meta: {
+                title: 'Thing Status',
+                auth: true
+              }
+            },
+            {
               path: 'thing/:url',
               name: 'thing',
               component: Thing,
@@ -242,19 +265,19 @@ const router = new VueRouter({
           ]
         },
         {
-          path: 'myapps',
-          component: MyApplications, // required, not change
+          path: 'mymicroservices',
+          component: MyMicroservices, // required, not change
           meta: {
-            title: 'My Applications',
+            title: 'My Microservices',
             auth: true
           },
           children: [
             {
               path: '',
-              name: 'myapps',
-              component: MyApplicationsList,
+              name: 'mymicroservices',
+              component: MyMicroservicesList,
               meta: {
-                title: 'My Applications List',
+                title: 'My Microservices List',
                 auth: true
               }
             },
@@ -275,6 +298,25 @@ const router = new VueRouter({
               props: true,
               meta: {
                 title: 'Edit Service',
+                auth: true
+              }
+            }
+          ]
+        },
+        {
+          path: 'myapplications',
+          component: MyAuthApplications, // required, not change
+          meta: {
+            title: 'My Applicationss',
+            auth: true
+          },
+          children: [
+            {
+              path: '',
+              name: 'myapplications',
+              component: MyAuthApplicationsList,
+              meta: {
+                title: 'My Application List',
                 auth: true
               }
             }
@@ -333,6 +375,15 @@ const router = new VueRouter({
           component: MyConsole,
           meta: {
             title: 'My Console',
+            auth: true
+          }
+        },
+        {
+          path: 'mydashboard',
+          name: 'mydashboard',
+          component: MyDashboard,
+          meta: {
+            title: 'My Dashboard',
             auth: true
           }
         },
@@ -403,7 +454,7 @@ router.beforeEach((to, from, next) => {
       if (store.getters.isAuthenticated) { // and user has been authenticated
         next() // continue go to 'to' page
       } else {
-        router.push({ name: 'home' })
+        router.push({ name: 'signup' })
       }
     } else { // if the 'to' page does not need the authentication
       next()

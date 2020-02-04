@@ -1,24 +1,29 @@
 <template>
-   <b-container fluid> 
+   <div> 
       <b-row align-v="center" class="at-bottombar">
         <b-col align="start">
           <h4>Console</h4>
         </b-col>
       </b-row>
       <b-row>
-        <b-col sm="8" lg="6">
+        <b-col sm="6">  <!-- left half -->
           <b-row align-v="center">
-             <b-col align="start">
-              <h6>Console output</h6>
-             </b-col>
-            <b-col sm="auto" align="end">
+            <b-col sm="6" align="start">
+              <h5>Console output</h5>
+            </b-col>
+            <b-col sm="6" align="end">
               <b-button variant="info" @click="scrollToEnd()" v-b-popover.hover.bottom="'Scroll to the end'">To end</b-button>
               <b-button variant="info" @click="resetConsoleOutput()">Clear</b-button> 
             </b-col>
           </b-row>
-          <b-row class="mt-3" style="border: 1px solid black; height:410px;" >
-            <b-container style="padding: 10px 0px 10px 5px; height: 100%;">
-              <div id="consoleOutputContainer" class="at-scroll">
+          <b-row class="mt-2 ml-0 mr-0" style="height:440px;" >
+            <b-container style="border: 1px solid black; padding: 10px 0px 10px 5px; height: 100%;">
+              <b-row v-if="consoleOutputs === null || consoleOutputs.length === 0" align-v="center" style="height:100%;">
+                <b-col align="center" style="color: grey;">
+                  Display messages with 'console/output' topic.
+                </b-col>
+              </b-row>
+              <div v-else id="consoleOutputContainer" class="at-scroll">
                   <p style="line-height: 1.1; margin-top:0em; margin-bottom:5px; " v-for="(output, index) in consoleOutputs" :key="index">
                     <small><b>{{output.date}}</b>:<b>{{output.fromService}}</b></small>: {{output.body}}
                   </p>     
@@ -26,49 +31,52 @@
             </b-container>
           </b-row>
         </b-col>
-        <b-col sm="4" lg="6">
+        <b-col sm="6">  <!-- right half -->
           <b-row align-v="center">
-            <b-col align="start">
-              <h6>Console input</h6>
+            <b-col sm="6" align="start">
+              <h5>Console input</h5>
             </b-col>
-            <b-col sm="auto" align="end">
+            <b-col sm="6" align="end">
               <b-button variant="info" @click="publishMessage()">Publish Message</b-button>
             </b-col>
           </b-row>
-          <b-row class="ml-1">
-            <b-form @submit="onSubmit" @reset="onReset" style="width:95%">
-              <b-form-group id="publishMessageTopicGroup"
-                      label="Message topic"
-                      label-for="publishTopic"
-                      >
-                <b-form-input class="at-border" id="publishTopic"
-                        type="text" 
-                        v-model="inputMessage.topic"
-                        required
-                        placeholder="Enter topic ( e.g. console/output )">
-                </b-form-input>
-              </b-form-group>
-            </b-form>
+          <b-row class="mt-2">
+            <b-col>
+              <b-form @submit.prevent="onSubmit" @reset="onReset">
+                <b-form-group id="publishMessageTopicGroup"
+                        label="Message topic"
+                        label-for="publishTopic"
+                        >
+                  <b-form-input class="at-border" id="publishTopic"
+                          type="text" 
+                          v-model="inputMessage.topic"
+                          required
+                          placeholder="Enter topic ( e.g. console/output )">
+                  </b-form-input>
+                </b-form-group>
+              </b-form>
+            </b-col>
           </b-row>
           <b-modal ref="missJsonModal" ok-only title="Failed to publish message" >
                 The message body is not a JSON.
           </b-modal>
-          <b-row class="ml-1">
-            <b-form @submit="onSubmit" @reset="onReset" style="width:95%">
-              <b-form-group id="publishMessageBodyGroup"
-                      label="Message body"
-                      label-for="publishTopic"
-                      description="Use this to publish message to AIoThings."
-                      >
-                <codemirror v-model="inputMessage.body" ref="sourceEditor" placeholder='Must be a JSON, e.g. { "item": "value" }'>
-                </codemirror>
-              </b-form-group>
-            </b-form>
+          <b-row>
+            <b-col>
+              <b-form @submit.prevent="onSubmit" @reset="onReset">
+                <b-form-group id="publishMessageBodyGroup"
+                        label="Message body"
+                        label-for="publishTopic"
+                        description="Use this to publish message to AIoThings."
+                        >
+                  <codemirror v-model="inputMessage.body" ref="sourceEditor" placeholder='Must be a JSON, e.g. { "item": "value" }'>
+                  </codemirror>
+                </b-form-group>
+              </b-form>
+            </b-col>
           </b-row>         
         </b-col>
       </b-row>
-      <p></p>
-  </b-container> 
+  </div> 
 </template>
 
 <script>
@@ -141,7 +149,7 @@ export default {
           this.$refs.missJsonModal.show()
           return
         }
-        let topic = 'aiot/' + this.$store.getters.username + '/console/' + this.inputMessage.topic
+        let topic = 'aiot/' + this.$store.getters.userId + '/console/' + this.inputMessage.topic
         await PubSub.publish(topic, bodyJson)
         console.log('message sent: ', topic)
       }
@@ -150,28 +158,7 @@ export default {
 }
 </script>
 
-<style>
-
-div.at-bottombar {
-  /* background-color : grey; */
-  padding-bottom: 5px;
-  margin-bottom: 5px;
-  border-bottom: 1px solid grey
-}
-
-.CodeMirror {
-  border: 1px solid #a78;
-  padding: 5px;
-}
-.CodeMirror pre.CodeMirror-placeholder {
-  color: #999;
-}
-/*
-.at-border {
-  border: 1px solid #a78;
-  padding: 5px;
-}
-*/
+<style scoped>
 div.at-scroll {
   /* height : 500px ; */
   overflow-y: scroll; /* auto */

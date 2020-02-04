@@ -8,6 +8,9 @@ import store from './store'
 import config from './config'
 
 export default {
+  truncatedString (textStr, length) {
+    return (textStr.length < (length)) ? textStr : (textStr.substring(0, length - 4) + '...')
+  },
   async downloadUrlToLocal (url, fileName) {
     let res = await fetch(url)
     // let data = await res.text()
@@ -27,7 +30,7 @@ export default {
       } // end of for loop
       // console.log('export zip')
       let zipContent = await zip.generateAsync({type:"blob"})
-      const userId = store.getters.username
+      const userId = store.getters.userId
       FileSaver.saveAs(zipContent, userId + '.zip')
     } catch (err) {
       console.log('export error: ', err)
@@ -39,7 +42,7 @@ export default {
       Storage.configure({level: 'public'})
       await this.exportServiceToZip (zip, mservice, isLoadCode)
       let zipContent = await zip.generateAsync({type:"blob"})
-      const userId = store.getters.username
+      const userId = store.getters.userId
       FileSaver.saveAs(zipContent, userId + '-' + mservice.ServiceName + '.zip')
     } catch (err) {
       console.log('export service error: ', err)
@@ -126,7 +129,7 @@ export default {
     return dataText
   },
   async deleteFavorite (serviceName) {
-    const userId = store.getters.username
+    const userId = store.getters.userId
     const result = await API.del('mserviceApi', '/favorites', {
         'queryStringParameters': {
           'userId': userId,
@@ -137,19 +140,23 @@ export default {
     store.dispatch('removeFavorite', serviceName)
   },
   async reloadFavoriteServices () { // { ms1, ms2, ms3 }
-    const userId = store.getters.username
-    const result = await API.get('mserviceApi', '/favorite-mservices', {
-      'queryStringParameters': {
-        'userId': userId
-      }
-    })
-    console.log(result)
-    // let favoriteMservices = JSON.parse(result)
-    let favoriteMservices = result
-    store.commit('setFavoriteMservices', favoriteMservices)
+    const userId = store.getters.userId
+    try {
+      const result = await API.get('mserviceApi', '/favorite-mservices', {
+        'queryStringParameters': {
+          'userId': userId
+        }
+      })
+      console.log(result)
+      // let favoriteMservices = JSON.parse(result)
+      let favoriteMservices = result
+      store.commit('setFavoriteMservices', favoriteMservices)
+    } catch (err) {
+      console.error(err)
+    }
   },
   async reloadFavoriteServiceList () { // { 'ms1 name' : true, 'ms2 name' : true, ... }
-    const userId = store.getters.username
+    let userId = store.getters.userId
     if (userId === null) {
       userId = ' '
     }
@@ -223,18 +230,25 @@ export default {
     let dataText = await dataResponse.text()
     return dataText
    },
+  async allowUseIoT () {
+    let authCredentialsPromise = Auth.currentCredentials()
+    authCredentialsPromise.catch(err => console.log('get current credentials err', err))
+    let credentials = await authCredentialsPromise
+    // console.log('credentials: ', credentials)
+    const identityId = credentials._identityId
+    await atHelper.allowLoginIdentityUseIoT(identityId)
+  },
   async allowLoginIdentityUseIoT (identityId) {
     const body = { identityId }
     const result = await API.post('thingApi', '/iot-allow', { body })
     console.log('allowLoginIdentityUseIoT: ', result)
   },
   async continueLoadSharedServices () {
-    const username = store.getters.username
+    const userId = store.getters.userId
     const continueIndex = store.getters.sharedMservicesContinueIndex
-    console.log('reloadServices: username: ', username)
     const result = await API.get('mserviceApi', '/mservices', {
           'queryStringParameters': {
-               'userId': username,
+               'userId': userId,
                'isShared': true,
                'continueIndex': continueIndex
           }
@@ -245,12 +259,11 @@ export default {
     store.commit('addSharedMservices', JSON.parse(result))
   },
   async reloadSharedServices () {
-    const username = store.getters.username
-    console.log('reloadSharedServices: username: ', username)
+    const userId = store.getters.userId
     store.commit('setSharedMServicesContinueIndex', null)
     const result = await API.get('mserviceApi', '/mservices', {
           'queryStringParameters': {
-               'userId': username,
+               'userId': userId,
                'isShared': true
           }
     })
@@ -260,54 +273,50 @@ export default {
     store.commit('setSharedServices', JSON.parse(result))
   },
   async reloadServices () {
-    const username = store.getters.username
-    console.log('reloadServices: username: ', username)
-    const result = await API.get('mserviceApi', '/mservices', {
-          'queryStringParameters': {
-               'userId': username
-          }
-    })
-    // let resultJson = JSON.parse(result)
-    let resultJson = result
-    console.log('reloadServices:: ', resultJson.length)
-    store.commit('setMservices', resultJson)
+    const userId = store.getters.userId
+    try {
+      const result = await API.get('mserviceApi', '/mservices', {
+            'queryStringParameters': {
+                'userId': userId
+            }
+      })
+      // let resultJson = JSON.parse(result)
+      let resultJson = result
+      store.commit('setMservices', resultJson)
+    } catch (err) {
+      console.error(err)
+    }
   },
   async reloadApis () {
-    const username = store.getters.username
-    console.log('reloadApis: username: ', username)
+    const userId = store.getters.userId
     const resultJson = await API.get('apiApi', '/apis', {
           'queryStringParameters': {
-               'userId': username
+               'userId': userId
           }
     })
-    console.log('reloadApis: ', resultJson)
     if (resultJson.error === null && resultJson.result !== undefined) {
       store.commit('setApis', resultJson.result)
     }
   },
   async reloadThings () {
-    const username = store.getters.username
-    console.log('reloadThings: username: ', username)
+    const userId = store.getters.userId
     const result = await API.get('thingApi', '/things', {
           'queryStringParameters': {
-               'userId': username
+               'userId': userId
           }
     })
-    // console.log('things result:', result)
     // let things = JSON.parse(result)
     let things = result
-    console.log('things: ', things)
     store.commit('setThings', things)
   },
   async reloadSolutions () {
-    const username = store.getters.username
-    if (username === null) {
-      username = ' '
+    let userId = store.getters.userId
+    if (userId === null) {
+      userId = ' '
     }
-    console.log('reloadSolutions: username: ', username)
     const result = await API.get('solutionApi', '/solutions', {
           'queryStringParameters': {
-               'userId': username
+               'userId': userId
           }
     })
     // store.commit('setThings', JSON.parse(result))

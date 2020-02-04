@@ -1,15 +1,14 @@
 <template>
-  <b-container fluid>
+  <div>
     <div v-bind:titleString="changeTitle()">
       <b-modal id="modalReturnConfirm"
-             hide-header=""
+             hide-header
              ref="modalReturnConfirmRef"
              @ok="returnDiscardChangesOk"
              @cancel="returnCancel">
-             <h5>Leave and ignore the changes?</h5>
+             <h5>Discard changes and return?</h5>
       </b-modal>
-      <b-row align-v="center" style="border-bottom: 1px solid grey; padding-bottom: 5px;
-  margin-bottom: 5px;">
+      <b-row align-v="center" style="border-bottom: 1px solid grey; padding-bottom: 5px; margin-bottom: 5px;">
         <b-col align="start">
             <h4>IoT Device : {{thingName}}</h4>
         </b-col>
@@ -19,7 +18,7 @@
           <b-button variant="info" @click="updateThing()">Update</b-button>
           <b-button v-if="isEdgeAbleToDeploy" v-b-popover.hover.bottom="'To deploy, make sure the edge device is online and edge daemon is running'" variant="info" @click="deployEdge()">Edge Deploy</b-button>
           <b-button v-if="isEdgeAbleToDelete" variant="info" @click="deleteEdge()">Delete Edge</b-button>
-          <b-button variant="dark" @click="backHome()">Return</b-button>
+          <b-button variant="dark" @click="backHome()">Return<sub><b-badge class="ml-1" variant="warning" v-if="isChangedNotSaved">&nbsp;</b-badge></sub></b-button>
         </b-col>
       </b-row>
       <spinner v-if="isDeploying === true" size="medium" />
@@ -33,51 +32,61 @@
       </b-row>
       -->
       <b-tabs card>
-        <b-tab title="Thing Settings">
-          <b-row class="mt-3">
-            <b-col>
-              <h4>Description </h4>
+        <b-tab title="Thing">
+          <b-row class="mt-3" align-v="center">
+            <b-col><h5>Description</h5></b-col>
+            <b-col v-if="isEditDesc">
+                <small>Markdown script...</small>
+            </b-col>
+            <b-col align="end">
+                <b-form-radio-group v-model="isEditDesc">
+                  <b-form-radio :value="false">Display</b-form-radio>
+                  <b-form-radio :value="true">Edit</b-form-radio>
+                </b-form-radio-group>
             </b-col>
           </b-row>
-          <!-- 
-          <b-row>
-            <b-col>
-              <b-collapse visible id="collapseShow" class="mt-2" style="white-space: pre-wrap;">
-                <textarea class="w-100 h-300" style="height: 150px;" v-model="thingDesc" placeholder="Please input for description" disabled></textarea>
-              </b-collapse> 
-            </b-col>       
-          </b-row>
-          -->
-          <b-row>
-            <b-col>
-            <!-- <b-collapse id="collapseEdit" class="mt-2"> -->
-              <!-- <b-collapse id="collapseEdit" class="mt-2" style="width:100%; height: 150px; "> -->
-                <textarea class="w-100 h-300" style="height: 150px;" v-model="thingDesc" placeholder="Please input for description"></textarea>
-              <!-- </b-collapse> -->
-            <!-- </b-collapse> -->
+          <b-row v-if="isEditDesc">
+            <b-col> 
+              <textarea class="at-desc-edit" v-model="thingDesc" placeholder="thing's description. (Can be a markdown text)"></textarea>
             </b-col>
           </b-row>
+          <b-row v-else>
+            <b-col>
+              <vue-markdown class="at-desc-display">{{thingDesc}}</vue-markdown>
+            </b-col>
+          </b-row> 
           <b-row class="mt-3">
-            <b-col sm="4">
+            <b-col sm="3">
               <h5 style="display: inline;">User ID</h5>
             </b-col>
-            <b-col>
-              <h5 style="display: inline;"><code>{{$store.getters.username}}</code></h5>
+            <b-col sm="9">
+              <h6 style="display: inline;"><code>{{$store.getters.userId}}</code></h6>
             </b-col>
           </b-row>
           <b-row class="mt-2">
-            <b-col sm="4">
+            <b-col sm="3">
               <h5 style="display: inline;">Thing ID</h5> 
             </b-col>
-            <b-col>
-              <h5 style="display: inline;"><code>{{thing.ThingId}}</code></h5>
+            <b-col sm="9">
+              <h6 style="display: inline;"><code>{{thing.ThingId}}</code></h6>
             </b-col>
           </b-row>
-          <b-row  class="mt-2">
-            <b-col sm="4">
+          <b-modal id="modalCertificateHelpConfirm"
+                  title="Certificates"
+                  hide-footer
+                  size="sm"
+                  >
+                    <b-row><b-col>Use to build secured connections.</b-col></b-row>
+                    <b-row><b-col><span class="text-danger">certificate.crt</span></b-col></b-row><b-row><b-col>Cloud to certify the device. <br /></b-col></b-row>
+                    <b-row><b-col><span class="text-danger">private.key</span></b-col></b-row><b-row><b-col>Private key of the device. <br /></b-col></b-row>
+                    <b-row><b-col><span class="text-danger">root-CA.crt</span></b-col></b-row><b-row><b-col>Issued by CA (Certificate Authority).<br /></b-col></b-row>
+          </b-modal>
+          <b-row  align-v="center" class="mt-2">
+            <b-col sm="3">
                 <h5 style="display: inline;">Certificates & key</h5>
+                <b-button variant="light" small v-b-modal.modalCertificateHelpConfirm><i class="fas fa-info-circle"></i></b-button>
             </b-col>
-            <b-col>
+            <b-col sm="9">
                 <b-button style="display: inline;" id="downloadButton" variant="info" @click="downloadCert()">Download</b-button>
             </b-col>
           </b-row>
@@ -88,6 +97,7 @@
              >
             Edge deployment is failed
           </b-modal>
+          <!--
           <b-popover v-if="isDownloading === false" target="downloadButton" triggers="hover focus">
                   <template slot="title">Download configurations</template>
                     <b-row><b-col>They are used to build a secured connection to IoT device.</b-col></b-row>
@@ -95,6 +105,7 @@
                     <b-row><b-col><span class="text-danger">private.key</span></b-col></b-row><b-row><b-col>Private key the device uses as it's identity. <br /></b-col></b-row>
                     <b-row><b-col><span class="text-danger">root-CA.crt</span></b-col></b-row><b-row><b-col>Certificate issued by CA (Certificate Authority) used to certify AIoThings. <br /></b-col></b-row>
           </b-popover>
+          -->
           <b-row class="mt-2">
             <b-col>
               <b-card>
@@ -105,28 +116,28 @@
                   <b-col sm="3"><span class="text-primary">MQTT broker (server)</span></b-col>
                   <b-col>
                     <b-row>
-                      <b-col><code>b-a3vgppxo7lddg8-ats.iot.ap-southeast-2.amazonaws.com</code></b-col>
+                      <b-col><code><em>iot.aiothings.com</em></code><br/></b-col>
                     </b-row>
                     <b-row>
-                      <b-col>Or, <code><em>iot.aiothings.com</em></code><br/></b-col>
+                      <b-col><code>Or, a3vgppxo7lddg8-ats.iot.ap-southeast-2.amazonaws.com</code></b-col>
                     </b-row>
                   </b-col>
                 </b-row>
                 <b-row>
                   <b-col sm="3"> <span class="text-primary">Certificates and keys</span></b-col> 
-                  <b-col>Set to the files <em>downloaded</em> from the above button<br /> </b-col>
+                  <b-col><code>Set to the downloaded files</code><br /> </b-col>
                 </b-row>
                 <b-row>
                   <b-col sm="3"> <span class="text-primary">Username/password</span></b-col> 
-                  <b-col>Leave it blank <br /> </b-col>
+                  <b-col><code>Leave blank </code><br /> </b-col>
                 </b-row>
                 <b-row>
                   <b-col sm="3"> <span class="text-primary">Client Id</span></b-col> 
-                  <b-col>Set to <code>{Thing ID}</code> showing above <br /> </b-col>
+                  <b-col><code>{Thing ID}</code><br /> </b-col>
                 </b-row>
                 <b-row>
                   <b-col sm="3"> <span class="text-primary">QoS</span></b-col> 
-                  <b-col>Set to <code>1 or higher</code> <br /> </b-col>
+                  <b-col><code>1 or higher</code> <br /> </b-col>
                 </b-row>
                 <b-row>
                   <b-col sm="3"> <span class="text-primary">MQTT port</span></b-col>
@@ -137,18 +148,18 @@
                 </b-row>
                 <b-row>
                   <b-col sm="3"> <span class="text-primary">MQTT topic format</span></b-col> 
-                  <b-col>Set to <code>'aiot/{User ID}/{Thing ID}/{your topic}'</code><br /> </b-col>
+                  <b-col><code>aiot/{User ID}/{Thing ID}/{your topic}</code><br /> </b-col>
                 </b-row>
                 <b-row>
                   <b-col sm="3"> <span class="text-primary">MQTT payload format</span></b-col> 
-                  <b-col>Must comply to JSON<br /> </b-col>
+                  <b-col><code>JSON</code><br /> </b-col>
                 </b-row>
               </b-card>
             </b-col>
           </b-row>
         </b-tab>
         <b-popover target="propsTabBtn___BV_tab_button__" placement="right" triggers="hover focus" content="An Edge device is more than a Thing, able to run microservices locally."></b-popover>
-        <b-tab title="Edge Setting" id="propsTabBtn">
+        <b-tab title="Edge" id="propsTabBtn">
          <spinner v-if="isEdgeUpdating === true" size="medium" />
          <b-row class="mt-1">
            <b-col>
@@ -278,7 +289,7 @@
                   </b-col>
                 </b-row>
                 <b-row class="mt-1" v-else>
-                  <div class="at-scroll">
+                  <b-col class="at-scroll">
                     <b-card-group columns>
                       <b-card v-for="(edgeFunction, index) in edgeFunctions" :key="edgeFunction.FunctionArn" header=" " class="at-card-mservice">
                           <b-row align-v="center">
@@ -296,8 +307,8 @@
                             </b-col>
                           </b-row>
                           <b-row class="mt-2" v-if="edgeFunctionToService(edgeFunction) !== null" >
-                            <b-col class="at-border">
-                              {{edgeFunctionToService(edgeFunction).ServiceDesc}}
+                            <b-col class="at-desc-display">
+                              <vue-markdown>{{edgeFunctionToService(edgeFunction).ServiceDesc}}</vue-markdown>
                             </b-col>
                           </b-row>
                           <!--
@@ -343,7 +354,7 @@
                           </small>
                       </b-card>
                     </b-card-group>
-                  </div>
+                  </b-col>
                 </b-row>
               </b-tab>
               <b-tab title="Resources">
@@ -520,7 +531,7 @@ inside the container that the function runs in.</p>
                   </b-col>
                 </b-row>
                 <b-row class="mt-1" v-else>
-                  <div class="at-scroll">
+                  <b-col class="at-scroll">
                     <b-card-group columns style="--color-at-background:red;">
                       <!-- v-bind:style="{'--color-at-background':resourceCboxColor(resource)}" -->
                                                 <!-- style="--color-at-background:red; --height-at-dynamic: 60px;" -->
@@ -569,7 +580,7 @@ inside the container that the function runs in.</p>
                           </div>
                       </b-card>
                     </b-card-group>
-                  </div>
+                  </b-col>
                 </b-row>
               </b-tab>
               <b-tab title="Connectors">
@@ -834,7 +845,7 @@ inside the container that the function runs in.</p>
                   </b-col>
                 </b-row>
                 <b-row class="mt-1" v-else>
-                  <div class="at-scroll">
+                  <b-col class="at-scroll">
                     <b-card-group columns>
                       <b-card v-for="(connector, index) in edgeConnectors" :key="connector.Id"
                           header = " "
@@ -860,7 +871,7 @@ inside the container that the function runs in.</p>
                           </b-row>
                       </b-card>
                     </b-card-group>
-                  </div>
+                  </b-col>
                 </b-row>
               </b-tab>
               <b-tab title="Configuration">
@@ -907,7 +918,7 @@ sudo ./greengrassd start</code></pre>
 
       </b-row>
     </div>
-  </b-container>
+  </div>
  </template>
 
 <script>
@@ -925,10 +936,12 @@ export default {
       /* edgeResources: [], */
       errorMessage: {header: '', message: ''},
       funcFilterString: '',
+      thingBackup: null,
       isChangedNotSaved: false,
       isDownloading: false,
       isEdgeUpdating: false,
       isDeploying: false,
+      isEditDesc: true,
       thingDesc: null,
       thingName: null,
       isShowEdit: false,
@@ -1303,7 +1316,7 @@ export default {
   async mounted () {
     await this.reloadThing()
     console.log('edit thing: ', this.thing)
-    this.services = this.$store.getters.mservices
+    // this.services = this.$store.getters.mservices
     if (this.services === null) {
       await atHelper.reloadServices()
       this.services = this.$store.getters.mservices
@@ -1313,6 +1326,7 @@ export default {
       await atHelper.reloadFavoriteServices()
       this.favoriteServices = this.$store.getters.favoriteMservices
     }
+    this.isEditDesc = false
   },
   watch: {
     /* right way to force rendering (refresh)
@@ -1321,18 +1335,19 @@ export default {
       3. put $forceUpdate()
     */
     thing: {
-        handler: function () {
-          this.$forceUpdate()
-          /*
-          console.log('computed: edgeResources evaluated')
-          if (this.thing !== null && this.thing.hasOwnProperty('EdgeDefinition') && this.thing.EdgeDefinition.resourceDefinition !== undefined) {
-            this.edgeResources = this.thing.EdgeDefinition.resourceDefinition.Definition.Resources
-          } else {
-            this.edgeResources = []
+      handler: function (newThing) {
+        if (this.thingBackup !== null) {
+          let compareOld = this.$_.omit(this.thingBackup, ['edgeData'])
+          let compareNew = this.$_.omit(newThing, ['edgeData'])
+          let isEqual = this.$_.isEqual(compareOld, compareNew)
+          if (isEqual === false && this.isChangedNotSaved !== true) {
+            this.isChangedNotSaved = true
           }
-          */
-        },
-        deep: true
+        }
+        this.thingBackup = this.$_.clone(newThing)
+        this.$forceUpdate()
+      },
+      deep: true
     },
     cboxColor (val) {
       this.$el.style.setProperty('--color', val)
@@ -1355,9 +1370,7 @@ export default {
       }
     },
     thingDesc: function (newDesc, oldDesc) {
-      console.log('thingDesc changed: ', oldDesc)
       if (newDesc !== oldDesc && this.isChangedNotSaved !== null && oldDesc !== null) {
-        console.log('thingDesc changed now')
         this.isChangedNotSaved = true
       }
     },
@@ -1392,7 +1405,7 @@ export default {
             this.$set(this.thing, 'EdgeDefinition', definitionData.edgeDefinition)
           }
         } catch (err) {
-          console.log('def error: ', err)
+          console.error(err)
         }
       }
     },
@@ -1988,7 +2001,7 @@ export default {
         this.thing.ThingDesc = this.thingDesc
         this.thing.ThingName = this.thingName
         // console.log('Thing: ', this.thing)
-        const userId = this.$store.getters.username
+        const userId = this.$store.getters.userId
         const certId = this.thing.CertId
         const thingId = this.thing.ThingId
         const name = this.thing.ThingName

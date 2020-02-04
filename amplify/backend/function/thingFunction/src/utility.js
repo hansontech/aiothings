@@ -177,7 +177,7 @@ let dbListCertinfo = ( userId, callback ) => {
     ExpressionAttributeValues: {
         ':userid': userId
     },
-    ProjectionExpression: "ThingName, ThingDesc, ThingId, CertId, UserId, EdgeData"
+    ProjectionExpression: "ThingName, ThingDesc, ThingId, CertId, UserId, EdgeData, ThingTimeZone"
   };
 
   dynamoDb.query(params, function(err, data) {
@@ -251,6 +251,7 @@ let dbGetCertinfoAsync = async (userId, iotcert) => {
 // Learn how to set IoT Policy
 // https://docs.aws.amazon.com/iot/latest/developerguide/pub-sub-policy.html
 // https://aws.timwang.space/blog/?p=295
+
 let iotPolicyTemplate = {
   "Version": "2012-10-17",
   "Statement": [
@@ -264,42 +265,30 @@ let iotPolicyTemplate = {
       "Action": [
         "iot:UpdateThingShadow",
         "iot:GetThingShadow",
-        "iot:DeleteThingShadow"
+        "iot:DeleteThingShadow",
+        "iot:Connect",
+        "iot:Subscribe",
+        "iot:DescribeJobExecution",
+        "iot:GetPendingJobExecutions",
+        "iot:UpdateJobExecution",
+        "iot:StartNextPendingJobExecution"
       ],
       "Resource": [
         "*"
       ]
     },
-      {
-          "Effect": "Allow",
-          "Action": [
-            "iot:Connect"
-          ],
-          "Resource": [
-            "*"
-          ]
-      },
-      {
-          "Effect": "Allow",
-          "Action": [
-            "iot:Subscribe"
-          ],
-          "Resource": [
-            "*" 
-          ]
-      },
-      {
-          "Effect": "Allow",
-          "Action": [
-              "iot:Publish",
-              "iot:Receive"
-          ],
-          "Resource": [
-            "arn:aws:iot:REGION_NAME:ACCOUNT_ID:topic/aiot/USER_ID/*",
-            "arn:aws:iot:REGION_NAME:ACCOUNT_ID:topic/aiot/THING_ID/*",
-            "arn:aws:iot:REGION_NAME:ACCOUNT_ID:topic/$aws/*"   
-          ]
-      }
+    {
+      "Effect": "Allow",
+      "Action": [
+          "iot:Publish",
+          "iot:Receive"
+      ],
+      "Resource": [
+        "arn:aws:iot:REGION_NAME:ACCOUNT_ID:topic/aiot/USER_ID/*",
+        "arn:aws:iot:REGION_NAME:ACCOUNT_ID:topic/aiot/THING_ID/*",
+        "arn:aws:iot:REGION_NAME:ACCOUNT_ID:topic/$aws/*"   
+      ]
+    }
   ]
 }
 // Apply cert & Attach thing, policy
@@ -324,8 +313,9 @@ let applyThingCert = ( userId, thingNameTag, callback ) => {
       // let datetime = (new Date()).getTime()
       // console.log('applyThingCert: certData: ', certData)
       //let thingId = userId + '_' + datetime
-      let thingId = userId + '_' + thingNameTag
-      // Create IoT Policy for above cert
+      let thingId = userId + '_' + thingNameTag // 2020/01 
+      let policyName = userId + '_' + thingNameTag
+      // Create IoT Policy for asbove cert
       let sts = new AWS.STS()
       let stsData = await sts.getCallerIdentity({}).promise()
       let accountId = stsData.Account
@@ -338,10 +328,10 @@ let applyThingCert = ( userId, thingNameTag, callback ) => {
       console.log('iotPolicy: ', iotPolicy)
       await iot.createPolicy({
         policyDocument: iotPolicyTemplateStr, /* required */
-        policyName: thingId /* required */
+        policyName: policyName /* required */
       }).promise()
       await iot.attachPolicy( {
-        policyName: thingId, /* required */
+        policyName: policyName, /* required */
         target: certData.certificateArn /* required */
       }).promise()
       await iot.createThing( {
@@ -361,8 +351,28 @@ let applyThingCert = ( userId, thingNameTag, callback ) => {
         principal: certArn, /* required */
         thingName: thingId /* required */
       }).promise()
+      // republish to transform aiot/thingId topic to aiot/userId/thingNameTag
+      let republishTopic = 'aiot/' + userId + '/' + thingId + '${substring(topic(),' + ('aiot/' + thingId).length + ')}'
+      // console.log('republish topic: ', republishTopic)
+      await iot.createTopicRule({
+        ruleName: thingId.replace(/\-/g, '_') + '_t2ut', /* required */
+        topicRulePayload: { /* required */
+          actions: [ /* required */
+            {
+              republish: {
+                roleArn: config.aiotIotActionRole, /* required */
+                topic: republishTopic /* required */
+                // qos: 1 // TODO, cause error Unexpected key - 
+              }
+            }
+          ],
+          sql: "SELECT * FROM 'aiot/" +  thingId + "/#'" , /* required */
+          // , topic() AS MessageTopic
+          ruleDisabled: false,
+          awsIotSqlVersion: '2016-03-23'
+        }
+      }).promise()
       callback( null, certId, thingId, certData);
- 
     } catch (err) {
       console.log('createKeysAndCertificate: ', err)
       callback(err)
@@ -371,7 +381,7 @@ let applyThingCert = ( userId, thingNameTag, callback ) => {
 }
 
 // Apply cert & Attach thing, policy
-let updateThingCert = ( userId, certId, thingId, callback ) => {
+let updateThingCert = ( userId, certId, thingId, thingNameTag, callback ) => {
   AWS.config.update({region: config.region});
   var iot = new AWS.Iot();
   // get cert
@@ -384,14 +394,14 @@ let updateThingCert = ( userId, certId, thingId, callback ) => {
       return
     }
     try {
-      let policyName = thingId
+      let policyName = userId + '_' + thingNameTag
       await iot.detachPolicy({
         policyName: policyName,
         target: certData.certificateDescription.certificateArn
       }).promise().catch( function(error) {
         console.log('detachPolicy: ', error)
       })
-      let listPolicyData = await iot.listPolicyVersions({policyName: thingId}).promise()
+      let listPolicyData = await iot.listPolicyVersions({policyName: policyName}).promise()
       for (let policyVersion of listPolicyData.policyVersions) {
         if (policyVersion.isDefaultVersion) {
         } else {
@@ -584,12 +594,17 @@ let cancelThingCert = (certId, thingId, callback ) => {
                         thingName: thingId, /* required */
                         // expectedVersion: 0
                       };
-                      iot.deleteThing(deleteThingParams, function(err, data) {
+                      iot.deleteThing(deleteThingParams, async function(err, data) {
                         if (err) {
                           console.log(err, err.stack); // an error occurred
                           callback(err)
                         }
                         else{
+                          iot.deleteTopicRule({
+                            ruleName: thingId.replace(/\-/g, '_') + '_t2ut', /* required */
+                          }).promise().catch(function(err) {
+                            console.log(err)
+                          })
                           // console.log(data);           // successful response
                           console.log('deleteThing: success')
                           callback( null );

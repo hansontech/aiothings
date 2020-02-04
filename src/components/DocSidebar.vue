@@ -19,6 +19,7 @@ export default {
     return {
       treeObj: null,
       tag: '',
+      isTreeNodeSelectWithoutLink: false,
       selectedNode: null,
       treeOptions: {
         multiple: false
@@ -48,7 +49,8 @@ export default {
                       children: [
                         { 'text': 'Mongoose OS', data: { 'link': 'DocMongooseOs' } }
                       ]
-                    }
+                    },
+                    { 'text': 'FreeRTOS', data: { 'link': 'DocFreeRTOS' } }
                   ]
                 },
                 { 'text': 'Edge computing',
@@ -62,7 +64,8 @@ export default {
                           data: { 'link': 'DocThingEdgeMachineLearning' }
                         }
                       ]
-                }
+                },
+                { 'text': 'Device JIT provisioning', data: { 'link': 'DocThingProvisioning' } }
               ]
             },
             { 'text': 'Microservices',
@@ -77,7 +80,15 @@ export default {
               ]
             },
             { 'text': 'REST APIs', data: { 'link': 'DocApi' } },
-            { 'text': 'App Connectors', data: { 'link': 'DocAppConnector' } },
+            { 'text': 'Applications', data: { 'link': 'DocAppAuth' } },
+            { 'text': 'App Connectors',
+              data: { 'link': 'DocAppConnector' },
+              state: { expanded: false },
+              children: [
+                { 'text': 'IFTTT Service', data: { 'link': 'DocAppConnectorIFTTT' } },
+                { 'text': 'Zapier Integration', data: { 'link': 'DocAppConnectorZapier' } }
+              ]
+            },
             { 'text': 'Shared Solutions', data: { 'link': 'DocSharedSolution' } },
             { 'text': 'Console', data: { 'link': 'DocConsole' } },
             { 'text': 'Running Log', data: { 'link': 'DocLog' } },
@@ -178,17 +189,22 @@ export default {
       // https://amsik.github.io/liquor-tree/#Tree-selected
       let selection = this.treeObj.find({ data: { link: id } })
       if (selection !== undefined && selection !== null) {
+        this.isTreeNodeSelectWithoutLink = true
         selection.select(true)
       }
     },
     onNodeSelected (node) {
+      if (this.isTreeNodeSelectWithoutLink) { // to avoid scroll jumping from sidebar updates
+        this.isTreeNodeSelectWithoutLink = false
+        return
+      }
       // this.$router.replace('/docs', undefined, () => { window.location.href = '#SHARED_ECONOMY' })
       if (node.data.hasOwnProperty('link')) {
         this.tag = '#' + node.data.link
         // console.log(this.tag)
         // https://router.vuejs.org/guide/essentials/navigation.html
         // onComplete and onAbort callbacks to router.push or router.replace as the 2nd and 3rd arguments.
-        this.$router.replace('/docs/main', () => { window.location.href = this.tag; this.$forceUpdate() }, () => { window.location.href = this.tag; this.$forceUpdate() })
+        this.$router.replace('/docs/main' + this.tag, () => { window.location.href = this.tag; this.$forceUpdate() }, () => { window.location.href = this.tag; this.$forceUpdate() })
       } else if (node.hasOwnProperty('children')) {
         // DO Nothing
       } else {

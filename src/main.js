@@ -24,13 +24,14 @@ import { AWSIoTProvider } from '@aws-amplify/pubsub/lib/Providers'
 import awsmobile from './aws-exports'
 import config from './config'
 import atHelper from './aiot-helper'
-import atWhitepaper from './assets/aiothings-wp'
+import VueGoogleCharts from 'vue-google-charts'
 import VueCodemirror from 'vue-codemirror'
 import Spinner from 'vue-simple-spinner'
 import SocialSharing from 'vue-social-sharing'
 import VueStripeCheckout from 'vue-stripe-checkout'
+import VueQrcodeReader from 'vue-qrcode-reader'
 import { library, dom } from '@fortawesome/fontawesome-svg-core'
-import { faCoffee, faHeart, faTrashAlt, faPhone, faEnvelope, faInfoCircle, faInfo, faCube, faSync } from '@fortawesome/free-solid-svg-icons'
+import { faCoffee, faHeart, faTrashAlt, faPhone, faEnvelope, faInfoCircle, faInfo, faCube, faSync, faAngleDoubleRight, faArrowAltCircleRight, faArrowAltCircleLeft, faEdit, faBullseye } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faGithub, faSlack, faFacebookF, faFacebook, faLinkedin, faTwitter, faGooglePlus, faLine, faWeibo, faWeixin } from '@fortawesome/free-brands-svg-icons'
 // https://fontawesome.com/icons?d=gallery
@@ -168,7 +169,7 @@ Vue.use(LiquorTree)
 // window.LOG_LEVEL = 'DEBUG'
 // Amplify.Logger.LOG_LEVEL = 'DEBUG'
 
-library.add(faCoffee, faHeart, faTrashAlt, faPhone, faEnvelope, faInfoCircle, faInfo, faCube, faSync)
+library.add(faBullseye, faEdit, faCoffee, faHeart, faTrashAlt, faPhone, faEnvelope, faInfoCircle, faInfo, faCube, faSync, faAngleDoubleRight, faArrowAltCircleRight, faArrowAltCircleLeft)
 library.add(faGithub, faSlack, faFacebook, faFacebookF, faLinkedin, faTwitter, faGooglePlus, faLine, faWeibo, faWeixin)
 
 // require more codemirror resource...
@@ -187,11 +188,22 @@ Vue.use(VueCodemirror, {
 // to invalidate cloudfront cache, force to update contents to edges.
 // > aws cloudfront create-invalidation --distribution-id $CDN_DISTRIBUTION_ID --paths "/*"
 
+Vue.use(VueGoogleCharts)
+Vue.use(VueQrcodeReader)
+// https://github.com/gruhn/vue-qrcode-reader
+
 const hostUrl = window.location.protocol + '//' + window.location.host
 // const hostUrl = 'https://d3n2wrf9ttsajg.cloudfront.net'
 // const hostUrl = 'https://www.aiothings.com'
 // const hostUrl = 'http://localhost:8080'
 let awsmobile2 = awsmobile
+awsmobile2.oauth.domain = 'auth.aiothings.com'
+    // 2019/12/25
+    // custom auth domain name, need to set 1) Cognito setting, 2) DNS server CNAME alias record too
+    // Facebook: developer.facebook.com app to allow access from this domain name
+    // Google: Trying login will show a link to add new domain name
+    // Apple ID: follow https://aws.amazon.com/blogs/security/how-to-set-up-sign-in-with-apple-for-amazon-cognito/ to modify the address
+
 awsmobile2.oauth.redirectSignIn = hostUrl + '/callback/'
 awsmobile2.oauth.redirectSignOut = hostUrl + '/signout/'
 awsmobile2.aws_cloud_logic_custom.push({
@@ -308,7 +320,7 @@ authLogger.onHubCapsule = async (capsule) => {
     const identityId = credentials._identityId
     await atHelper.allowLoginIdentityUseIoT(identityId)
     // console.log('jump to mythings')
-    router.replace({ name: 'myapps' })
+    router.replace({ name: 'mymicroservices' })
   }
 }
 */
@@ -327,6 +339,7 @@ async function listenHandler (data) {
 export var eventBus = new Vue({})
 
 async function onAuthEvent (payload) {
+  // list of events https://aws-amplify.github.io/docs/js/hub#authentication-events
   console.log('event:', payload.event)
   if (payload.event === 'cognitoHostedUI') {
     // console.log('Hosted UI detected')
@@ -345,9 +358,11 @@ async function onAuthEvent (payload) {
     await atHelper.allowLoginIdentityUseIoT(identityId)
     // console.log('jump to mythings')
     eventBus.$emit('login')
-    router.replace({ name: 'myapps' })
+    router.replace({ name: 'mymicroservices' })
   } else if (payload.event === 'signOut') {
     eventBus.$emit('logout')
+  } else if (payload.event === 'signIn_failure') {
+    eventBus.$emit('loginFailed')
   }
 }
 
@@ -357,7 +372,6 @@ Vue.component('spinner', Spinner)
 Vue.component('at-footer', AppFooter)
 Vue.use(underscore)
 
-Vue.component('at-whitepaper', atWhitepaper)
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */

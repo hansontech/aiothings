@@ -1,9 +1,8 @@
 <template>
   <div>
-      <div class="at-bottombar">
-        <b-row align-v="center">
+        <b-row align-v="center" class="at-bottombar">
           <b-col align="start" sm="3">
-            <p class="h4">My Microservices <small>({{mservicesCounter}})</small></p>
+            <p class="h4">Microservices <small>({{mservicesCounter}})</small></p>
           </b-col>
           <b-col sm="4">
             <b-form-input class="at-border" id="publishTopic"
@@ -26,14 +25,19 @@
             </b-form-checkbox>
           </b-col>
           <b-col sm="4" align="end">
+            <b-dropdown variant="info" text="Actions" right>
+              <b-dropdown-item  v-b-modal.walkTreeModal v-b-popover.hover.left="'Show microservices\' message trees'" @click="walkTree()">Tree</b-dropdown-item>
+              <b-dropdown-item  @click="exportServices()" v-b-popover.hover.left="'Export all designs to local files'">Export</b-dropdown-item>
+            </b-dropdown>
+            <!--
             <b-button variant="info" v-b-modal.walkTreeModal v-b-popover.hover.bottom="'Show microservices\' message trees'" @click="walkTree()">Tree</b-button> 
             <b-button variant="info" @click="exportServices()" v-b-popover.hover.bottom="'Export all designs to local files'">Export</b-button> 
+            -->
             <b-button variant="info" @click="reloadServices()">Refresh</b-button>
             <b-button variant="success" @click="createService()" >Create</b-button>
           </b-col>
         </b-row>
         <spinner v-if="isExporting === true" size="medium" />
-      </div>
       <b-modal id="walkTreeModal" ok-only title="Trees by Message Topics">
         <spinner v-if="walkTreeLoading === true" size="medium" />
         <div>
@@ -54,7 +58,7 @@
               No services available.
       </div>
       <b-row class="mt-2">
-        <div class="at-scroll">
+        <b-col class="at-scroll">
           <b-card-group columns>
             <b-modal id="modalDeleteConfirm"
                   hide-header 
@@ -70,18 +74,24 @@
               img-src="/static/photo-27.png"
               img-top
            -->
+           <!--
+              :footer-bg-variant="(service.IsShared === 'true') ? 'secondary' : 'default'"
+              :footer-text-variant="(service.IsShared === 'true') ? 'white' : 'default'"
+              :footer="(service.IsShared === 'true') ? ' ' : ''"
+           -->
            <b-card v-for="service in filteredServices" :key="service.ServiceName"
               header = " "
               class="at-card-mservice"
+              :header-bg-variant="(service.IsShared === 'true') ? 'secondary' : 'default'"
            >
               <b-row align-v="center">
                 <!-- for unexplainable reason, need set cols to 9 -->
-                <b-col sm="9">
+                <b-col lg="9">
                   <h5 class="card-text">
                     {{service.ServiceName}}
                   </h5>
                 </b-col>
-                <b-col sm="2" align="end">   
+                <b-col lg="3" align="end">   
                   <b-dropdown :variant="service.hasOwnProperty('DeployMessage') ? (service.hasOwnProperty('IsDeployed') && service.IsDeployed === 'true' ? 'success' : 'Primary') : 'secondary'" class="mx-0" right >
                     <!-- VUE reference: https://vuejs.org/v2/guide/events.html -->
                     <b-dropdown-item v-if="service.hasOwnProperty('DeployMessage') && service.IsDeployed !== 'true'" @click ="deployService(service)" ><b>Deploy</b></b-dropdown-item>
@@ -111,8 +121,11 @@
                 </b-col>
               </b-row>
               <b-row class="ml-0 mt-1">
-                <b-col class="at-border" style="white-space: pre-wrap;">{{truncatedString( service.ServiceDesc, 256 )}}</b-col>
+                <b-col class="at-desc-display">
+                  <vue-markdown>{{service.ServiceDesc}}</vue-markdown>
+                </b-col>
                 <!--
+                    {{truncatedString( service.ServiceDesc, 256 )}}
                 <p class="card-text">
                   {{service.ServiceDesc).replace(/(\r\n|\n|\r)/gm,'\&#13;\&#10;")}}
                 </p>
@@ -120,12 +133,12 @@
               </b-row>
               <b-row v-if="service.InputMessageTopic !== 'null'" class="ml-0 mt-1">  
                 <p class="card-text">
-                  Input: <code>{{service.InputMessageTopic}}</code>
+                  <i class="fas fa-arrow-alt-circle-right"></i> <code>{{service.InputMessageTopic}}</code>
                 </p>
               </b-row>
               <b-row v-if="service.OutputMessageTopic !== 'null'" class="ml-0">  
                 <p class="card-text">
-                  Output: <code>{{service.OutputMessageTopic}}</code>
+                  <i class="fas fa-arrow-alt-circle-left"></i> <code>{{service.OutputMessageTopic}}</code>
                 </p>
               </b-row>
               <b-row class="mt-1" v-if="isLogLoading.hasOwnProperty(service.ServiceName) && isLogLoading[service.ServiceName] === true">
@@ -162,7 +175,7 @@
               -->
             </b-card>
           </b-card-group>
-        </div>
+        </b-col>
       </b-row>
   </div>
 </template>
@@ -235,7 +248,6 @@ export default {
     }
   },
   created () {
-    // console.log('MyApplicationList created')
   },
   async mounted () { // enter everytime the page becomes active
     this.services = this.$store.getters.mservices
@@ -246,7 +258,6 @@ export default {
       this.mservicesCounter = 0
       await this.reloadServices()
     }
-    // console.log('MyApplicationList mounted')
     eventBus.$on('newLoggingOutput', this.onNewLoggingOutput)
   },
   methods: {
@@ -311,7 +322,7 @@ export default {
       if (message.hasOwnProperty('topic') === false) {
         return false
       }
-      const senderId = this.$store.getters.username
+      const senderId = this.$store.getters.userId
       let messageTopic = 'aiot/' + senderId + '/' + service.ServiceName + '/' + message.topic
       let messageData = {}
       if (message.hasOwnProperty('data')) {
@@ -331,12 +342,11 @@ export default {
       this.isExporting = false
     },
     async reloadServices () {
-      const username = store.getters.username
-      // console.log('reloadServices: username: ', username)
+      const userId = store.getters.userId
       this.isLoading = true
       const result = await API.get('mserviceApi', '/mservices', {
           'queryStringParameters': {
-               'userId': username
+               'userId': userId
           }
       })
       this.isLoading = false
@@ -438,11 +448,11 @@ export default {
       this.$router.push({name: 'newService', params: { serviceIndex: index, copiedService: this.services[index] }})
     },
     deleteService (index) {
-      const username = this.$store.getters.username
+      const userId = this.$store.getters.userId
       let mservice = this.$store.getters.mservices[index]
       API.del('mserviceApi', '/mservices', {
             'queryStringParameters': {
-                 'userId': username,
+                 'userId': userId,
                  'mserviceName': mservice.ServiceName
             }
       }).then(response => {
@@ -611,10 +621,10 @@ export default {
     },
     async walkTree () {
       this.walkTreeLoading = true
-      const username = store.getters.username
+      const userId = store.getters.userId
       const result = await API.get('mserviceApi', '/messagetrees', {
           'queryStringParameters': {
-               'userId': username
+               'userId': userId
           }
       })
       // let mservicesList = JSON.parse(result)
@@ -669,13 +679,6 @@ export default {
 </script>
 
 <style>
-div.at-bottombar {
-  /* background-color : grey; */
-  padding-bottom: 5px;
-  margin-bottom: 5px;
-  border-bottom: 1px solid grey
-}
-
 .at-bar {
   border-bottom: 1px solid green;
 }

@@ -21,11 +21,21 @@ export default {
     isAuthenticated: state => state.isAuthenticated,
     username: state => {
       try {
-        let username = state.profile['cognito:username']
+        let cognitoUsername = state.profile['cognito:username']
+        let username = cognitoUsername.replace(/\./g, '_') // for Apple User name case .
+            // as the username is going to be used as UserId, and it cannot have characters other than a-zA-Z_
+            // Apple returned sub field has the formatlike 'SignInWithApple_001315.e4ff039ee97a4392bde22a525c7bc2ff.0226'
+            // must replace the . to _
         return username
       } catch (e) {
         return null
       }
+    },
+    userId: state => {
+      // sub field is the UUID of the authenticated user.
+      // sub is globally unique and hence is unique for user pool as well.
+      // Unlike username, which can be reassigned to another user in user pool, sub is never reassigned.
+      return state.profile['sub']
     }
   },
   mutations: {
@@ -50,19 +60,24 @@ export default {
   },
 
   actions: {
+    clearCache: function (context) {
+      context.dispatch('resetLoadedMserviceCaches')
+      context.dispatch('resetLoadedThingsCaches')
+      context.dispatch('resetLoadedApisCaches')
+      context.dispatch('resetLoadedUsageCaches')
+      context.dispatch('resetDashboard')
+    },
     signout: function (context, payload) {
       context.commit('setProfile', null)
       context.commit('setAccessToken', null)
       context.commit('setAuthenticated', false)
+      context.dispatch('clearCache')
       // router.push({ name: 'login' })
     },
     profileUpdate: function (context, payload) {
       if (context.getters.username !== payload['cognito:username']) {
         console.log('reset all cached buffers')
-        context.dispatch('resetLoadedMserviceCaches')
-        context.dispatch('resetLoadedThingsCaches')
-        context.dispatch('resetLoadedApisCaches')
-        context.dispatch('resetLoadedUsageCaches')
+        context.dispatch('clearCache')
       }
       context.commit('setProfile', payload)
       context.commit('setAuthenticated', true)

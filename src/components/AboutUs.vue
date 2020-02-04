@@ -67,8 +67,4 @@ export default {
 </script>
 
 <style>
-div.at-bottombar {
-  padding-bottom: 5px;
-  border-bottom: 1px solid grey
-}
 </style>

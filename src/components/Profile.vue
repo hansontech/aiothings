@@ -1,8 +1,7 @@
 <template>
   <div> 
    <App></App>
-   <b-container>
-   <div style="min-height: 500px">
+   <b-container style="min-height: 620px; margin-top: 65px;">
     <b-row align-v="center" class="mt-2 at-bottombar">
       <h4>Account Information</h4>
     </b-row>
@@ -22,7 +21,7 @@
     </b-row>
     <b-row align-v="center" class="mt-2 at-bottombar">
       <b-col>User ID:</b-col>
-      <b-col sm="7"><code>{{$store.getters.username}}</code></b-col>
+      <b-col sm="7"><code>{{$store.getters.userId}}</code></b-col>
     </b-row>
     <b-row align-v="center" class="mt-2 at-bottombar">
       <b-col> Email address: </b-col>
@@ -161,7 +160,6 @@
       {{profile}}
     </b-row>
     -->
-   </div>
    </b-container>
    <at-footer/>
   </div>
@@ -394,8 +392,4 @@ export default {
 </script>
 
 <style>
-div.at-bottombar {
-  padding-bottom: 5px;
-  border-bottom: 1px solid grey
-}
 </style>

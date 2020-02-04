@@ -1,75 +1,77 @@
 <template>
-   <b-container fluid> 
-      <div class="at-bottombar">
-        <b-row align-v="center">
-            <b-col align="start">
-              <h4>My Favorites ({{favoriteServices.length}})</h4>
-            </b-col>
-            <b-col sm="auto" align="end">
-              <b-button variant="info" @click="reloadFavoriteServices()">Refresh</b-button>
-            </b-col>
-        </b-row>
-      </div>
-      <b-card no-body>
-        <b-tabs card>
-          <b-tab title="Favorite Microservices" active>
-            <div v-if="isLoading" class="mb-2">
-              <b-row>
-                <b-col align="center">
-                  <spinner  size="medium" />
-                </b-col>
-              </b-row>
-            </div>
-            <div class="text-center" v-if="favoriteServices.length === 0">
-              No favorites selected.
-            </div>
-            <div class="at-scroll">
-              <b-card-group columns>
-                <b-card v-for="(service, index) in favoriteServices" :key="service.ServiceName"
-                    header = " "
-                    class="at-card-mservice">
-                    <b-row align-v="center">
-                      <b-col sm="9">
-                        <h5>
-                          {{service.ServiceName}}
-                        </h5>
-                      </b-col>
-                      <b-col sm="2" align="end">   
-                        <b-dropdown variant="secondary" class="mx-0" right >
-                          <!-- VUE reference: https://vuejs.org/v2/guide/events.html -->
-                          <b-dropdown-item @click.stop="deleteFavorite(index)" >Unfavourite</b-dropdown-item>
-                          <b-dropdown-item @click = "showServiceDetail(index)" >Edit</b-dropdown-item>
-                          <b-dropdown-item @click = "copyService(index)" >Copy</b-dropdown-item>
-                        </b-dropdown>
-                      </b-col>
-                    </b-row>
-                    <b-row class="mt-2">
-                      <b-col sm="10">
-                       <b-button size="sm" variant="light" @click="loadUser(service.UserId)"><em>{{getUsername(service.UserId)}}</em></b-button>
-                      </b-col>
-                    </b-row>
-                     <b-row class="ml-0 mt-1 at-bar" style="border-bottom: 1px solid green;">  
-                      <p class="card-text">
-                        {{service.ServiceDesc}}
-                      </p>
-                    </b-row>
-                    <b-row class="ml-0 mt-1">  
-                      <p class="card-text">
-                        Input: <code>{{service.InputMessageTopic}}</code>
-                      </p>
-                    </b-row>
-                    <b-row class="ml-0">  
-                      <p class="card-text">
-                        Output: <code>{{service.OutputMessageTopic}}</code>
-                      </p>
-                    </b-row>
-                </b-card>
-              </b-card-group>
-            </div>
-          </b-tab>
-        </b-tabs>
-      </b-card>
-  </b-container> 
+   <div>
+    <b-row align-v="center" class="at-bottombar">
+      <b-col align="start">
+        <h4>Favorites <small>({{favoriteServices.length}})</small></h4>
+      </b-col>
+      <b-col sm="auto" align="end">
+        <b-button variant="info" @click="reloadFavoriteServices()">Refresh</b-button>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col>
+        <b-card no-body>
+          <b-tabs card>
+            <b-tab title="Favorite Microservices" active>
+              <div v-if="isLoading" class="mb-2">
+                <b-row>
+                  <b-col align="center">
+                    <spinner  size="medium" />
+                  </b-col>
+                </b-row>
+              </div>
+              <div class="text-center" v-if="favoriteServices.length === 0">
+                No favorites selected.
+              </div>
+              <div class="at-scroll">
+                <b-card-group columns>
+                  <b-card v-for="(service, index) in favoriteServices" :key="service.ServiceName"
+                      header = " "
+                      class="at-card-mservice">
+                      <b-row align-v="center">
+                        <b-col lg="9">
+                          <h5>
+                            {{service.ServiceName}}
+                          </h5>
+                        </b-col>
+                        <b-col lg="3" align="end">   
+                          <b-dropdown variant="secondary" class="mx-0" right >
+                            <!-- VUE reference: https://vuejs.org/v2/guide/events.html -->
+                            <b-dropdown-item @click.stop="deleteFavorite(index)" >Unfavourite</b-dropdown-item>
+                            <b-dropdown-item @click = "showServiceDetail(index)" >Edit</b-dropdown-item>
+                            <b-dropdown-item @click = "copyService(index)" >Copy</b-dropdown-item>
+                          </b-dropdown>
+                        </b-col>
+                      </b-row>
+                      <b-row class="mt-2">
+                        <b-col sm="10">
+                          <b-button size="sm" variant="light" @click="loadUser(service.UserId)"><em>{{getUsername(service.UserId)}}</em></b-button>
+                        </b-col>
+                      </b-row>
+                      <b-row class="ml-0 mt-1">
+                        <b-col class="at-border at-desc-display">
+                          <vue-markdown>{{service.ServiceDesc}}</vue-markdown>
+                        </b-col>
+                      </b-row>
+                      <b-row class="ml-0 mt-1">  
+                        <p class="card-text">
+                          <i class="fas fa-arrow-alt-circle-right"></i> <code>{{service.InputMessageTopic}}</code>
+                        </p>
+                      </b-row>
+                      <b-row class="ml-0">  
+                        <p class="card-text">
+                          <i class="fas fa-arrow-alt-circle-left"></i> <code>{{service.OutputMessageTopic}}</code>
+                        </p>
+                      </b-row>
+                  </b-card>
+                </b-card-group>
+              </div>
+            </b-tab>
+          </b-tabs>
+        </b-card>
+      </b-col>
+    </b-row>
+  </div> 
 </template>
 
 <script>
@@ -117,6 +119,9 @@ export default {
     // Unsubscribe client disconnected
   },
   methods: {
+    truncatedString (str, len) {
+      return atHelper.truncatedString(str, len)
+    },
     async reloadFavoriteServices () {
       this.isLoading = true
       await atHelper.reloadFavoriteServices()
@@ -168,12 +173,5 @@ export default {
 </script>
 
 <style>
-
-div.at-bottombar {
-  /* background-color : grey; */
-  padding-bottom: 5px;
-  margin-bottom: 5px;
-  border-bottom: 1px solid grey
-}
 
 </style>

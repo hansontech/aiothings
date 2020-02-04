@@ -1,94 +1,81 @@
 <template>
 <div> 
   <App/>
-  <b-container>
-  <div>
-<font color="white"><vue-markdown id="ShopBegin" style="background-color: darkcyan; padding-left: 20px">
-```
+  <b-container class="mt-2" style="min-height: 620px; margin-top: 65px">
+      <font color="white">
+        <vue-markdown id="ShopBegin" style="background-color: darkcyan; padding: 20px">
 
-```
 ### Shop
-```
 
-```
-</vue-markdown></font>
-<vue-markdown class="borderLine" id="ShopIoTGateway">
-```
+        </vue-markdown>
+      </font>
+      <vue-markdown class="borderLine mt-2" id="ShopIoTGateway" style="padding-top: 20px">
 
+#### IoT Gateways
 
-
-```
-##### IoT Gateways
-
-Start a new IoT project from selecting IoT Gateways.
+Start a new IoT project from selecting your IoT Gateway.
 The gateway hardware plays as the [Thing Enabler](/docs/main#DocThingEnabler) to work locally with sensors, and to connect to AIoThings cloud.
 
-</vue-markdown>
-
-<div>
-  <table style="width:100%">
-    <tr>
-      <th>IoT Gateway Models</th>
-      <th>Package</th>
-      <th>Price (+ One Year Cloud Subscription)</th> 
-    </tr>
-    <tr>
-      <td>NodeMCU ESP32S<a href="/docs/main#DocESP8266">**</a></td>
-      <td>
-        <ul>
-          <li>USB Cable </li>
-        </ul>
-      </td>
-      <td style="text-align:center">AUD 150</td> 
-    </tr>
-    <tr>
-      <td>Raspberry Pi 3 Model B+<a href="/docs/main#DocPi">**</a></td>
-      <td>
-        <ul>
-          <li>Power Supply</li>
-          <li>MicroSD Software Preloaded</li>
-        </ul>
-      </td>
-      <td style="text-align:center">AUD 200</td> 
-    </tr>    
-    <tr>
-      <td>SBC700<a href="#ShopSBC700">**</a></td>
-      <td>
-        <ul>
-          <li>SIM Telstra NB-IOT network </li>
-          <li>Antenna</li>
-          <li>Power Supply</li>
-        </ul>
-      </td>
-      <td style="text-align:center">AUD 400</td> 
-    </tr>
-  </table>
-</div>
-
-<div class="mt-2">
-
-The One Year Cloud Subscription includes: 
-            <ul>
-              <li>Easy setup through preinstalled software </li>
-              <li>12 month AIoThings paid membership</li>
-              <li>IoT data storage access</li>
-              <li>Custom REST APIs to serve externally</li>
-              <li>Unlimited microservices for data analytics</li> 
-              <li>Interact with popular mobile/home apps</li>
-            </ul>
-</div>
-<vue-markdown class="mt-2">
-  **Please contact [US](mailto:service@hanson-tech.com?subject=Shop) for more information.**
-</vue-markdown> 
-<vue-markdown id="ShopSBC700" class="borderLine mt-4"> 
-```
-
-```
+      </vue-markdown>
+      <div>
+        <table style="width:100%">
+          <tr>
+            <th>IoT Gateway Models</th>
+            <th>&ensp;&ensp;&ensp;Package</th>
+            <th style="text-align:center">Price (+ One Year Cloud Subscription)</th> 
+          </tr>
+          <tr>
+            <td>NodeMCU ESP32S<a href="/docs/main#DocESP8266">**</a></td>
+            <td>
+              <ul>
+                <li>USB Cable </li>
+              </ul>
+            </td>
+            <td style="text-align:center">USD 100</td> 
+          </tr>
+          <tr>
+            <td>Raspberry Pi 3 Model B+<a href="/docs/main#DocPi">**</a></td>
+            <td>
+              <ul>
+                <li>Power Supply</li>
+                <li>MicroSD Software Preloaded</li>
+              </ul>
+            </td>
+            <td style="text-align:center">USD 140</td> 
+          </tr>    
+          <tr>
+            <td>SBC700<a href="#ShopSBC700">**</a></td>
+            <td>
+              <ul>
+                <li>SIM Telstra NB-IOT network </li>
+                <li>Antenna</li>
+                <li>Power Supply</li>
+              </ul>
+            </td>
+            <td style="text-align:center">USD 270</td> 
+          </tr>
+        </table>
+      </div>
+      <div class="mt-2"> 
+        The One Year Cloud Subscription includes: 
+                    <ul>
+                      <li>Preinstalled software to connect to AIoThings</li>
+                      <li>12 month AIoThings premium membership</li>
+                      <li>Unlimited microservices</li>
+                      <li>Privilege using advanced AWS features</li>
+                      <li>Increased IoT data storage</li>
+                      <li>Custom REST APIs to serve externally</li>
+                    </ul>
+        </div>
+  <vue-markdown class="mt-2">
+  **Please [contact us](mailto:service@aiothings.com?subject=Shop) for more information.**
+  </vue-markdown> 
+  <vue-markdown id="ShopSBC700" class="borderLine mt-5" style="padding-top: 20px"> 
 #### SBC700 Product Overview
 
 
 SBC700 is a compact, low power, cost effective and high performance IoT Gateway. 
-As an industrial grade edge computing device, it is designed to work between sensors and cloud.
+As an industrial grade edge computing device, it is designed to work with sensors and cloud.
 
 The features include 
 * 32-bit low power, high performance (580 MHz) processor 
@@ -106,49 +93,40 @@ The features include
 * Mounting - Wall-mount, DIN rail
 
 It's Mini-PCIe interfaced LPWAN modules support CAT-NB ane NB-IOT standards.
-In Australia, they work with [Telstra IoT network](https://www.telstra.com.au/business-enterprise/solutions/internet-of-things).
-
 Also, the USB port supports UIO modules for AI/AO/DI/DO with/without isolation features.
 
-</vue-markdown>
-<b-row>
-  <b-col>
-    <b-img style="padding:20px;" src="/static/sbc700-image.png" fluid align=center />
-  </b-col>
-  <b-col>
-    <b-img style="padding:20px;" src="/static/sbc700-photo.png" fluid align=center />
-  </b-col>
-</b-row>
-<vue-markdown>
-```
-
-
-```
-</vue-markdown>
-<b-row>
-  <b-col>
-    <img width="250" height="250" title="Climate Sensor Hub" src="/static/sbc700-climate_sensor_hub.jpg" style="float: right; margin-left: 20px; margin-right: 20px; margin-bottom: 20 px;">
-    <vue-markdown>
+  </vue-markdown>
+  <b-row style="min-height: 300px">
+    <b-col>
+      <img width="300" src="/static/sbc700-image.png" style="float: center; margin-left: 20px; margin-right: 20px; margin-top: 0px;">
+      <!--
+      <b-img style="padding: 30px; width: 80%;" src="/static/sbc700-image.png" fluid align="center" />
+      -->
+    </b-col>
+    <b-col>
+      <img width="300" src="/static/sbc700-photo.png" style="float: center; margin-left: 20px; margin-right: 20px; margin-top: 20px;">
+      <!--
+      <b-img style="margin-top:15px; padding:30px; width: 80%;" src="/static/sbc700-photo.png" fluid align="center" />
+      -->
+    </b-col>
+  </b-row>
+  <vue-markdown class="borderLine mt-4" style="padding-top: 20px"> 
 #### Climate Sensor Hub
-```
-
-```
+  </vue-markdown>
+  <b-row class="mt-2">
+    <b-col cols="7">
+      <vue-markdown>
 **Climate Sensor Hub** integrates SBC700 together with Temperature, CO2, Humidity, and Light sensors.
-This product is being deployed to greenhouse environment for smart farming purposes.
-    </vue-markdown>
-  </b-col>
-</b-row>
-<vue-markdown>
-```
-
-
-```
-</vue-markdown>
-
-</div>
-  </b-container>
-  <at-footer/>
-</div>
+This product is deploying to greenhouses for smart farming purposes.
+      </vue-markdown>
+    </b-col>
+    <b-col cols="5">
+      <img width="250" height="250" title="Climate Sensor Hub" src="/static/sbc700-climate_sensor_hub.jpg" style="float: center; margin-left: 20px; margin-right: 20px; margin-bottom: 20 px;">
+    </b-col>
+  </b-row>
+    </b-container>
+    <at-footer class="mt-4"/>
+  </div>
 </template>
 
 <script>

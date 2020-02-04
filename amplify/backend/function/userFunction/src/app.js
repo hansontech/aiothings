@@ -12,7 +12,7 @@ var awsServerlessExpressMiddleware = require('aws-serverless-express/middleware'
 
 const aws = require('aws-sdk');
 let config = {
-  awsUserPoolId: "ap-southeast-2_2gQEl126n"
+  awsUserPoolId: "ap-southeast-2_GETSSHigP"
 };
 
 // declare a new express app

@@ -1,35 +1,48 @@
 <template>
-  <div id="app2" >
+
     <!-- for fixed-top  https://mdbootstrap.com/docs/vue/utilities/position/ --> 
-    <b-navbar toggleable="md" type="dark" variant="dark" class="fixed-top">
+    <b-navbar toggleable="md" type="dark" variant="dark" fixed="top"> <!--  class="fixed-top"> -->
       <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
       <b-navbar-brand to="/">
         <img src="./assets/aiothings-logo-wb.png" height="40" alt="AIoThings">
       </b-navbar-brand>
       <b-collapse is-nav id="nav_collapse">
         <!-- Right aligned nav items -->
-        <b-navbar-nav> <!-- v-if="isAuthenticated" -->
-          <b-nav-text>&ensp;Solutions&ensp;</b-nav-text>
+        <b-navbar-nav class="ml-auto">
+          <b-nav-item @click="gotoDocuments()"><i class="fas fa-info"></i>&ensp;Docs</b-nav-item>
+        </b-navbar-nav>
+        <b-navbar-nav class="ml-auto"> <!-- v-if="isAuthenticated" -->
+          &ensp;
+          <!-- <b-nav-text>&ensp;Solutions&ensp;</b-nav-text> -->
           <b-nav-form>
-            <b-form-input v-model="searchText" type="text" placeholder="Search keywords.."/>
+            <!-- .prevent to prevent form input to reload page -->
+            <b-form @submit.prevent="onSearchInputSubmit">
+              <b-form-group>
+                <b-form-input v-model="searchText" type="text" placeholder="Search solutions.."/>
+              </b-form-group>
+            </b-form>  
           </b-nav-form>
           &ensp;
+          <!--
           <b-nav-form>
-            <b-button type="button" v-b-popover.hover.bottomleft="'Search from the shared resources'" @click="searchSolutions()">Search</b-button>
+            <b-button type="button" v-b-popover.hover.bottomleft="'Search from sharing library'" @click="searchSolutions()">Search</b-button>
+          </b-nav-form>
+          -->
+          &ensp;
+          <b-nav-form v-if="!isAuthenticated && ($router.currentRoute.name !== 'queriedSolutions')">
+            <b-nav-item v-b-popover.hover.bottomleft="'List of sharing resources'" @click="$router.push({name: 'queriedSolutions'})">Library</b-nav-item>
           </b-nav-form>
         </b-navbar-nav>
         <b-navbar-nav class="ml-auto">
           <b-nav-item center @click="gotoShop()"><i class="fas fa-cube"></i>&ensp;Shop</b-nav-item>
         </b-navbar-nav>
         <b-navbar-nav class="ml-auto">
-          <b-nav-item @click="gotoDocuments()"><i class="fas fa-info"></i>&ensp;Docs</b-nav-item>
-          &ensp;
           <b-nav-item v-if="!isAuthenticated" @click="authenticate()">Log in / Sign up</b-nav-item>
           <b-nav-item-dropdown right v-if="isAuthenticated">
             <!-- Using button-content slot -->
             <template slot="button-content">
               <img class="at-imageRound" v-if="userHasPhoto" v-bind:src="pictureUrl" height="25" width="25" />
-              <em>{{userName}}</em>
+              {{userName}}
             </template>
             <b-dropdown-item @click="gotoUserProfile()">Profile</b-dropdown-item>
             <b-dropdown-item @click="gotoUserPage()">User Home</b-dropdown-item>
@@ -37,17 +50,31 @@
           </b-nav-item-dropdown>
 
         </b-navbar-nav>
+
+        <b-navbar-nav id="smallSizeScreen" class="ml-auto">
+          <b-nav-item-dropdown text="Functions" v-if="isAuthenticated">
+            <b-dropdown-item  :active="reachRoute('mythings','') === 'primary'" :to="{ path: '/user/mythings' }">IoT Devices</b-dropdown-item>
+            <b-dropdown-item  :active="reachRoute('mymicroservices') === 'primary'" :to="{ path: '/user/mymicroservices' }">Microservices</b-dropdown-item>
+            <b-dropdown-item  :active="reachRoute('myapis') === 'primary'" :to="{ path: '/user/myapis' }">REST APIs </b-dropdown-item>
+            <b-dropdown-item  :active="reachRoute('myapplications') === 'primary'" :to="{ path: '/user/myapplications' }">Applications </b-dropdown-item>
+            <b-dropdown-item  :active="reachRoute('myfavorites') === 'primary'" :to="{ path: '/user/myfavorites' }" v-b-popover.hover.bottom="'Shared services marked favorite'">Favorites</b-dropdown-item>
+            <b-dropdown-item  :active="reachRoute('solutions') === 'primary'" :to="{ path: '/solutions' }" v-b-popover.hover.bottom="'Shared microservices and Node-RED flows'">Shared Solutions</b-dropdown-item>
+            <b-dropdown-divider />   
+            <b-dropdown-item  :active="reachRoute('mydashboard') === 'primary'" :to="{ path: '/user/mydashboard' }">Dashboard</b-dropdown-item>
+            <b-dropdown-item  v-b-popover.hover.bottom="'Console input output for test'" :active="reachRoute('myconsole') === 'primary'" :to="{ path: '/user/myconsole' }">Test Console</b-dropdown-item>
+          </b-nav-item-dropdown>
+        </b-navbar-nav>
       </b-collapse>
     </b-navbar>
     <!-- routes will be rendered here -->
-    <div class="mt-3">
+    <!-- <div class="mt-3">  -->
       <!-- must reserve more space for header, TODO -->
-      <pre style="background-color: white; border: 0px; padding: 0px;"> 
-      </pre>
+      <!-- <pre style="background-color: white; border: 0px; padding: 0px;"> -->
+      <!-- </pre> -->
       <!-- <router-view></router-view>  -->
-    </div>
+    <!-- </div> -->
     <!-- <at-footer v-if="isDocumentPath" class="modal__footer"/> -->
- </div> 
+
 </template>
 
 <script>
@@ -97,7 +124,10 @@ export default {
       this.$store.commit('setSearchKeywords', keyword)
     },
     searchText: function (newValue, oldValue) {
-      this.$store.commit('setSearchText', this.searchText)
+      // console.log('text: ', newValue, oldValue)
+      if (oldValue !== null && newValue !== oldValue) {
+        this.$store.commit('setSearchText', this.searchText)
+      }
     }
   },
   created () {
@@ -113,6 +143,7 @@ export default {
     eventBus.$on('login', () => {
       this.isUserLoggedIn = true
     })
+    console.log('page: ', this.$router.currentRoute.name)
   },
   computed: {
     isDocumentPath: function () {
@@ -132,7 +163,7 @@ export default {
       try {
         let fullname = this.$store.getters.profile.name
         if (fullname != null) {
-          return fullname.split(' ')[0]
+          return fullname // ?? 2019/11/30 ?? fullname.split(' ')[0]
         }
         // cognito username is uniquely assigned even for federated logins
         let username = this.$store.getters.profile['cognito:username']
@@ -157,6 +188,29 @@ export default {
     }
   },
   methods: {
+    reachRoute (matchRoute, defaultRoot) {
+      let paths = this.$route.path.split('/')
+      let currentRoute = ''
+      if (paths[1] === 'user') {
+        currentRoute = paths[2]
+      } else {
+        currentRoute = paths[1]
+      }
+
+      // console.log('currentRoute: ', currentRoute, ' : ', matchRoute, ' :path: ', this.$route.path)
+      if ((defaultRoot === '' && (currentRoute === undefined || currentRoute === '')) || currentRoute === matchRoute) {
+        return 'primary'
+      }
+      return 'warning'
+    },
+    onSearchInputSubmit () {
+      // Pressing 'Enter' to trigger new search
+      if (this.$router.currentRoute.name !== 'queriedSolutions') {
+        this.$router.replace({name: 'queriedSolutions'})
+      } else {
+        eventBus.$emit('pageRefresh')
+      }
+    },
     async searchSolutions () {
       let solutionCategory = this.selected
       if (solutionCategory === null) {
@@ -225,6 +279,21 @@ export default {
 }
 </script>
 
+<style scoped>
+@media only screen and (max-width: 600px) {
+  #smallSizeScreen {
+    visibility: visible;
+  }
+}
+@media only screen and (min-width: 600px) {
+  #smallSizeScreen {
+    visibility: hidden;
+    /* height: 0px; */
+    display: none;
+  }
+}
+</style>
+
 <style>
 body {
   margin: 0;
@@ -265,31 +334,6 @@ img.at-imageRound {
     border-radius: 50%;
 }
 
-:root {
-    --color-thing: lightblue;
-    --color-mservice: gainsboro;
-    --color-api: MediumAquamarine;
-    --color-at-card-header: var(--color-thing, rgb(199, 174, 174));
-    --height-at-card-header: 30px;
-    --height-at-dynamic: 10px;
-    --color-at-dynamic: red;
-}
-
-.at-border {
-  border: 1px solid #a78;
-  padding: 5px;
-}
-
-.at-card-thing {
-  --color-at-card-header: var(--color-thing);
-}
-.at-card-mservice {
-  --color-at-card-header: var(--color-mservice);
-}
-.at-card-api {
-  --color-at-card-header: var(--color-api);
-}
-
 .at-card-thing .card-header {   /* multiple classes together */
     background-color: var(--color-at-card-header);
     height: var(--height-at-card-header);
@@ -318,5 +362,26 @@ img.at-imageRound {
   */
   box-shadow : 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   /* box-shadow: 1px -1px teal; */
+}
+</style>
+<style scoped>
+/* https://www.w3schools.com/cssref/css_selectors.asp */
+input[type="text"]:focus {
+  background-color: white;
+  color: black;
+}
+/*
+input[type="text"]:invalid {
+  background-color: darkgrey;
+  color: green;
+}
+*/
+input[type="text"] {
+  background-color: #606060;
+  border-color: #606060;
+  color: white;
+}
+input[type="text"]::placeholder {
+  color: #C0C0C0;
 }
 </style>

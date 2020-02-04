@@ -9,6 +9,7 @@ import mservices from './mservices.js'
 import apis from './apis.js'
 import atusers from './atusers.js'
 import usage from './usage.js'
+import dashboard from './dashboard.js'
 
 Vue.use(Vuex)
 
@@ -24,6 +25,7 @@ const store = new Vuex.Store({
     things,
     mservices,
     apis,
+    dashboard,
     usage
   }
 })

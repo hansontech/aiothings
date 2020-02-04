@@ -1,5 +1,5 @@
 <template>
-  <b-container fluid>
+  <div>
        <b-row align-v="center" style="border-bottom: 1px solid grey; padding-bottom: 5px; margin-bottom: 5px;">
           <b-col align="start">
             <h4>New REST API</h4>
@@ -74,16 +74,28 @@
                   </b-collapse>
                 </b-col>
             </b-row>
-            <b-row>
-              <b-col>
-                <div class="mt-3">
-                  <p class="h5">Description</p>
-                </div>
-                <div style="height: 100px; background-color: rgba(255,0,0,0.1);">
-                  <textarea class="at-border w-100 h-100" v-model="api.Desc" placeholder="Api description"></textarea>
-                </div>
+            <b-row class="mt-3" align-v="center">
+              <b-col><h5>Description</h5></b-col>
+              <b-col v-if="isEditDesc">
+                  <small>Markdown script...</small>
+              </b-col>
+              <b-col align="end">
+                  <b-form-radio-group v-model="isEditDesc">
+                    <b-form-radio :value="false">Display</b-form-radio>
+                    <b-form-radio :value="true">Edit</b-form-radio>
+                  </b-form-radio-group>
               </b-col>
             </b-row>
+            <b-row v-if="isEditDesc">
+              <b-col> 
+                <textarea class="at-desc-edit" v-model="api.Desc" placeholder="Api description. (Can be a markdown text)"></textarea>
+              </b-col>
+            </b-row>
+            <b-row v-else>
+                <b-col>
+                  <vue-markdown class="at-desc-display">{{api.Desc}}</vue-markdown>
+                </b-col>
+            </b-row>             
             <b-row class="mt-3" v-if="api.ApiName !== null && api.ApiName !== ''">
                 <b-col sm="3" align="start" >
                   <h5 id="popoverInvokeUrl"> Invoke URL <i class="fas fa-info-circle"></i></h5>
@@ -178,7 +190,7 @@
                 </b-form-input>
               </b-col>
             </b-row>
-  </b-container>
+  </div>
 </template>
 
 <script>
@@ -195,11 +207,12 @@ export default {
       activeMenu: 'app',
       response: 'unknown',
       what: 0,
+      isEditDesc: true,
       isCreating: false,
       mservices: null,
       apiService: null,
       api: {
-        UserId: this.$store.getters.username,
+        UserId: this.$store.getters.userId,
         Desc: '',
         ApiName: '',
         AuthorizationType: 'NONE', // NONE | AWS_IAM | COGNITO_USER_POOLS
@@ -248,7 +261,7 @@ export default {
       console.log('copied from')
       this.api = Object.assign({}, this.copiedApi)
       this.api.ApiName = this.copiedApi.ApiName + '_copy'
-      this.api.UserId = this.$store.getters.username
+      this.api.UserId = this.$store.getters.userId
     }
     console.log('new api: copied? ', this.api)
   },
@@ -358,18 +371,4 @@ export default {
 </script>
 
 <style>
-/*
-.at-border {
-  border: 1px solid #a78;
-  padding: 5px;
-}
-*/
-.CodeMirror {
-  border: 1px solid #a78;
-  padding: 5px;
-}
-.CodeMirror pre.CodeMirror-placeholder {
-  color: #999;
-}
-
 </style>

@@ -1,7 +1,7 @@
 <template>
 <div> 
   <App/>
-  <b-container>
+  <b-container style="min-height: 620px; margin-top: 65px;">
         <!-- https://www.codeply.com/go/p2pModdHxc/bootstrap-independent-scrolling-columns -->
         <!--
           <div class="row">
@@ -14,12 +14,20 @@
         </div>
         -->
         <!-- reference source CSS https://amsik.github.io/liquor-tree/#Guides -->
-        <div class="menu" style="border-right: 1px solid blue; top: 70px;" >         
-          <doc-sidebar></doc-sidebar>
+        <div id="normalSizeScreen">
+          <div class="menu" style="border-right: 1px solid blue; margin-top: 65px;" >         
+            <doc-sidebar></doc-sidebar>
+          </div>
+          <div id="docMain" class="page">
+              <router-view/>
+          </div>
         </div>
-        <div id="docMain" class="page">
+        <div id="smallSizeScreen">
+          <div id="docMain">
             <router-view/>
+          </div>
         </div>
+
   </b-container>
 </div>
 </template>
@@ -61,7 +69,7 @@ export default {
   }
 }
 </script>
-<style>
+<style scoped>
 
 /* 
   Explain to the position definitions,
@@ -90,5 +98,25 @@ export default {
   padding-bottom: 80px;
 }
 
+@media only screen and (max-width: 600px) {
+  #smallSizeScreen div {
+    visibility: visible;
+  }
+  #normalSizeScreen div {
+    visibility: hidden;
+    /* height: 0px; */
+    display: none;
+  }
+}
+@media only screen and (min-width: 600px) {
+  #smallSizeScreen div {
+    visibility: hidden;
+    /* height: 0px; */
+    display: none;
+  }
+  #normalSizeScreen div {
+    visibility: visible;
+  }
+}
 </style>
 

@@ -1,15 +1,18 @@
 <template>
   <b-container fluid >
     <div style="min-height: 500px">
-      <b-row align-v="center" align-h="center" > 
+      <b-row v-if="isWaitingAuthFinish" align-v="center" align-h="center" > 
         <spinner size="large" />
+      </b-row>
+      <b-row v-if="isLoginFailed" align-v="center" align-h="center" > 
+        <h3>Sign-in did not succeed, please try again. </h3> 
       </b-row>
     </div>
   </b-container>
 </template>
 
 <script>
-
+import { eventBus } from '../main'
 // import store from '../store'
 // import router from '../router'
 // import { Auth } from 'aws-amplify'
@@ -59,6 +62,13 @@ CognitoAuth.userhandler = {
 } */
 
 export default {
+  name: 'auth callback',
+  data () {
+    return {
+      isWaitingAuthFinish: true,
+      isLoginFailed: false
+    }
+  },
   /* beforeCreate () {
     Amplify.configure(awsmobile)
     Amplify.configure({
@@ -68,7 +78,7 @@ export default {
     })
   }, */
 
-  async created () {
+  created () {
     // let self = this
     // const curUrl = window.location.href
     // CognitoAuth.parseCognitoWebResponse(curUrl)
@@ -142,7 +152,7 @@ export default {
     } catch (e) {
       console.log('error from auth???')
     } */
-    this.$store.commit('setAuthenticated', true)
+    // set this flag later after receiving profile information, this.$store.commit('setAuthenticated', true)
     /*
     Auth.currentAuthenticatedUser()
     .then(user => {
@@ -160,6 +170,19 @@ export default {
       event: 'cognitoHostedUI'
     })
     */
+  },
+  mounted () {
+       eventBus.$on('loginFailed', this.onLoginFailed)
+  },
+  methods: {
+    onLoginFailed () {
+      this.isWaitingAuthFinish = false
+      this.isLoginFailed = true
+      let routerObj = this.$router
+      setTimeout(function () {
+        routerObj.replace({name: 'home'})
+      }, 5000)
+    }
   }
 }
 </script>

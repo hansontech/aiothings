@@ -1,25 +1,28 @@
 <template> 
-  <b-container fluid>
+  <div>
     <b-row align-v="center" align-h="center" class="at-footer-background text-center">
       <!--
       <b-col sm="4" lg="3">
         &copy; 2018 Copyright &nbsp; <a v-b-tooltip.hover="'ABN: 63737379731'" href="https://www.aiothings.com"> Hanson Technology</a>
       </b-col>
       -->
-      <b-col sm="4" lg="3">
-        <a href="/aboutus">About Us</a>
+      <b-col>
+        <a href="/aboutus">About</a>
       </b-col>
+       <!-- position as a pure internet operation
       <b-col>
         <a href="tel:+61-421858381">
             <i class="fas fa-phone"></i>&ensp;+61-421858381
         </a>
         &ensp;
-        <a v-b-tooltip.hover="'service@hanson-tech.com'" href="mailto:service@hanson-tech.com?subject=Enquiry">
+      </b-col>
+      -->
+      <b-col>
+        Find us on:
+        &ensp;
+        <a v-b-tooltip.hover="'service@aiothings.com'" href="mailto:service@aiothings.com?subject=Enquiry">
             <i class="fas fa-envelope"></i>
         </a>
-      </b-col>
-      <b-col sm="4" lg="3">
-        Find us on:
         &ensp;
         <a v-b-tooltip.hover="'Comments over FB'" href="https://www.facebook.com/aiothings" target="_blank">
             <i class="fab fa-facebook-f"></i>
@@ -33,7 +36,7 @@
             <i class="fab fa-github"></i>
         </a>
       </b-col>
-      <b-col sm="auto" lg="auto">
+      <b-col>
         <social-sharing url="https://www.aiothings.com/"
                       title="The AI + IoT playground"
                       description="Intuitive and Fast AI + IoT application development environment"
@@ -71,7 +74,7 @@
         </social-sharing>
       </b-col>
     </b-row>
-  </b-container>
+  </div>
 </template>
 <script>
 export default {
@@ -88,6 +91,7 @@ export default {
   border-top: 1px solid #000;
   background: lightgray;
   padding: 5px;
+  margin-bottom: 0px;
 }
 
 </style>

@@ -1,8 +1,8 @@
 <template>
-  <b-container fluid> 
+  <div> 
     <!-- component matched by the route will render here -->
     <router-view /> 
-  </b-container> 
+  </div> 
 </template>
 
 <script>

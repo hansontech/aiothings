@@ -2,7 +2,7 @@
   <div>
         <b-row align-v="center" class="at-bottombar">
           <b-col sm="4" align="start">
-            <h4>REST APIs <small>({{apis.length}})</small></h4>
+            <h4>Applications <small>({{applications.length}})</small></h4>
           </b-col>
           <b-col sm="4">
             <b-form-input class="at-border" id="publishTopic"
@@ -13,19 +13,21 @@
             </b-form-input>
           </b-col>  
           <b-col sm="4" align="end">
-            <!-- <b-button variant="info" @click="testApi()">Test</b-button> -->
-            <b-button variant="info" @click="reloadApis()">Refresh</b-button>
-            <b-button variant="success" @click="createApi()" >Create</b-button>
+            <!-- <b-button variant="info" @click="testApplications()">Test</b-button> -->
+            <!--
+            <b-button variant="info" @click="reloadApplicationss()">Refresh</b-button>
+            <b-button variant="success" @click="createApplications()" >Create</b-button>
+            -->
           </b-col>
         </b-row>
-        <div v-if="isApiReloading" class="mb-2">
+        <div v-if="isApplicationsReloading" class="mb-2">
           <b-row>
             <b-col align="center">
               <spinner  size="medium" />
             </b-col>
           </b-row>
         </div>
-        <div v-if="isApiActionRunning" class="mb-2">
+        <div v-if="isApplicationsActionRunning" class="mb-2">
           <b-row>
             <b-col align="center">
               <!-- <spinner  size="medium" />{{timeLeftBeforeActionComplete}}s -->
@@ -36,36 +38,36 @@
             </b-col>
           </b-row>
         </div>
-            <div class="text-center" v-if="apis.length === 0">
-              No APIs available.
+            <div class="text-center" v-if="applications.length === 0">
+              No Applications available.
             </div>
             <div class="at-scroll">
               <b-card-group columns>
                 <b-modal id="modalDeleteConfirm"
                       hide-header 
                       size="sm"
-                      @ok="deleteApi(deletingApiIndex)"
+                      @ok="deleteApplications(deletingApplicationsIndex)"
                       >
                   <div class="text-center">
-                    <h5>Delete this API?</h5>
+                    <h5>Delete this Application?</h5>
                   </div>                  
                 </b-modal>
-                <b-card v-for="(api, index) in filteredApis" :key="index"
+                <b-card v-for="(api, index) in filteredApplications" :key="index"
                     header = " "
                     class="at-card-api" 
                 >
                     <b-row align-v="center">
                       <b-col lg="9">
                         <h5 class="card-text">
-                          {{api.ApiName}}
+                          {{api.ApplicationsName}}
                         </h5>
                       </b-col>
                       <b-col lg="3" align="end">   
                         <b-dropdown variant="secondary" class="mx-0" right >
                           <!-- VUE reference: https://vuejs.org/v2/guide/events.html -->
-                          <b-dropdown-item @click = "showApiDetail(apis.indexOf(api))" >Edit</b-dropdown-item>
-                          <b-dropdown-item @click = "copyApi(apis.indexOf(api))" >Copy</b-dropdown-item>
-                          <b-dropdown-item v-b-modal.modalDeleteConfirm @click="deletingApiIndex=apis.indexOf(api)" >Delete</b-dropdown-item>
+                          <b-dropdown-item @click = "showApplicationsDetail(applications.indexOf(api))" >Edit</b-dropdown-item>
+                          <b-dropdown-item @click = "copyApplications(applications.indexOf(api))" >Copy</b-dropdown-item>
+                          <b-dropdown-item v-b-modal.modalDeleteConfirm @click="deletingApplicationsIndex=applications.indexOf(api)" >Delete</b-dropdown-item>
                         </b-dropdown>
                       </b-col>
                     </b-row>
@@ -84,7 +86,7 @@
                       <b-col>  
                         <b-list-group>
                           <!-- string is truncated as abcde... form by text-overflow: ellipsis; -->
-                          <b-list-group-item style="white-space: nowrap; overflow:hidden; text-overflow: ellipsis;" v-for="(path, index) in api.Paths" v-b-popover.hover.bottom="'https://api.aiothings.com/' + api.ApiName.toLowerCase() + '/' + path.toLowerCase()" :key="index">
+                          <b-list-group-item style="white-space: nowrap; overflow:hidden; text-overflow: ellipsis;" v-for="(path, index) in api.Paths" v-b-popover.hover.bottom="'https://api.aiothings.com/' + api.ApplicationsName.toLowerCase() + '/' + path.toLowerCase()" :key="index">
                             <code>{{path}}</code>
                           </b-list-group-item>
                         </b-list-group>
@@ -102,34 +104,34 @@ import atHelper from '../aiot-helper'
 import { Auth, API } from 'aws-amplify'
 
 export default {
-  name: 'myapis',
+  name: 'myapplications',
   data: function () {
     return {
       loading: false,
       loadedUserData: null,
       loadingUsers: {},
       select_options: {text: 'toggle'},
-      apis: [],
-      isApiActionRunning: false,
-      isApiReloading: false,
+      applications: [],
+      isApplicationsActionRunning: false,
+      isApplicationsReloading: false,
       timeLeftBeforeActionComplete: 0,
       apiActionTimer: null,
-      deletingApiIndex: -1
+      deletingApplicationsIndex: -1
     }
   },
   computed: {
-    filteredApis () {
-      let foundApis = this.apis.filter(api => {
-        return api.ApiName.toLowerCase().includes(this.$parent.searchString.toLowerCase())
+    filteredApplicationss () {
+      let foundApplicationss = this.applications.filter(api => {
+        return api.ApplicationsName.toLowerCase().includes(this.$parent.searchString.toLowerCase())
       })
-      foundApis.sort(function (a, b) {
-        return a.ApiName.localeCompare(b.ApiName)
+      foundApplicationss.sort(function (a, b) {
+        return a.ApplicationsName.localeCompare(b.ApplicationsName)
       })
-      return foundApis
+      return foundApplicationss
     }
   },
   watch: {
-    apis: {
+    applications: {
         handler: function () {
           this.$forceUpdate()
         },
@@ -137,12 +139,12 @@ export default {
     }
   },
   mounted () {
-    // console.log('apis mounted')
-    this.apis = this.$store.getters.apis
-    if (this.apis === null || this.apis.length === 0) {
-      this.apis = []
+    // console.log('applications mounted')
+    this.applications = this.$store.getters.applications
+    if (this.applications === null || this.applications.length === 0) {
+      this.applications = []
       console.log('reload api')
-      this.reloadApis()
+      this.reloadApplicationss()
     }
     this.loadedUserData = this.$store.getters.atusers
     if (this.loadedUserData === null) {
@@ -150,18 +152,18 @@ export default {
     }
   },
   created () {
-    // console.log('apis created')
+    // console.log('applications created')
   },
   beforeDestroy () {
     // Unsubscribe client connected
     // Unsubscribe client disconnected
   },
   methods: {
-    async testApi () {
+    async testApplications () {
       let accessToken = (await Auth.currentSession()).getAccessToken().getJwtToken()
       try {
         // console.log('token: ', accessToken)
-        let result = await API.get('myApi', '/query', {
+        let result = await API.get('myApplications', '/query', {
               headers: {
                 'Authorization': 'Bearer ' + accessToken,
                 'Accept': 'application/json',
@@ -176,64 +178,64 @@ export default {
         console.log('test api error: ', e)
       }
     },
-    createApi () {
-      console.log('createApi')
-      this.$router.push({ name: 'newApi' })
+    createApplications () {
+      console.log('createApplications')
+      this.$router.push({ name: 'newApplications' })
     },
-    releaseApiActionLock () {
+    releaseApplicationsActionLock () {
       this.timeLeftBeforeActionComplete--
       if (this.timeLeftBeforeActionComplete > 0) {
       } else {
         window.clearInterval(this.apiActionTimer)
-        this.isApiActionRunning = false
+        this.isApplicationsActionRunning = false
         console.log('released lock')
       }
       this.$forceUpdate()
     },
-    deleteApi (index) {
-      console.log('deleteApi')
-      if (this.isApiActionRunning) {
+    deleteApplications (index) {
+      console.log('deleteApplications')
+      if (this.isApplicationsActionRunning) {
         return
       }
-      this.isApiActionRunning = true
+      this.isApplicationsActionRunning = true
       this.timeLeftBeforeActionComplete = 32
-      this.apiActionTimer = window.setInterval(this.releaseApiActionLock, 1000)
-      let api = this.$store.getters.apis[index]
-      API.del('apiApi', '/apis', {
+      this.apiActionTimer = window.setInterval(this.releaseApplicationsActionLock, 1000)
+      let api = this.$store.getters.applications[index]
+      API.del('apiApplications', '/applications', {
             'queryStringParameters': {
                  'api': JSON.stringify(api)
             }
       }).then(response => {
         // remove api entry from list
         if (response.error === null) {
-          let apis = this.$store.getters.apis
-          apis.splice(index, 1)
-          this.$store.commit('setApis', apis)
-          this.apis = apis
+          let applications = this.$store.getters.applications
+          applications.splice(index, 1)
+          this.$store.commit('setApplicationss', applications)
+          this.applications = applications
         } else {
-          console.log('deleteApi error: ', response.error)
+          console.log('deleteApplications error: ', response.error)
         }
       }).catch(err => {
         console.log(err)
       })
     },
-    async reloadApis () {
-      this.isApiReloading = true
-      await atHelper.reloadApis()
-      this.isApiReloading = false
-      this.apis = this.$store.getters.apis
-      if (this.apis === null) {
-        this.apis = []
+    async reloadApplicationss () {
+      this.isApplicationsReloading = true
+      await atHelper.reloadApplicationss()
+      this.isApplicationsReloading = false
+      this.applications = this.$store.getters.applications
+      if (this.applications === null) {
+        this.applications = []
       }
-      console.log('apis: ', this.apis)
+      console.log('applications: ', this.applications)
       this.$forceUpdate()
     },
-    showApiDetail (index) {
-      console.log('showApiDetail: ', index)
-      this.$router.push({name: 'editApi', params: { apiIndex: index, apiSource: this.apis }})
+    showApplicationsDetail (index) {
+      console.log('showApplicationsDetail: ', index)
+      this.$router.push({name: 'editApplications', params: { apiIndex: index, apiSource: this.applications }})
     },
-    copyApi (index) {
-      this.$router.push({name: 'newApi', params: { apiIndex: index, copiedApi: this.apis[index] }})
+    copyApplications (index) {
+      this.$router.push({name: 'newApplications', params: { apiIndex: index, copiedApplications: this.applications[index] }})
     }
   }
 }

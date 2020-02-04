@@ -7,5 +7,5 @@ const aiot = require('aiothings');
 exports.handler = async (event, context) => {
     // Add your code here
     await aiot.consoleOutput('console display:' + process.env.MSERVICE_NAME); // display from console
-	await aiot.messagePublish({data: 'payload'}); // must be a JSON
+	await aiot.messagePublish({data: event.data}); // must be a JSON, forward data as output message
 };

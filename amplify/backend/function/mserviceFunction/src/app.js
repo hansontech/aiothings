@@ -52,8 +52,8 @@ var config = {
     mserviceS3bucketName: "aiot-bucket" + '-' + process.env.ENV,
     mserviceRole: "arn:aws:iam::414327512415:role/aiot-mservice-role-default",
     awsIotEndpoint: "a3vgppxo7lddg8-ats.iot.ap-southeast-2.amazonaws.com",
-    awsUserPoolId: "ap-southeast-2_2gQEl126n",
-    adminUsers: ["Facebook_10212683421500597"],
+    awsUserPoolId: "ap-southeast-2_GETSSHigP",
+    adminUsers: ["Facebook_10212683421500597", "system", "root"],
     userDataTable: 'atUserDataTable'
 };
 
@@ -719,6 +719,7 @@ app.post('/mservices', async function(req, res) {
       'MSERVICE_NAME': inputs.ServiceName,
       'S3_BUCKET': config.mserviceS3bucketName,
       'OWNER_ID': inputs.UserId,
+      'OWNER_UNAME': inputs.UserName,
       'REGION': config.region,
       'ACCOUNT_ID': config.awsAccountId,
       'IS_SHARED': inputs.IsShared,
@@ -728,13 +729,13 @@ app.post('/mservices', async function(req, res) {
       console.log('createFunction')
       let fRuntime = inputs.ServiceRuntime
       if (fRuntime === 'nodejs') {
-        fRuntime = 'nodejs8.10'
+        fRuntime = 'nodejs12.x'
       } else if (fRuntime === 'python') {
         fRuntime = 'python3.7'
       }
         let isAdminUser = 'false'
         for (let superuser of config.adminUsers) {
-          if (superuser === inputs.UserId) {
+          if (superuser === inputs.UserId || superuser === inputs.UserName) {
             isAdminUser = 'true'
             break
           }
@@ -804,7 +805,7 @@ app.post('/mservices', async function(req, res) {
             // console.log('updateFunction runtime: ', inputs.ServiceRuntime)
             let fRuntime = inputs.ServiceRuntime
             if (fRuntime === 'nodejs') {
-              fRuntime = 'nodejs8.10'
+              fRuntime = 'nodejs12.x'
             } else if (fRuntime === 'python') {
               fRuntime = 'python3.7'
             }
@@ -824,7 +825,7 @@ app.post('/mservices', async function(req, res) {
               */
               let isAdminUser = 'false'
               for (let superuser of config.adminUsers) {
-                if (superuser === inputs.UserId) {
+                if (superuser === inputs.UserId || superuser === inputs.UserName) {
                   isAdminUser = 'true'
                   break
                 }
@@ -833,6 +834,11 @@ app.post('/mservices', async function(req, res) {
                 funcEnvs.SYSTEM_MSERVICE = isAdminUser
               } else if (funcEnvs.hasOwnProperty('SYSTEM_MSERVICE')) {
                 delete funcEnvs.SYSTEM_MSERVICE
+              }
+              // 2019/12/24 revise to use 'sub field as user id, instead of user name
+              // still leave user name as part of env variable.
+              if (funcEnvs.hasOwnProperty('OWNER_UNAME') === false) {
+                funcEnvs.OWNER_UNAME = inputs.UserName
               }
               console.log('funcEnvs: ', funcEnvs)
               await lambda.updateFunctionConfiguration( {
@@ -920,7 +926,7 @@ app.post('/mservices', async function(req, res) {
           // console.log('after add permission: ', data);
           let iot = new aws.Iot();
           let theFunctionArn = data.Configuration.FunctionArn;
-          let iotTopicRuleName = inputs.UserId + '_' + inputs.ServiceName + '_rule';
+          let iotTopicRuleName = inputs.UserId.replace(/\-/g, '_') + '_' + inputs.ServiceName + '_rule';
           let params = {
             ruleName: iotTopicRuleName /* required */
           };
@@ -963,7 +969,7 @@ app.post('/mservices', async function(req, res) {
                     }
                   }
                 ],
-                sql: "SELECT topic() AS topic, topic(2) AS sender, topic(3) AS fromWhere * FROM '" + allowedTopicHeader + inputs.InputMessageTopic + "'" + whereClouse, /* required */
+                sql: "SELECT *, topic() AS topic, topic(2) AS sender, topic(3) AS fromWhere FROM '" + allowedTopicHeader + inputs.InputMessageTopic + "'" + whereClouse, /* required */
                 // , topic() AS MessageTopic
                 ruleDisabled: false,
                 awsIotSqlVersion: '2016-03-23'
@@ -1254,16 +1260,17 @@ app.delete('/mservices', function(req, res) {
           // console.log('found function: ', data);
           let iot = new aws.Iot();
           let theFunctionArn = data.Configuration.FunctionArn;
-          let iotTopicRuleName = userId + '_' + functionName + '_rule';
+          let iotTopicRuleName = userId.replace(/\-/g, '_') + '_' + functionName + '_rule';
           let params = {
             ruleName: iotTopicRuleName /* required */
           };
           iot.deleteTopicRule(params, function(err, data) {
             if (err){
-              console.log('deleteTopicRule: ', err);
+              // the rule may not exist
+              console.log('warn: deleteTopicRule: ', err);
             }else{
-              gulp.task('delete-lambda')();
             }
+            gulp.task('delete-lambda')();
           }); // end deleteTopicRule
 
       } // if without error

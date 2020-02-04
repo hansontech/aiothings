@@ -1,8 +1,8 @@
 <template>
-  <b-container fluid> 
+  <div> 
     <!-- component matched by the route will render here -->
     <router-view /> 
-  </b-container> 
+  </div> 
 </template>
 
 <script>
@@ -17,7 +17,6 @@ export default {
     searchString: {
       handler: function (newS) {
         this.$parent.searchString.mservice = newS
-        // console.log('MyApplications set: ', this.$parent.searchString.mservice)
       }
     },
     servicesLogging: {
@@ -27,7 +26,6 @@ export default {
     }
   },
   mounted () {
-    // console.log('MyApplications get: ', this.$parent.searchString.mservice)
     this.searchString = this.$parent.searchString.mservice
     this.servicesLogging = this.$parent.servicesLogging
   }

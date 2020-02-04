@@ -1,114 +1,116 @@
 <template>
-  <b-container fluid> 
-      <div class="at-bottombar">
-       <b-row align-v="center" class="at-sidebar">
-            <b-col align="start" class="mt-1">
-              <h4 v-b-popover.hover.bottom="'Use Search to query microservices'">Shared Solutions &ensp;<small><i class="fas fa-info-circle"></i></small></h4>
-            </b-col>
-            <b-col align="end">
-              <b-button variant="info" @click="refreshSolutions()">Refresh</b-button>
-              <!-- <b-button align="end" variant="info" @click="createSolution()" >Add new solution</b-button> -->
-            </b-col>
-        </b-row>
-      </div>
-      <b-card no-body>
-         <b-tabs card>
-          <b-tab title="Node-RED Flows">
-            <div class="holds-the-iframe embed-responsive embed-responsive-16by9">
-              <iframe id="nodered" class="embed-responsive-item" :src="nodeRedLink" allowfullscreen></iframe>
-            </div>
-          </b-tab>
-          <!--
-          <b-tab title="AWS solutions">
-            <div class="text-center" v-if="solutions.length === 0">
-              No shared solution is found.
-            </div>
-            <div class="at-scroll">
-              <b-card-group columns>
-              <b-card v-for="(solution, index) in solutions" :key="solution.SolutionId"
-                  img-src="https://picsum.photos/600/300/?image=25"
-                  img-alt="Image"
-                  img-top
-                  @click = "showSolutionDetail(index)"
-                  tag="article"
-                  class="mb-2 at-card">
-                  <b-row>
-                    <b-col align="start">
-                      <b-badge variant="primary">{{solution.SolutionName}}</b-badge>
-                    </b-col>
-                    <b-col align="end">   
-                      <b-dropdown variant="success" class="mx-1" right >
-                        <b-dropdown-item @click.stop="deploySolution(solution)" >Deploy</b-dropdown-item>
-                        <b-dropdown-item @click.stop="deleteSolution(index)" >Delete</b-dropdown-item>
-                      </b-dropdown>
-                    </b-col>
-                  </b-row>
-                  <b-row class="ml-1 mt-2">  
-                    <p class="card-text">
-                      {{solution.SolutionDesc}}
-                    </p>
-                  </b-row>
-                </b-card>
-              </b-card-group>
-            </div>
-          </b-tab>
-          -->
-         <b-tab :title="'Shared Microservices ( '+ services.length + ' )'" active>
-            <div v-if="isLoadingServices">
-              <spinner size="medium" />
-            </div>
-            <div class="text-center" v-if="services.length === 0 && isLoadingServices === false">
-              <p>No shared micoservices from others found.</p>
-            </div>
-            <div class="at-scroll">
-              <b-card-group columns>
-                <b-card v-for="(service, index) in services" :key="service.ServiceName"
-                    header = " "
-                    class="at-card-mservice">
-                    <b-row align-v="center">
-                      <!-- for unexplainable reason, need set cols to 9 -->
-                      <b-col sm="9">
-                        <h5 class="card-text">
-                          {{service.ServiceName}}
-                        </h5>
+  <div> 
+    <b-row align-v="center" class="mt-1 at-bottombar">
+        <b-col align="start">
+          <h4 v-b-popover.hover.bottom="'Use Search to query microservices'">Shared Solutions &ensp;<small><i class="fas fa-info-circle"></i></small></h4>
+        </b-col>
+        <b-col align="end">
+          <b-button variant="info" @click="refreshSolutions()">Refresh</b-button>
+          <!-- <b-button align="end" variant="info" @click="createSolution()" >Add new solution</b-button> -->
+        </b-col>
+    </b-row>
+    <b-row>
+      <b-col>
+        <b-card no-body>
+          <b-tabs card>
+            <b-tab title="Node-RED Flows">
+              <div class="holds-the-iframe embed-responsive embed-responsive-16by9">
+                <iframe id="nodered" class="embed-responsive-item" :src="nodeRedLink" allowfullscreen></iframe>
+              </div>
+            </b-tab>
+            <!--
+            <b-tab title="AWS solutions">
+              <div class="text-center" v-if="solutions.length === 0">
+                No shared solution is found.
+              </div>
+              <div class="at-scroll">
+                <b-card-group columns>
+                <b-card v-for="(solution, index) in solutions" :key="solution.SolutionId"
+                    img-src="https://picsum.photos/600/300/?image=25"
+                    img-alt="Image"
+                    img-top
+                    @click = "showSolutionDetail(index)"
+                    tag="article"
+                    class="mb-2 at-card">
+                    <b-row>
+                      <b-col align="start">
+                        <b-badge variant="primary">{{solution.SolutionName}}</b-badge>
                       </b-col>
-                      <b-col sm="2" align="end">   
-                       <b-dropdown variant="secondary" class="mx-0" right >
-                           <!-- VUE reference: https://vuejs.org/v2/guide/events.html -->
-                          <b-dropdown-item @click = "showServiceDetail(index)" >Edit</b-dropdown-item>
-                          <b-dropdown-item @click = "copyService(index)" >Copy</b-dropdown-item>
+                      <b-col align="end">   
+                        <b-dropdown variant="success" class="mx-1" right >
+                          <b-dropdown-item @click.stop="deploySolution(solution)" >Deploy</b-dropdown-item>
+                          <b-dropdown-item @click.stop="deleteSolution(index)" >Delete</b-dropdown-item>
                         </b-dropdown>
                       </b-col>
                     </b-row>
-                    <b-row class="mt-2" >
-                      <b-col sm="10">
-                        <b-button size="sm" variant="light" v-b-popover.hover.bottomright="'Owner'" @click="loadUser(service.UserId)"><em>{{getUsername(service.UserId)}}</em></b-button>
-                      </b-col>
-                      <b-col sm="2" align="end" v-if="$store.getters.isAuthenticated"> 
-                          <input id="toggle" v-b-popover.hover.bottom="'Set as favorite'"  @click="toggleSelect(service.ServiceName, index)" type="checkbox" v-model="favoriteServices[service.ServiceName]" class="check_box"><label for="toggle"></label>
-                      </b-col>
-                    </b-row>                    
-                    <b-row class="ml-0 mt-1 at-bar" style="border-bottom: 1px solid green;">  
+                    <b-row class="ml-1 mt-2">  
                       <p class="card-text">
-                        {{service.ServiceDesc}}
+                        {{solution.SolutionDesc}}
                       </p>
                     </b-row>
-                    <b-row class="ml-0 mt-1">  
-                      <p class="card-text">
-                       Input: <code>{{service.InputMessageTopic}}</code>
-                      </p>
-                    </b-row>
-                    <b-row class="ml-0">  
-                      <p class="card-text">
-                        Output: <code>{{service.OutputMessageTopic}}</code>
-                      </p>
-                    </b-row>
-                </b-card>
-              </b-card-group>
-            </div>
-          </b-tab>
-        </b-tabs>
-      </b-card>
+                  </b-card>
+                </b-card-group>
+              </div>
+            </b-tab>
+            -->
+            <b-tab :title="'Shared Microservices ( '+ services.length + ' )'" active>
+              <div v-if="isLoadingServices">
+                <spinner size="medium" />
+              </div>
+              <div class="text-center" v-if="services.length === 0 && isLoadingServices === false">
+                <p>No shared micoservice is found.</p>
+              </div>
+              <div class="at-scroll">
+                <b-card-group columns>
+                  <b-card v-for="(service, index) in services" :key="service.ServiceName"
+                      header = " "
+                      class="at-card-mservice">
+                      <b-row align-v="center">
+                        <!-- for unexplainable reason, need set cols to 9 -->
+                        <b-col lg="9">
+                          <h5 class="card-text">
+                            {{service.ServiceName}}
+                          </h5>
+                        </b-col>
+                        <b-col lg="3" align="end">   
+                        <b-dropdown variant="secondary" class="mx-0" right >
+                            <!-- VUE reference: https://vuejs.org/v2/guide/events.html -->
+                            <b-dropdown-item @click = "showServiceDetail(index)" >Edit</b-dropdown-item>
+                            <b-dropdown-item @click = "copyService(index)" >Copy</b-dropdown-item>
+                          </b-dropdown>
+                        </b-col>
+                      </b-row>
+                      <b-row class="mt-2" >
+                        <b-col lg="10">
+                          <b-button size="sm" variant="light"  @click="loadUser(service.UserId)"><em>{{getUsername(service.UserId)}}</em></b-button>
+                        </b-col>
+                        <b-col lg="2" align="end" v-if="$store.getters.isAuthenticated"> 
+                            <input i  d="toggle" v-b-popover.hover.bottom="'Set as favorite'"  @click="toggleSelect(service.ServiceName, index)" type="checkbox" v-model="favoriteServices[service.ServiceName]" class="check_box"><label for="toggle"></label>
+                        </b-col>
+                      </b-row>
+                      <b-row class="ml-0 mt-1">
+                        <b-col class="at-border at-desc-display">
+                          <vue-markdown>{{service.ServiceDesc}}</vue-markdown>
+                        </b-col>
+                      </b-row>
+                      <b-row v-if="service.InputMessageTopic !== 'null'" class="ml-0 mt-1">  
+                        <p class="card-text">
+                        <i class="fas fa-arrow-alt-circle-right"></i> <code>{{service.InputMessageTopic}}</code>
+                        </p>
+                      </b-row>
+                      <b-row v-if="service.OutputMessageTopic !== 'null'" class="ml-0">  
+                        <p class="card-text">
+                          <i class="fas fa-arrow-alt-circle-left"></i> <code>{{service.OutputMessageTopic}}</code>
+                        </p>
+                      </b-row>
+                  </b-card>
+                </b-card-group>
+              </div>
+            </b-tab>
+          </b-tabs>
+        </b-card>
+      </b-col>
+    </b-row>
       <!-- 
       <b-row v-if="isSearchFromNodeRed == true">
         <div class="embed-responsive embed-responsive-16by9">
@@ -146,7 +148,7 @@
         </div>
       </b-row>
       -->
-  </b-container> 
+  </div> 
 </template>
 
 <script>
@@ -197,11 +199,12 @@ export default {
   watch: {
     favoriteServices: {
         handler: async function (updatedFavoriteList) {
-          if (updatedFavoriteList === null || this.favoriteActiveSelected === '') {
+          const UserId = this.$store.getters.userId
+          // console.log('userId: ', UserId)
+          if (UserId === null || updatedFavoriteList === null || this.favoriteActiveSelected === '') {
             return
           }
           let favoriteStatusChanged = updatedFavoriteList[this.favoriteActiveSelected]
-          const UserId = this.$store.getters.username
           const ServiceName = this.favoriteActiveSelected
           this.favoriteActiveSelected = ''
           if (typeof favoriteStatusChanged === 'undefined') {
@@ -227,20 +230,13 @@ export default {
     solutions: function () {
       // this.testFlag = true
     },
-    searchText: function (newText, oldText) {
-      console.log('watch searchText')
-      if ((typeof newText !== 'undefined' && newText !== null) ||
-          (typeof newText !== 'undefined' && newText !== null)) {
-          if ((typeof newText !== 'undefined' && newText !== null) &&
-              (typeof newText !== 'undefined' && newText !== null)) {
-            if (newText !== oldText) {
-              this.searchFromNodeRed()
-              this.refreshSolutions()
-            }
-          } else {
+    searchText: {
+      handler: function (newText, oldText) {
+        console.log('watch searchText: ', newText, oldText)
+        if (newText !== oldText) {
             this.searchFromNodeRed()
             this.refreshSolutions()
-          }
+        }
       }
     }
   },
@@ -251,7 +247,9 @@ export default {
       console.log('refresh')
       // this.updateSearchSetting()
       // this.solutions = this.$store.getters.solutions
-      this.refreshSolutions()
+      if (this.searchText !== this.$store.getters.searchText) {
+        this.searchText = this.$store.getters.searchText
+      }
     })
     this.loadedUserData = this.$store.getters.atusers
       // await this.$store.commit('setAtusers', null)
@@ -287,7 +285,14 @@ export default {
     // Unsubscribe client disconnected
   },
   methods: {
+    truncatedString (str, len) {
+      return atHelper.truncatedString(str, len)
+    },
     async reloadFavoriteServices () {
+      let userId = this.$store.getters.userId
+      if (userId === null) {
+        return
+      }
       await atHelper.reloadFavoriteServiceList()
       this.favoriteServices = this.$store.getters.favoriteMserviceList
       if (this.favoriteServices === null) {
@@ -331,7 +336,7 @@ export default {
       this.$forceUpdate()
     },
     async reloadSharedServices (searchText) {
-      let username = this.$store.getters.username
+      let username = this.$store.getters.userId
       if (username === null) {
         username = ' '
       }
@@ -365,19 +370,21 @@ export default {
       this.$forceUpdate()
     },
     updateSearchSetting () {
-      if (this.$store.getters.searchText === null || this.$store.getters.searchText === '') {
+      // console.log('updateSearchSetting')
+      if ((this.$store.getters.searchText === null || this.$store.getters.searchText === '') && (typeof this.$store.getters.searchKeywords !== 'undefined')) {
         this.searchText = this.$store.getters.searchKeywords
       } else {
         this.searchText = this.$store.getters.searchText
       }
-      console.log('searchText: ', this.searchText)
+      // console.log('update searchText: ', this.searchText)
     },
     searchFromNodeRed () {
-      console.log('searchFromNodeRed')
+      // console.log('searchFromNodeRed')
       let flowsQueryText = encodeURIComponent(this.searchText)
       // let flowsResponse = await fetch('https://flows.nodered.org/api/v1/search?term=' + flowsQueryText + 'sort=downloads&per_page=30', { mode: 'no-cors' })
       // let flowsJson = await flowsResponse.json()
-      this.nodeRedLink = 'https://flows.nodered.org/?sort=downloads&term=' + flowsQueryText
+      // https://flows.nodered.org/search?term=ifttt&type=node&type=flow&type=collection&sort=downloads
+      this.nodeRedLink = 'https://flows.nodered.org/search?term=' + flowsQueryText + '&type=node&type=flow&type=collection&sort=downloads'
 
       this.isSearchFromNodeRed = !(this.isSearchFromNodeRed)
     },
@@ -413,13 +420,6 @@ export default {
 .at-scroll {
   /* height : 500px ; */
   overflow-y: auto;
-}
-
-div.at-bottombar {
-  /* background-color : grey; */
-  padding-bottom: 5px;
-  margin-bottom: 5px;
-  border-bottom: 1px solid grey
 }
 
 /*

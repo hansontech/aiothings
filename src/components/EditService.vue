@@ -1,19 +1,20 @@
 <template>
-  <b-container fluid>
+  <div>
     <div v-bind:titleString="changeTitle()">
-      <b-row align-v="center" style="border-bottom: 1px solid grey; padding-bottom: 5px; margin-bottom: 5px;">
+      <b-row align-v="center" class = "at-bottombar">
         <b-col align="start">
             <h4>Edit Service : {{mservice.ServiceName}} </h4>
         </b-col>
         <b-col sm="auto" align="end" >
           <b-button v-if="!isShowEdit" variant="info" @click="exportService(mservice)" v-b-popover.hover.bottom="'Export the microservice to a local file'">Export</b-button> 
-          <b-button variant="success" :disabled="mservice.UserId !== $store.getters.username" @click="updateService()">Update</b-button>
+          <b-button variant="success" :disabled="mservice.UserId !== $store.getters.userId" @click="updateService()">Update</b-button>
           <b-button variant="dark" @click="backHome()">Return<sub><b-badge class="ml-1" variant="warning" v-if="isChangedNotSaved">&nbsp;</b-badge></sub></b-button>
           <b-modal id="modalReturnConfirm"
              ref="modalReturnConfirmRef"
-             title="Discard changes and return?" 
+             hide-header
              @ok="returnDiscardChangesOk"
              @cancel="returnCancel">
+             Discard changes and return?
           </b-modal>
         </b-col>
       </b-row>
@@ -26,36 +27,46 @@
       <spinner v-if="isUpdating === true" size="medium" />
       <b-tabs card>
        <b-tab title="Info" active>
-            <div class="mt-3">
-              <p class="h5">Service Name</p>
-            </div>
-            <div>
-              <b-form-input class="at-border" v-model="mservice.ServiceName" placeholder="Service name" disabled></b-form-input>
-            </div>
-            <div class="mt-3">
-              <p class="h5">Description</p>
-            </div>
-            <div style="height: 100px; background-color: rgba(255,0,0,0.1);">
-              <textarea class="at-border w-100 h-100" v-model.lazy="mservice.ServiceDesc" placeholder="Service description"></textarea>
-            </div>
+            <b-row class="mt-3" align-v="center">
+              <b-col><h5>Description</h5></b-col>
+              <b-col v-if="isEditDesc">
+                  <small>Markdown script...</small>
+              </b-col>
+              <b-col align="end">
+                  <b-form-radio-group v-model="isEditDesc">
+                    <b-form-radio :value="false">Display</b-form-radio>
+                    <b-form-radio :value="true">Edit</b-form-radio>
+                  </b-form-radio-group>
+              </b-col>
+            </b-row>
+            <b-row v-if="isEditDesc">
+              <b-col> 
+                <textarea class="at-desc-edit" v-model.lazy="mservice.ServiceDesc" placeholder="Service description. (Can be a markdown text)"></textarea>
+              </b-col>
+            </b-row>
+            <b-row v-else>
+                <b-col>
+                  <vue-markdown class="at-desc-display">{{mservice.ServiceDesc}}</vue-markdown>
+                </b-col>
+            </b-row> 
             <b-form-group
                   label-cols-sm="3"
-                  label="Runtime:"
+                  label="Runtime"
                   label-size="lg"
-                  label-class="font-weight-bold"
                   class="mt-3">
               <b-dropdown variant="secondary" class="mx-1" :text="currentRuntime">
+                <b-dropdown-item @click="changeRuntime('nodejs12.x')">Node.js 12.x</b-dropdown-item>
+                <b-dropdown-item @click="changeRuntime('nodejs10.x')">Node.js 10.x</b-dropdown-item>
                 <b-dropdown-item @click="changeRuntime('nodejs8.10')">Node.js 8.10</b-dropdown-item>
-                <b-dropdown-item @click="changeRuntime('nodejs6.10')">Node.js 6.10</b-dropdown-item>
                 <b-dropdown-item @click="changeRuntime('python3.7')">Python 3.7</b-dropdown-item>
                 <b-dropdown-item @click="changeRuntime('python2.7')">Python 2.7</b-dropdown-item>
               </b-dropdown>
             </b-form-group>
+            <!-- label-class="font-weight-bold" -->
             <b-form-group
                   label-cols-sm="3"
-                  label="Sharing:"
+                  label="Sharing"
                   label-size="lg"
-                  label-class="font-weight-bold"
                   class="mt-3">
               <b-form-radio-group class="pt-3" v-model="mservice.IsShared" :options="[{text: 'Yes', value: 'true'}, {text: 'No', value: 'false'}]" />
             </b-form-group>
@@ -63,7 +74,7 @@
                 :label-cols="3"
                 breakpoint="md"
                 label-size="lg"
-                label-class="font-weight-bold"
+                
                 label="Deploy message"
                 label-for="inputHorizontal">
               <b-form-input v-model="mservice.DeployMessage" :placeholder="deployMessageFormat" id="inputHorizontal"></b-form-input>
@@ -72,7 +83,7 @@
                 :label-cols="3"
                 breakpoint="md"
                 label-size="lg"
-                label-class="font-weight-bold"
+                
                 label="Undeploy message"
                 label-for="inputHorizontal">
               <b-form-input v-model="mservice.UndeployMessage" :placeholder="deployMessageFormat" id="inputHorizontal"></b-form-input>
@@ -99,9 +110,11 @@
             </b-col>
           </b-row>
           <b-row v-if="mservice.CodeEntryType === 'inline'">
-            <spinner v-if="isSourceLoading === true" size="medium" />
-            <codemirror id="sourceEditor" v-else class="mt-2 w-100 h-100" v-bind:class="languageType" v-model="mservice.ServiceCode" ref="sourceEditor" placeholder="Microservice code" :lintOptions="{}">
-            </codemirror>
+            <b-col>
+              <spinner v-if="isSourceLoading === true" size="medium" />
+              <codemirror id="sourceEditor" class="mt-2 w-100 h-100" v-bind:class="languageType" v-model="mservice.ServiceCode" ref="sourceEditor" placeholder="Microservice code" :lintOptions="{}">
+              </codemirror>
+            </b-col>
           </b-row>
           <div v-else-if="mservice.CodeEntryType === 'zip'">
             <b-row class = "mt-2">
@@ -124,7 +137,7 @@
               :label-cols="4"
               breakpoint="md"
               label-size="lg"
-              label-class="font-weight-bold"
+              
               label="Entry handler"
               description="main module and entry handler"
               label-for="inputHorizontal">
@@ -146,7 +159,7 @@
                 :label-cols="4"
                 breakpoint="md"
                 label-size="lg"
-                label-class="font-weight-bold"
+                
                 label="Input message topic"
                 label-for="inputHorizontal">
               <b-form-input v-model="mservice.InputMessageTopic" placeholder="Input topic" id="inputHorizontal"></b-form-input>
@@ -155,7 +168,7 @@
                 :label-cols="4"
                 breakpoint="md"
                 label-size="lg"
-                label-class="font-weight-bold"
+                
                 label="Input microservice:"
                 description="Optional, limit the input message only from this microservice"
                 label-for="inputHorizontal">
@@ -164,7 +177,7 @@
              <b-form-group id="fieldsetHorizontal"
                 :label-cols="4"
                 label-size="lg"
-                label-class="font-weight-bold"
+                
                 breakpoint="md"
                 label="Output message topic"
                 label-for="inputHorizontal">
@@ -174,7 +187,7 @@
       </b-tab>
      </b-tabs>
     </div>
-  </b-container>
+  </div>
  </template>
 
 <script>
@@ -191,6 +204,7 @@ export default {
       mservice: null,
       zipFile: null,
       inputMicroservice: '',
+      isEditDesc: false,
       isChangedNotSaved: null,
       isUpdating: false,
       isZipDownloading: false,
@@ -199,7 +213,7 @@ export default {
       isShowEdit: false,
       showZipOnlySupportPython: false,
       showInvalidCodeHandlerAlert: false,
-      runtimeOptions: {'nodejs': 'Node.js 8.10', 'nodejs6.10': 'Node.js 6.10', 'nodejs8.10': 'Node.js 8.10', 'python2.7': 'Python 2.7', 'python3.7': 'Python 3.7', 'python': 'Python 3.7'},
+      runtimeOptions: {'nodejs': 'Node.js 12.x', 'nodejs12.x': 'Node.js 12.x', 'nodejs10.x': 'Node.js 10.x', 'nodejs8.10': 'Node.js 8.10', 'python2.7': 'Python 2.7', 'python3.7': 'Python 3.7', 'python': 'Python 3.7'},
       codeEntryOptions: [
           {value: 'inline', text: 'Edit code inline'},
           {value: 'zip', text: 'Upload .zip file'}
@@ -266,10 +280,10 @@ export default {
     mservice: {
       handler: function (newService) {
         if (this.mserviceBackup !== null) {
-          let isEqual = this.$_.isEqual(
-            this.$_.omit(this.mserviceBackup, ['ServiceCode']),
-            this.$_.omit(newService, ['ServiceCode']))
-          // console.log('mservices : ', this.mserviceBackup, newService)
+          let compareOld = this.$_.omit(this.mserviceBackup, ['ServiceCode', 'QueryString'])
+          let compareNew = this.$_.omit(newService, ['ServiceCode', 'QueryString'])
+          let isEqual = this.$_.isEqual(compareOld, compareNew)
+          // console.log('mservices : ', compareOld, compareNew)
           // console.log('mservice changed: ', isEqual)
           if (isEqual === false && this.isChangedNotSaved !== true) {
             this.isChangedNotSaved = true
@@ -494,19 +508,6 @@ export default {
 </script>
 
 <style>
-/*
-.at-border {
-  border: 1px solid #a78;
-  padding: 5px;
-}
-*/
-.CodeMirror {
-  border: 1px solid #a78;
-  padding: 5px;
-}
-.CodeMirror pre.CodeMirror-placeholder {
-  color: #999;
-}
 
 .CodeMirror-focused .cm-matchhighlight {
     background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFklEQVQI12NgYGBgkKzc8x9CMDAwAAAmhwSbidEoSQAAAABJRU5ErkJggg==);
@@ -528,13 +529,6 @@ export default {
   border-radius: 50%; 
   padding: 0 3px; 
   margin-right: 7px;
-}
-
-div.at-bottombar {
-  /* background-color : grey; */
-  padding-bottom: 5px;
-  margin-bottom: 5px;
-  border-bottom: 1px solid grey
 }
 
 .btn:hover { outline: 0 !important }

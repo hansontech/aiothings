@@ -2,17 +2,15 @@
 <div> 
   <App/>
   <b-container fluid class="bv-example-row" >
-    <div style="min-height: 500px">
       <!-- <b-alert :show="loading" variant="info">Loading...</b-alert> -->
-      <b-row>
+      <b-row  style="min-height: 620px; margin-top: 65px">
         <b-col sm="3" lg="2" style="border-right: 1px solid blue">
           <at-sidebar menu="user"></at-sidebar>
         </b-col>
         <b-col sm="9" lg="10">
-          <router-view />
+          <router-view class="mt-1" />
         </b-col>
       </b-row>
-    </div>
   </b-container>
   <at-footer/>
  </div>

@@ -25,13 +25,12 @@ app.use(function(req, res, next) {
 });
 
 var config = {
+  apiDomainName: 'api.aiothings.com',
   apiTableName: "atApiTable",
   mserviceTableName: "atServiceTable",
-  relationTableName: "atRelationTable",
-  mserviceTableIndexByUserId: "UserId-index",
   region: "ap-southeast-2",
   mserviceRole: "arn:aws:iam::414327512415:role/aiot-mservice-role-default",
-  awsUserPoolId: "ap-southeast-2_2gQEl126n",
+  awsUserPoolId: "ap-southeast-2_GETSSHigP",
   apiGatewayAuthorizerFunction: 'apiAuthorizerFunction-' + process.env.ENV
 };
 aws.config.region = config.region;

@@ -1,9 +1,8 @@
 <template>
-  <b-container fluid> 
     <div>
        <b-row align-v="center" class="at-bottombar">
           <b-col align="start" sm="4">
-            <h4>IoT Devices ({{things.length}})</h4>
+            <h4>IoT Devices <small>({{things.length}})</small></h4>
           </b-col>
          <b-col sm="4">
             <b-form-input class="at-border" id="publishTopic"
@@ -16,8 +15,13 @@
           <b-col sm="4" align="end">
             <b-button variant="info" @click="refreshThings()">Refresh</b-button>
             <b-button variant="success" @click="createThing()" v-b-popover.hover.bottom="'Create new IoT device'" >Create</b-button>
+            <!-- <b-button variant="light" v-b-modal.scanDeviceModal v-b-popover.hover.bottom="'Add new device from QR Code'" >Scan</b-button> -->
           </b-col>
+          <!--  <qrcode-stream @decode="onQRCodeDecode"></qrcode-stream> -->
       </b-row>
+      <b-modal id="scanDeviceModal" ref="scanDeviceModalRef" title="Scan Device" ok-only ok-variant="secondary" ok-title="Cancel">
+        <qrcode-stream @decode="onQRCodeDecode"></qrcode-stream>
+      </b-modal>
       <!-- VUE reference https://vuejs.org/v2/guide/list.html -->
         <!-- <router-view class="child"></router-view> -->
        <!-- style="max-width: 20rem;" 
@@ -36,7 +40,7 @@
               No IoT devices available.
       </div>
       <b-row class="mt-2">
-        <div class="at-scroll">
+        <b-col class="at-scroll">
           <b-card-group columns>
             <b-modal id="modalDeleteConfirm"
                   hide-header 
@@ -53,33 +57,36 @@
               class="at-card-thing" 
               >
               <b-row align-v="center">
-                <b-col sm="10" align="start">
+                <b-col lg="9">
                   <h5 class="card-text">
                     {{thing.ThingName}}
                   </h5>
                 </b-col>
-                <b-col sm="2" align="end">   
-                  <b-dropdown variant="secondary" class="mx-0" right >
+                <b-col lg="3" align="end">
+                  <b-dropdown variant="secondary">
                     <!-- VUE reference: https://vuejs.org/v2/guide/events.html -->
+                    <b-dropdown-item @click.stop="showThingStatus(things.indexOf(thing))">Dashboard</b-dropdown-item>
                     <b-dropdown-item @click.stop="showThingDetail(things.indexOf(thing))">Edit</b-dropdown-item>
                     <b-dropdown-item v-b-modal.modalDeleteConfirm @click="deletingThingIndex=things.indexOf(thing)">Delete</b-dropdown-item>
                   </b-dropdown>
                 </b-col>
               </b-row>
-              <b-row>
-                <b-col align="start">
-                  <b-button size="sm" variant="success" v-b-popover.hover.bottomright="'Launch Node-RED from device'" v-if="typeof thingsMap[thing.ThingId] !== 'undefined'" @click.stop="launchThingNodeRed(thingsMap[thing.ThingId])">{{thingsMap[thing.ThingId]}}</b-button>
+              <b-row class="mt-1">
+                <b-col align="center">
+                  <b-button size="sm" variant="success" v-b-popover.hover.bottomright="thingsMap[thing.ThingId]" v-if="typeof thingsMap[thing.ThingId] !== 'undefined'" @click.stop="launchThingNodeRed(thingsMap[thing.ThingId])"><i class="fas fa-bullseye"></i></b-button>
+                  <!-- 'Launch Node-RED from device' -->
                 </b-col>
               </b-row>
               <b-row class="ml-0 mt-1">
-                <b-col class="at-border" style="white-space: pre-wrap;">{{truncatedString( thing.ThingDesc, 256 )}}</b-col>               
+                <b-col class="at-border at-desc-display">
+                  <vue-markdown>{{thing.ThingDesc}}</vue-markdown>
+                </b-col>               
               </b-row>
             </b-card>
           </b-card-group>
-        </div>
+        </b-col>
       </b-row>
     </div>
-  </b-container> 
 </template>
 
 <script>
@@ -178,23 +185,25 @@ export default {
           close: () => console.log('Done')
         }))
         // Subscribe alive response
-        this.subs.push(PubSub.subscribe('aiot/' + thing.ThingId + '/alive/resp').subscribe({
+        this.subs.push(PubSub.subscribe(['aiot/' + thing.ThingId + '/alive/resp', 'aiot/' + thing.UserId + '/' + thing.ThingId + '/alive/resp']).subscribe({
           next: data => {
               console.log('alive resp:', data)
-              let deviceIpAddr = data.value.hostIp
-              // const regex = new RegExp('/contact\\b', 'g');
-              // or /.../;
-              let thingsMatched = this.things.filter(function (thy) {
-                 // console.log('match: ', thy)
-                 return thy.ThingId.match(thing.ThingId)
-              })
-              thingsMatched[0].ipAddr = deviceIpAddr
-              this.thingsMap[thing.ThingId] = deviceIpAddr
-              this.$set(this.thingsMap, thing.ThingId, deviceIpAddr)
-              this.$set(this.things, 0, this.things[0])
-              // console.log('thingsMap: ', this.thingsMap)
-              // console.log('thingsMap value: ', this.thingsMap[thing.ThingId])
-              this.testFlag = true
+              if (data.hasOwnProperty('value') && data.value.hasOwnProperty('hostIp')) {
+                let deviceIpAddr = data.value.hostIp
+                // const regex = new RegExp('/contact\\b', 'g');
+                // or /.../;
+                let thingsMatched = this.things.filter(function (thy) {
+                  // console.log('match: ', thy)
+                  return thy.ThingId.match(thing.ThingId)
+                })
+                thingsMatched[0].ipAddr = deviceIpAddr
+                this.thingsMap[thing.ThingId] = deviceIpAddr
+                this.$set(this.thingsMap, thing.ThingId, deviceIpAddr)
+                this.$set(this.things, 0, this.things[0])
+                // console.log('thingsMap: ', this.thingsMap)
+                // console.log('thingsMap value: ', this.thingsMap[thing.ThingId])
+                this.testFlag = true
+              }
           },
           error: error => console.error('error: ', error),
           close: () => console.log('Done')
@@ -248,14 +257,18 @@ export default {
       // console.log('detail things:')
       this.$router.push({name: 'edit', params: { thingIndex: index }})
     },
+    showThingStatus (index) {
+      // console.log('detail things:')
+      this.$router.push({name: 'thing_status', params: { thingIndex: index }})
+    },
     deleteThing (index) {
       console.log('deleteThing')
-      const username = this.$store.getters.username
+      const userId = this.$store.getters.userId
       let thing = this.$store.getters.things[index]
       console.log('deleteThing: thing: ', thing)
       API.del('thingApi', '/things', {
             'queryStringParameters': {
-                 'userId': username,
+                 'userId': userId,
                  'certId': thing.CertId,
                  'thingId': thing.ThingId
             }
@@ -275,28 +288,19 @@ export default {
       console.log('showDeleteConfirm')
       console.log('refs:', this.$refs)
       this.$refs['modalConfirmRef'].show()
+    },
+    onQRCodeDecode (decodedString) {
+      console.log('d: ', decodedString)
+      this.$refs.scanDeviceModalRef.hide()
     }
   }
 }
 </script>
 
 <style>
-/*
-.at-border {
-  border: 1px solid #a78;
-  padding: 5px;
-}
-*/
 .at-scroll {
   /* height : 500px ; */
   overflow-y: auto;
-}
-
-div.at-bottombar {
-  /* background-color : grey; */
-  padding-bottom: 5px;
-  margin-bottom: 5px;
-  border-bottom: 1px solid grey
 }
 
 </style>

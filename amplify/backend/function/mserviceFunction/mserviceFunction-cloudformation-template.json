@@ -60,7 +60,7 @@
 				"Timeout": "25",
 				"Code": {
 					"S3Bucket": "aiothings-20190217141129-deployment",
-					"S3Key": "amplify-builds/mserviceFunction-65634c58486f774a6346-build.zip"
+					"S3Key": "amplify-builds/mserviceFunction-4f664e504f2b6f53434d-build.zip"
 				}
 			}
 		},
