@@ -14,8 +14,13 @@
         <b-card no-body>
           <b-tabs card>
             <b-tab title="Node-RED Flows">
+              <!--
               <div class="holds-the-iframe embed-responsive embed-responsive-16by9">
                 <iframe id="nodered" class="embed-responsive-item" :src="nodeRedLink" allowfullscreen></iframe>
+              </div>
+              -->
+              <div>
+                <iframe style="width:100%; height:600px;" id="nodered" :src="nodeRedLink" allowfullscreen></iframe>
               </div>
             </b-tab>
             <!--
@@ -390,7 +395,7 @@ export default {
     },
     async refreshSolutions () {
       this.updateSearchSetting()
-      await atHelper.reloadSolutions()
+      // await atHelper.reloadSolutions()
       await this.reloadSharedServices(this.searchText)
       await this.reloadFavoriteServices()
     },

@@ -7,7 +7,9 @@ export default {
     solutions: null,
     consoleOutputs: null,
     consoleInputTopic: null,
-    consoleInputBody: null
+    consoleInputBody: null,
+    consoleInputFrom: null,
+    consoleSubscribeTopic: null
   },
 
   getters: {
@@ -16,7 +18,9 @@ export default {
     searchKeywords: state => state.searchKeywords,
     solutions: state => state.solutions,
     consoleOutputs: state => state.consoleOutputs,
+    consoleSubscribeTopic: state => state.consoleSubscribeTopic,
     consoleInputTopic: state => state.consoleInputTopic,
+    consoleInputFrom: state => state.consoleInputFrom,
     consoleInputBody: state => {
       console.log('read body: ', state.consoleInputBody)
       if (state.consoleInputBody !== null) {
@@ -51,11 +55,18 @@ export default {
           state.consoleInputTopic = consoleInput.topic
           // console.log('write topic: ', consoleInput.topic)
         }
+        if (consoleInput.hasOwnProperty('fromService')) {
+          state.consoleInputFrom = consoleInput.fromService
+          // console.log('write body: ', consoleInput.body)
+        }
         if (consoleInput.hasOwnProperty('body')) {
           state.consoleInputBody = consoleInput.body
           // console.log('write body: ', consoleInput.body)
         }
       }
+    },
+    setConsoleSubscribeTopic: (state, topic) => {
+      state.consoleSubscribeTopic = topic
     }
   },
   actions: {
@@ -66,6 +77,7 @@ export default {
       context.commit('setQueriedSolutions', null)
       context.commit('setConsoleOutputs', null)
       context.commit('setConsoleInput', null)
+      context.commit('setConsoleSubscribeTopic', null)
     }
   }
 }

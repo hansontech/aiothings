@@ -4,54 +4,84 @@
             "name": "/things",
             "lambdaFunction": "thingFunction",
             "privacy": {
-                "protected": true,
-                "auth": "rw",
-                "unauth": "rw"
-            }
-        },
-        {
-            "name": "/iot-allow",
-            "lambdaFunction": "thingFunction",
-            "privacy": {
-                "protected": true,
-                "auth": "rw",
-                "unauth": "rw"
-            }
-        },
-        {
-            "name": "/edge",
-            "lambdaFunction": "thingFunction",
-            "privacy": {
-                "protected": true,
-                "auth": "rw",
-                "unauth": "rw"
+                "private": true,
+                "auth": [
+                    "/POST",
+                    "/GET",
+                    "/PUT",
+                    "/PATCH",
+                    "/DELETE"
+                ]
             }
         },
         {
             "name": "/edge/deploy",
             "lambdaFunction": "thingFunction",
             "privacy": {
-                "protected": true,
-                "auth": "rw",
-                "unauth": "rw"
+                "private": true,
+                "auth": [
+                    "/POST"
+                ]
             }
         },
         {
-            "name": "/edge/deploy/status",
+            "name": "/device-groups",
             "lambdaFunction": "thingFunction",
             "privacy": {
-                "protected": true,
-                "auth": "rw",
-                "unauth": "rw"
+                "private": true,
+                "auth": [
+                    "/POST",
+                    "/GET",
+                    "/PUT",
+                    "/PATCH",
+                    "/DELETE"
+                ]
+            }
+        },
+        {
+            "name": "/devices",
+            "lambdaFunction": "thingFunction",
+            "privacy": {
+                "private": true,
+                "auth": [
+                    "/POST",
+                    "/GET",
+                    "/PUT",
+                    "/PATCH",
+                    "/DELETE"
+                ]
             }
         },
         {
             "name": "/edge/definition",
             "lambdaFunction": "thingFunction",
             "privacy": {
-                "protected": true,
-                "auth": "rw",
-                "unauth": "rw"
+                "private": true,
+                "auth": [
+                    "/GET"
+                ]
+            }
+        },
+        {
+            "name": "/iot-allow",
+            "lambdaFunction": "thingFunction",
+            "privacy": {
+                "private": true,
+                "auth": [
+                    "/POST"
+                ]
+            }
+        },
+        {
+            "name": "/edge",
+            "lambdaFunction": "thingFunction",
+            "privacy": {
+                "private": true,
+                "auth": [
+                    "/POST",
+                    "/GET",
+                    "/DELETE"
+                ]
             }
         }
     ],
@@ -63,8 +93,8 @@
         }
     ],
     "privacy": {
-        "auth": 6,
-        "unauth": 6,
+        "auth": 7,
+        "unauth": 0,
         "authRoleName": "aiothings-20190217141129-authRole",
         "unAuthRoleName": "aiothings-20190217141129-unauthRole"
     },
@@ -77,5 +107,6 @@
                 "Arn"
             ]
         }
-    ]
+    ],
+    "uuid": "feb96609"
 }

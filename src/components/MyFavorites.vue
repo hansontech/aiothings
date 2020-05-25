@@ -53,12 +53,12 @@
                           <vue-markdown>{{service.ServiceDesc}}</vue-markdown>
                         </b-col>
                       </b-row>
-                      <b-row class="ml-0 mt-1">  
+                      <b-row v-if="service.InputMessageTopic !== 'null'" class="ml-0 mt-1">  
                         <p class="card-text">
                           <i class="fas fa-arrow-alt-circle-right"></i> <code>{{service.InputMessageTopic}}</code>
                         </p>
                       </b-row>
-                      <b-row class="ml-0">  
+                      <b-row v-if="service.OutputMessageTopic !== 'null'" class="ml-0">  
                         <p class="card-text">
                           <i class="fas fa-arrow-alt-circle-left"></i> <code>{{service.OutputMessageTopic}}</code>
                         </p>

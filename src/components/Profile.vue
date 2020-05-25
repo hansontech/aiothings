@@ -1,7 +1,7 @@
 <template>
   <div> 
    <App></App>
-   <b-container style="min-height: 620px; margin-top: 65px;">
+   <b-container style="min-height: 620px; margin-top: 85px;">
     <b-row align-v="center" class="mt-2 at-bottombar">
       <h4>Account Information</h4>
     </b-row>

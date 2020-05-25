@@ -80,7 +80,7 @@
 <script>
 
 import { eventBus } from './main'
-import { Auth, API } from 'aws-amplify'
+import { Auth } from 'aws-amplify'
 import atHelper from './aiot-helper'
 
 export default {
@@ -211,6 +211,7 @@ export default {
         eventBus.$emit('pageRefresh')
       }
     },
+    /*
     async searchSolutions () {
       let solutionCategory = this.selected
       if (solutionCategory === null) {
@@ -226,6 +227,7 @@ export default {
       this.$router.push({name: 'queriedSolutions'})
       eventBus.$emit('pageRefresh')
     },
+    */
     goSolutions () {
       this.$router.push({name: 'queriedSolutions'})
       eventBus.$emit('pageRefresh')

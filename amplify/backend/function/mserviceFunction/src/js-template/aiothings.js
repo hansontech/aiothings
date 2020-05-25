@@ -251,7 +251,7 @@ let setInterval = async (periodTime, messageTopic, messageData, numberOfTimes) =
             }).promise()
         }
         if (periodTime < 60) {
-            stepFunctionClient = new AWS.StepFunctions()
+            let stepFunctionClient = new AWS.StepFunctions()
             await stepFunctionClient.startExecution({
                 stateMachineArn: 'arn:aws:states:ap-southeast-2:414327512415:stateMachine:atTimerStepMachine'
             }).promise()

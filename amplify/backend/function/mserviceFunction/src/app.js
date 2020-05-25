@@ -648,7 +648,6 @@ app.post('/mservices', async function(req, res) {
   gulp.task('create-update-database', function() {
     console.log('create-update-database')
     aws.config.region = config.region;
-    let lambda = new aws.Lambda();
     let s3 = new aws.S3();
     let sourceFile = inputs.ServiceName + '.src';
     let s3ObjectParams = {
@@ -706,9 +705,9 @@ app.post('/mservices', async function(req, res) {
         Bucket: bucketName,
         Key: 'public/' + zipFile
       };
-      s3.getObject(params, function (err, data) {
+      s3.getObject(params, async function (err, data) {
         if (err) console.log('BUCKET ERROR', err);
-        else fn();
+        else await fn();
       });
     }
     let funcEnvs = {
@@ -728,8 +727,9 @@ app.post('/mservices', async function(req, res) {
     function createFunction () {
       console.log('createFunction')
       let fRuntime = inputs.ServiceRuntime
-      if (fRuntime === 'nodejs') {
+      if (fRuntime === 'nodejs' || fRuntime === 'nodejs8.10') {
         fRuntime = 'nodejs12.x'
+        inputs.ServiceRuntime = fRuntime
       } else if (fRuntime === 'python') {
         fRuntime = 'python3.7'
       }
@@ -782,30 +782,21 @@ app.post('/mservices', async function(req, res) {
                 }) 
               }
             });
-            
           }
         });
     }
-    function updateFunction () {
-        console.log('updateFunction')
-        let params = {
-          FunctionName: functionName,
-          S3Bucket: bucketName,
-          S3Key: 'public/' + zipFile
-        };
-        lambda.updateFunctionCode(params, async function(err, data) {
-          if (err) console.error(err);
-          else{
+    async function updateFunction () {
+            console.log('updateFunction')
             let handlerName = 'mservice_main.handler' 
-            // console.log('updateFunction continue')
             if (inputs.ServiceRuntime.includes('nodejs') === false) {
               handlerName = 'mservice_main.handler'
             }
             // console.log('updateFunction handlerName: ', handlerName)
             // console.log('updateFunction runtime: ', inputs.ServiceRuntime)
             let fRuntime = inputs.ServiceRuntime
-            if (fRuntime === 'nodejs') {
+            if (fRuntime === 'nodejs' || fRuntime === 'nodejs8.10') {
               fRuntime = 'nodejs12.x'
+              inputs.ServiceRuntime = fRuntime
             } else if (fRuntime === 'python') {
               fRuntime = 'python3.7'
             }
@@ -850,6 +841,11 @@ app.post('/mservices', async function(req, res) {
                 Handler: handlerName,
                 Runtime: fRuntime
               }).promise()
+              await lambda.updateFunctionCode({
+                FunctionName: functionName,
+                S3Bucket: bucketName,
+                S3Key: 'public/' + zipFile
+              }).promise()
               let publishVersionData = await lambda.publishVersion({
                 FunctionName: functionName /* required */
               }).promise()
@@ -871,8 +867,6 @@ app.post('/mservices', async function(req, res) {
             } catch (err) {
               console.log('updateFunction error: ', err)
             }
-          } // end else
-        });
     }
     return true
   }); // create-update-lambda
@@ -1077,6 +1071,14 @@ app.post('/mservices', async function(req, res) {
   let getItemParams = {
     TableName: config.mserviceTableName,
     Key: params
+  }
+  let fRuntime = inputs.ServiceRuntime
+  if (fRuntime === 'nodejs' || fRuntime === 'nodejs8.10') {
+    fRuntime = 'nodejs12.x'
+    inputs.ServiceRuntime = fRuntime
+  } else if (fRuntime === 'python') {
+    fRuntime = 'python3.7'
+    inputs.ServiceRuntime = fRuntime
   }
   // check if the mservice exists and if yes, check the ownership
   dynamodb.get(getItemParams, (err, data) => {

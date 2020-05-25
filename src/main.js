@@ -5,6 +5,7 @@ import Vuex from 'vuex'
 import underscore from 'vue-underscore'
 import App from './App'
 import Root from './Root'
+import NewThing from './components/NewThing'
 import AppFooter from './components/AppFooter'
 import Sidebar from './components/Sidebar'
 import DocSidebar from './components/DocSidebar'
@@ -31,7 +32,7 @@ import SocialSharing from 'vue-social-sharing'
 import VueStripeCheckout from 'vue-stripe-checkout'
 import VueQrcodeReader from 'vue-qrcode-reader'
 import { library, dom } from '@fortawesome/fontawesome-svg-core'
-import { faCoffee, faHeart, faTrashAlt, faPhone, faEnvelope, faInfoCircle, faInfo, faCube, faSync, faAngleDoubleRight, faArrowAltCircleRight, faArrowAltCircleLeft, faEdit, faBullseye } from '@fortawesome/free-solid-svg-icons'
+import { faCoffee, faHeart, faTrashAlt, faPhone, faEnvelope, faInfoCircle, faInfo, faCube, faSync, faAngleDoubleRight, faArrowAltCircleRight, faArrowAltCircleLeft, faEdit, faBullseye, faCopy } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faGithub, faSlack, faFacebookF, faFacebook, faLinkedin, faTwitter, faGooglePlus, faLine, faWeibo, faWeixin } from '@fortawesome/free-brands-svg-icons'
 // https://fontawesome.com/icons?d=gallery
@@ -169,7 +170,7 @@ Vue.use(LiquorTree)
 // window.LOG_LEVEL = 'DEBUG'
 // Amplify.Logger.LOG_LEVEL = 'DEBUG'
 
-library.add(faBullseye, faEdit, faCoffee, faHeart, faTrashAlt, faPhone, faEnvelope, faInfoCircle, faInfo, faCube, faSync, faAngleDoubleRight, faArrowAltCircleRight, faArrowAltCircleLeft)
+library.add(faCopy, faBullseye, faEdit, faCoffee, faHeart, faTrashAlt, faPhone, faEnvelope, faInfoCircle, faInfo, faCube, faSync, faAngleDoubleRight, faArrowAltCircleRight, faArrowAltCircleLeft)
 library.add(faGithub, faSlack, faFacebook, faFacebookF, faLinkedin, faTwitter, faGooglePlus, faLine, faWeibo, faWeixin)
 
 // require more codemirror resource...
@@ -355,7 +356,7 @@ async function onAuthEvent (payload) {
     let credentials = await authCredentialsPromise
     // console.log('credentials: ', credentials)
     const identityId = credentials._identityId
-    await atHelper.allowLoginIdentityUseIoT(identityId)
+    await atHelper.allowLoginIdentityUseIoT(identityId, store.getters.userId, store.getters.profile)
     // console.log('jump to mythings')
     eventBus.$emit('login')
     router.replace({ name: 'mymicroservices' })
@@ -370,6 +371,7 @@ Vue.component('at-sidebar', Sidebar)
 Vue.component('doc-sidebar', DocSidebar)
 Vue.component('spinner', Spinner)
 Vue.component('at-footer', AppFooter)
+Vue.component('at-new-thing', NewThing)
 Vue.use(underscore)
 
 Vue.config.productionTip = false

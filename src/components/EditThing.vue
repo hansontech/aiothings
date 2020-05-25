@@ -6,7 +6,7 @@
              ref="modalReturnConfirmRef"
              @ok="returnDiscardChangesOk"
              @cancel="returnCancel">
-             <h5>Discard changes and return?</h5>
+             <h5>Discard the changes and return?</h5>
       </b-modal>
       <b-row align-v="center" style="border-bottom: 1px solid grey; padding-bottom: 5px; margin-bottom: 5px;">
         <b-col align="start">
@@ -16,12 +16,19 @@
           <!-- <b-button v-if="!isShowEdit" v-b-popover.hover.bottom="'toggle to edit mode'" v-b-toggle.collapseEdit.collapseShow variant="info" @click="isChangedNotSaved = false">Edit</b-button>
           <b-button v-if="isShowEdit" v-b-popover.hover.bottom="'toggle to display only'" v-b-toggle.collapseEdit.collapseShow variant="info">Show</b-button> -->
           <b-button variant="info" @click="updateThing()">Update</b-button>
-          <b-button v-if="isEdgeAbleToDeploy" v-b-popover.hover.bottom="'To deploy, make sure the edge device is online and edge daemon is running'" variant="info" @click="deployEdge()">Edge Deploy</b-button>
+          <b-button v-if="isEdgeAbleToDeploy" v-b-popover.hover.bottom="'To deploy, make sure the edge device is online and edge daemon is running'" :variant="(isDeployed) ? 'success' : 'info'" @click="deployEdge()">Edge Deploy</b-button>
           <b-button v-if="isEdgeAbleToDelete" variant="info" @click="deleteEdge()">Delete Edge</b-button>
           <b-button variant="dark" @click="backHome()">Return<sub><b-badge class="ml-1" variant="warning" v-if="isChangedNotSaved">&nbsp;</b-badge></sub></b-button>
         </b-col>
       </b-row>
-      <spinner v-if="isDeploying === true" size="medium" />
+      <b-row v-if="isDeploying === true">
+        <b-col align="center">
+          <b-button variant="primary" disabled>
+            <b-spinner small type="grow"></b-spinner>
+            Edge Deploying... {{deployingStatus}}
+          </b-button>        
+        </b-col>
+      </b-row>
       <!-- 
       <b-row align-v="center" class="mt-3">
         <b-col sm align="start">
@@ -60,7 +67,7 @@
               <h5 style="display: inline;">User ID</h5>
             </b-col>
             <b-col sm="9">
-              <h6 style="display: inline;"><code>{{$store.getters.userId}}</code></h6>
+              <h6 style="display: inline;"><code>{{thing.UserId}}</code></h6>
             </b-col>
           </b-row>
           <b-row class="mt-2">
@@ -88,6 +95,7 @@
             </b-col>
             <b-col sm="9">
                 <b-button style="display: inline;" id="downloadButton" variant="info" @click="downloadCert()">Download</b-button>
+                <b-button variant="light" v-b-toggle.collapseSetup>?</b-button>
             </b-col>
           </b-row>
           <spinner v-if="isDownloading === true" size="medium" />
@@ -106,6 +114,7 @@
                     <b-row><b-col><span class="text-danger">root-CA.crt</span></b-col></b-row><b-row><b-col>Certificate issued by CA (Certificate Authority) used to certify AIoThings. <br /></b-col></b-row>
           </b-popover>
           -->
+         <b-collapse id="collapseSetup" class="mt-2">
           <b-row class="mt-2">
             <b-col>
               <b-card>
@@ -155,6 +164,23 @@
                   <b-col><code>JSON</code><br /> </b-col>
                 </b-row>
               </b-card>
+            </b-col>
+          </b-row>
+         </b-collapse>
+         <b-row  v-b-popover.hover="'When the device is disconnected, send notification emails to the owner'" align-v="center" class="mt-3">
+            <b-col sm="3">
+                <h5 style="display: inline;">Notification</h5>
+            </b-col>
+            <b-col sm="9">
+                   <b-form-checkbox
+                    id="checkbox-alert-enable"
+                    v-model="thing.AlertEnabled"
+                    name="checkbox-alert-enable"
+                    :value="true"
+                    :unchecked-value="false"
+                  >
+                    <h5>Alert {{(thing.AlertEnabled) ? 'enabled' : 'disabled' }}</h5>
+                  </b-form-checkbox>           
             </b-col>
           </b-row>
         </b-tab>
@@ -220,7 +246,7 @@
                       </b-row>
                       <b-row class="mt-1">
                         <b-col sm="4">
-                          Memory size
+                          Memory size (KB)
                         </b-col>
                         <b-col sm="8">
                           <b-form-input v-model="ggFunction.FunctionConfiguration.MemorySize" type="number" placeholder=">= 32000 in KB">
@@ -461,6 +487,7 @@
                             <li>GPUs (for example, /dev/nvidia0).</li>
                             <li>Cameras (for example, /dev/video0).</li>
                         </ul>
+                        ggc_group is the default User Group name to access the device. Otherwise, need assign the Group Owner of the device.
                         </p>
                       </small>
                     </b-row> 
@@ -509,6 +536,9 @@
 location is outside of the container that the function runs in. The path can't start with /sys.</p>
                       <p>Destination path is the absolute path of the resource in the Lambda namespace. This location is
 inside the container that the function runs in.</p>
+                      <p>
+                      ggc_group is the default User Group name to access the path. Otherwise, need assign the Group Owner of the path. 
+                      </p>
                       </small>
                     </b-row> 
                   </b-container>
@@ -894,8 +924,8 @@ inside the container that the function runs in.</p>
                           <a v-b-tooltip.hover="'that enable secure communications between AWS IoT'">security certificates</a> and <a v-b-tooltip.hover="'that contains configuration information specific to your AWS IoT Greengrass core and the AWS IoT endpoint.'">the config.json file of this device as a zipped setup file.</a>
                         </li>
                         <li>Move and decompress the downloaded files of [1] amd [2] to the Edge device, under the same path.
-                          <pre class="at-code"><code>sudo tar -xzvf greengrass-OS-architecture-1.7.0.tar.gz -C /
-sudo unzip thing-id-setup.zip -d /greengrass</code></pre>
+                          <pre class="at-code"><code>sudo tar -xzvf greengrass-OS-architecture-x.x.x.tar.gz -C /
+sudo unzip thing_id-edge-setup.zip -d /greengrass</code></pre>
                         <li>Start AWS IoT Greengrass on your core device. 
                           <pre class="at-code"><code>cd /greengrass/ggc/core/
 sudo ./greengrassd start</code></pre>
@@ -929,11 +959,11 @@ import config from '../config'
 
 export default {
   name: 'device',
-  props: ['thingIndex'], // VUE reference https://router.vuejs.org/guide/essentials/passing-props.html
+  props: ['thingBody', 'thingIndex'], // VUE reference https://router.vuejs.org/guide/essentials/passing-props.html
   data: function () {
     return {
-      thing: {},
       /* edgeResources: [], */
+      thing: {},
       errorMessage: {header: '', message: ''},
       funcFilterString: '',
       thingBackup: null,
@@ -941,6 +971,8 @@ export default {
       isDownloading: false,
       isEdgeUpdating: false,
       isDeploying: false,
+      deployingStatus: '',
+      isDeployed: false,
       isEditDesc: true,
       thingDesc: null,
       thingName: null,
@@ -1246,6 +1278,10 @@ export default {
       return unselectedList
     },
     unselectedMicroservices () {
+      if (this.services === null) {
+        return null
+      }
+      // console.log('services: ', this.services)
       let selectedSet = new Set()
       for (let edgeFunction of this.edgeFunctions) {
         selectedSet.add(this.edgeFunctionArnToName(edgeFunction).toLowerCase())
@@ -1316,7 +1352,7 @@ export default {
   async mounted () {
     await this.reloadThing()
     console.log('edit thing: ', this.thing)
-    // this.services = this.$store.getters.mservices
+    this.services = this.$store.getters.mservices
     if (this.services === null) {
       await atHelper.reloadServices()
       this.services = this.$store.getters.mservices
@@ -1326,7 +1362,9 @@ export default {
       await atHelper.reloadFavoriteServices()
       this.favoriteServices = this.$store.getters.favoriteMservices
     }
+    console.log('thing: ', this.thing)
     this.isEditDesc = false
+    this.checkDeployStatus('')
   },
   watch: {
     /* right way to force rendering (refresh)
@@ -1339,8 +1377,13 @@ export default {
         if (this.thingBackup !== null) {
           let compareOld = this.$_.omit(this.thingBackup, ['edgeData'])
           let compareNew = this.$_.omit(newThing, ['edgeData'])
+          if (compareOld.EdgeDefinition === undefined && compareNew !== undefined) {
+            delete compareNew.EdgeDefinition
+          }
           let isEqual = this.$_.isEqual(compareOld, compareNew)
           if (isEqual === false && this.isChangedNotSaved !== true) {
+            console.log('new: ', compareNew)
+            console.log('old: ', compareOld)
             this.isChangedNotSaved = true
           }
         }
@@ -1371,23 +1414,35 @@ export default {
     },
     thingDesc: function (newDesc, oldDesc) {
       if (newDesc !== oldDesc && this.isChangedNotSaved !== null && oldDesc !== null) {
+        console.log('thingDesc changed')
         this.isChangedNotSaved = true
       }
     },
     thingName: function (newName, oldName) {
-      console.log('thingName changed: ', oldName)
       if (newName !== oldName && this.isChangedNotSaved !== null && oldName !== null) {
         console.log('thingName changed now')
         this.isChangedNotSaved = true
       }
+    },
+    isDeploying: function (newV, oldV) {
+      console.log('isDeploying changed')
+      if (newV === false) this.deployingStatus = ''
+      this.$forceUpdate()
     }
    },
   methods: {
     async reloadThing () {
-      let index = this.thingIndex
-      this.thing = this.$store.getters.things[index]
+      if (this.thingIndex >= 0) {
+        let index = this.thingIndex
+        this.thing = this.$store.getters.things[index]
+      } else {
+        this.thing = this.thingBody
+      }
       this.thingDesc = this.thing.ThingDesc
       this.thingName = this.thing.ThingName
+      if (this.thing.AlertEnabled === undefined) {
+        this.thing.AlertEnabled = false
+      }
       if (this.thing !== null && this.thing.hasOwnProperty('EdgeData')) {
         // this.thing.EdgeData
         try {
@@ -1591,13 +1646,18 @@ export default {
         this.$delete(this.thing, 'EdgeDefinition')
         this.$delete(this.thing, 'EdgeData')
         // TODO update thing
-        let storedThings = this.$store.getters.things
-        storedThings[this.thingIndex] = this.thing
-        this.$store.commit('setThings', storedThings)
+        this.updateEdgeToStoredThing()
       } catch (err) {
         console.log(err)
       }
       this.$forceUpdate()
+    },
+    updateEdgeToStoredThing () {
+      if (this.thingIndex >= 0) {
+        let storedThings = this.$store.getters.things
+        storedThings[this.thingIndex] = this.thing
+        this.$store.commit('setThings', storedThings)
+      }
     },
     confirmAddEdgeService (service) {
       console.log('service: ', service)
@@ -1641,7 +1701,7 @@ export default {
       this.thing.EdgeDefinition.subscriptionDefinition.Definition.Subscriptions.push({
           Id: 'subTo_' + functionName,
           Source: 'cloud',
-          Subject: '#',
+          Subject: 'aiot/' + this.thing.UserId + '/' + this.thing.ThingId + '/#',
           Target: newFunction.FunctionArn
       })
       this.thing.EdgeDefinition.subscriptionDefinition.CreationTimestamp = '0'
@@ -1666,9 +1726,7 @@ export default {
             this.$set(this.thing, 'EdgeDefinition', result.edgeDefinition)
             this.$set(this.thing, 'EdgeData', result.edgeData)
             // update to current cached things array
-            let storedThings = this.$store.getters.things
-            storedThings[this.thingIndex] = this.thing
-            this.$store.commit('setThings', storedThings)
+            this.updateEdgeToStoredThing()
           }
         } catch (err) {
           console.log('uploadEdge error: ', err)
@@ -1685,61 +1743,94 @@ export default {
         let body = {}
         body.edgeData = this.thing.EdgeData
         try {
+          this.isDeploying = true
+          this.deployingStatus = 'Requesting'
           const deployResult = await API.post('thingApi', '/edge/deploy', { body })
           console.log('deploy result: ', deployResult)
+          this.isDeploying = false
           if (deployResult.DeploymentStatus === 'Failure') {
             this.$refs.deployErrorModalRef.show()
           } else if (deployResult.DeploymentStatus === 'Success') {
+            this.isDeployed = true
             console.log('Deployment succeeded')
           } else {
-            /*
-            let that = this
-            let edgeData = JSON.stringify(that.thing.EdgeData)
-            let timer = setInterval(async function () {
-                this.isDeploying = true
-                try {
-                  const statusResult = await API.get('thingApi', '/edge/deploy/status', {
+            this.checkDeployStatus(deployResult.DeploymentId)
+          }
+        } catch (err) {
+          this.$refs.deployErrorModalRef.show()
+          this.isDeploying = false
+          console.log(err)
+        }
+      } // end if
+    },
+    checkDeployStatus (deployId) {
+      // console.log('checkDeployStatus entered: ', this.thing)
+      this.isDeployed = false
+      if (this.thing.EdgeData === undefined) {
+        return
+      }
+      try {
+          let that = this
+          let edgeData = JSON.stringify(that.thing.EdgeData)
+          that.isDeploying = true
+          that.deployingStatus = 'Checking'
+          let timer = setInterval(async function () {
+              try {
+                  const statusResult = await API.get('thingApi', '/edge/deploy', {
                     'queryStringParameters': {
-                        deployId: deployResult.DeploymentId,
+                        deployId: deployId,
                         edgeData: edgeData
                     }
                   })
+                  if (statusResult.hasOwnProperty('error')) {
+                    console.log('deploy error returned: ', statusResult.error)
+                    that.isDeploying = false
+                    clearInterval(timer)
+                    return
+                  }
+                  if (statusResult.deployStatus === undefined || statusResult.deployStatus === null) {
+                    console.log('deploy status with null or no data')
+                    that.isDeploying = false
+                    clearInterval(timer)
+                    return
+                  }
                   let deployStatus = statusResult.deployStatus
                   console.log('deploy status: ', deployStatus)
                   console.log('deploy status value: ', deployStatus.DeploymentStatus)
+                  that.deployingStatus = deployStatus.DeploymentStatus
+                  that.$forceUpdate()
                   switch (deployStatus.DeploymentStatus) {
                     case 'Pending':
                     case 'InProgress':
+                      // continue to check
                       break
                     case 'Success':
-                      this.isDeploying = false
+                      that.isDeploying = false
+                      that.isDeployed = true
                       clearInterval(timer)
                       break
                     case 'Failure':
-                      this.isDeploying = false
+                      that.isDeploying = false
                       that.$refs.deployErrorModalRef.show()
                       clearInterval(timer)
                       break
                     default:
-                      this.isDeploying = false
+                      that.isDeploying = false
                       that.$refs.deployErrorModalRef.show()
                       clearInterval(timer)
                       break
                   }
-                } catch (err) {
-                  console.log(err)
-                  this.isDeploying = false
-                  that.$refs.deployErrorModalRef.show()
-                  clearInterval(timer)
-                }
-            }, 3000) // in ms, run every 3 seconds
-            */
-          } // if after successful deployment
-        } catch (err) {
-          this.$refs.deployErrorModalRef.show()
-          console.log(err)
-        }
-      } // end if
+              } catch (err) {
+                console.log('deploy status: ', err)
+                that.isDeploying = false
+                that.$refs.deployErrorModalRef.show()
+                clearInterval(timer)
+              }
+          }, 6000) // in ms, run every 6 seconds
+      } catch (err) {
+        this.$refs.deployErrorModalRef.show()
+        console.log(err)
+      }
     },
     uploadModelFile (file) {
       let reader = new window.FileReader() // if window is not used it says File READER is not defined
@@ -2001,12 +2092,13 @@ export default {
         this.thing.ThingDesc = this.thingDesc
         this.thing.ThingName = this.thingName
         // console.log('Thing: ', this.thing)
-        const userId = this.$store.getters.userId
+        const userId = this.thing.UserId
         const certId = this.thing.CertId
         const thingId = this.thing.ThingId
         const name = this.thing.ThingName
         const desc = this.thing.ThingDesc
-        const body = { userId, certId, thingId, name, desc }
+        const alertEnabled = this.thing.AlertEnabled
+        const body = { userId, certId, thingId, name, desc, alertEnabled }
         const result = await API.post('thingApi', '/things', { body })
         console.log('updateThing: result: ', result)
         this.$store.dispatch('replaceThing', this.thing)

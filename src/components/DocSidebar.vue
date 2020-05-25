@@ -65,7 +65,9 @@ export default {
                         }
                       ]
                 },
-                { 'text': 'Device JIT provisioning', data: { 'link': 'DocThingProvisioning' } }
+                { 'text': 'Device Provisioning', data: { 'link': 'DocThingProvisioning' } },
+                { 'text': 'Board Support Package', data: { 'link': 'DocThingBSP' } },
+                { 'text': 'Event Notification', data: { 'link': 'DocThingNotification' } }
               ]
             },
             { 'text': 'Microservices',

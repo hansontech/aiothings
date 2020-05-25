@@ -3,15 +3,20 @@
     <div>
        <b-row align-v="center" class="at-bottombar">
           <b-col align="start">
-            <h3>New IoT Device</h3>
+            <h4>New IoT Thing</h4>
           </b-col>
           <b-col sm="auto" align="end" >
-            <b-button variant="success" @click="$router.go(-1)">Cancel</b-button>
+            <b-button variant="success" @click="cancelAndReturn()">Cancel</b-button>
             <b-button variant="success" @click="createThing()"
                   v-b-popover.hover.bottom="'Create new thing'">
                     Create
             </b-button>
           </b-col>
+      </b-row>
+      <b-row v-if="isLoading" class="mb-2">
+        <b-col align="center">
+          <spinner  size="medium" />
+        </b-col>
       </b-row>
       <b-modal ref="downloadModal" hide-footer>
               <div class="d-block text-center">
@@ -34,7 +39,7 @@
       </b-row>
     </div>
     <div class="mt-3">
-      <p class="h4">Thing Name</p>
+      <p class="h5">Thing Name</p>
     </div>
     <div>
       <b-form-input class="at-border" v-model="thingNameTag" placeholder="thing's name"></b-form-input>
@@ -60,7 +65,20 @@
         <b-col>
           <vue-markdown class="at-desc-display">{{thingDesc}}</vue-markdown>
         </b-col>
-    </b-row> 
+    </b-row>
+    <b-row  align-v="center" class="mt-4">
+      <b-col>
+            <b-form-checkbox
+              id="checkbox-alert-enable"
+              v-model="alertEnabled"
+              name="checkbox-alert-enable"
+              :value="true"
+              :unchecked-value="false"
+            >
+            <h5>Alert {{(alertEnabled) ? 'enabled' : 'disabled' }}</h5>
+            </b-form-checkbox>           
+      </b-col>
+    </b-row>
     <div class="mt-3">
     </div>  
   </div>
@@ -73,7 +91,7 @@ import atHelper from '../aiot-helper'
 
 export default {
   name: 'device',
-  props: ['description'],
+  props: ['deviceGroupName', 'deviceId'],
   data: function () {
     return {
       activeMenu: 'app',
@@ -81,16 +99,19 @@ export default {
       thing: null,
       guess: 123,
       what: 0,
-      loading: false,
+      isLoading: false,
       thingDesc: '',
       thingNameTag: '',
+      alertEnabled: false,
       showDescCannotEmptyAlert: false,
       isEditDesc: true
     }
   },
   computed: {},
   created () {
-    console.log('new thing')
+    console.log('new thing: ', this.$route.query)
+    console.log('deviceGroupName: ', this.deviceGroupName)
+    console.log('deviceId: ', this.deviceId)
   },
   methods: {
     async createThing () {
@@ -101,11 +122,18 @@ export default {
       const userId = this.$store.getters.userId
       const desc = this.thingDesc
       const thingNameTag = this.thingNameTag
+      const alertEnabled = this.alertEnabled
+      let deviceGroupName = ''
+      if (this.deviceGroupName !== undefined) {
+        deviceGroupName = this.deviceGroupName
+      }
       if (userId !== null) {
-        const body = { userId, desc, thingNameTag }
+        this.isLoading = true
+        const body = { userId, desc, thingNameTag, deviceGroupName, alertEnabled }
         const result = await API.post('thingApi', '/things', { body })
         console.log('result: ', result)
         this.thing = result
+        this.isLoading = false
         this.showDownloadModal()
         // popup for save certificates and keys
       }
@@ -124,7 +152,18 @@ export default {
     },
     async returnSuccess () {
       await atHelper.reloadThings()
-      this.$router.go(-1)
+      this.cancelAndReturn()
+    },
+    cancelAndReturn () {
+      if (this.deviceGroupName !== undefined && this.deviceId !== undefined) {
+        // this.$router.replace({name: 'mythings'})
+        let deviceGroupName = this.deviceGroupName
+        let deviceId = this.deviceId
+        let thing = this.thing
+        this.$emit('thingCreated', {deviceGroupName, deviceId, thing})
+      } else {
+        this.$router.go(-1)
+      }
     }
   }
 }

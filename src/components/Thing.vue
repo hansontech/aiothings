@@ -3,7 +3,7 @@
     <b-alert :show="loading" variant="info">Loading...</b-alert>
     <b-row>
       <b-col>
-        <div class="embed-responsive embed-responsive-16by9">
+        <div class="embed-responsive ">
           <!-- <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/v64KOxKVLVg" allowfullscreen></iframe>
             <iframe class="embed-responsive-item" src="https://www.google.com" allowfullscreen></iframe>  -->
           <iframe class="embed-responsive-item" :src="nodeRedUrl" allowfullscreen></iframe>

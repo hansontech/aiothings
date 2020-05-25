@@ -48,6 +48,35 @@ export default {
       console.log('export service error: ', err)
     }
   },
+  async exportDeviceGroupCert(deviceGroup) {
+    let zip = new JSZip()
+    let thingData = deviceGroup.Thing
+    let deviceGroupName = deviceGroup.DeviceGroupName
+    let privateKeyPath = 'aiot-' + deviceGroupName + '-private.key'
+    let certificatePath = 'aiot-' + deviceGroupName  + '-certificate.crt'
+    let rootCAPath = 'aiot-root-CA.crt'
+    let folderPath = '/root/aiothings/'
+    let configFileName = 'aiotConfig.json'
+    try {
+      let zipFolder = zip.folder('aiothings')
+      zipFolder.file(privateKeyPath, thingData.PrivateKey)
+      zipFolder.file(certificatePath, thingData.CertPem)
+      zipFolder.file(rootCAPath, thingData.RootCA)
+      let configFileContent = {}
+      configFileContent.thingName = ''
+      configFileContent.endpoint = config.awsIotHost
+      configFileContent.certificatePath = folderPath + certificatePath
+      configFileContent.privateKeyPath = folderPath + privateKeyPath
+      configFileContent.rootCAPath = folderPath + rootCAPath
+      let configFileContentStr = JSON.stringify(configFileContent, null, "\t")
+      zipFolder.file(configFileName, configFileContentStr)
+      let zipContent = await zip.generateAsync({type:"blob"})
+      // const userId = store.getters.userId
+      FileSaver.saveAs(zipContent, 'aiot-' + deviceGroup.DeviceGroupName + '.zip')
+    } catch (err) {
+      console.log('export device group cert error: ', err)
+    }
+  },
   async exportServiceToZip (zipFolder, ms, isLoadCode) {
     /* mservice header file */
     let serviceHeader = ''
@@ -230,16 +259,9 @@ export default {
     let dataText = await dataResponse.text()
     return dataText
    },
-  async allowUseIoT () {
-    let authCredentialsPromise = Auth.currentCredentials()
-    authCredentialsPromise.catch(err => console.log('get current credentials err', err))
-    let credentials = await authCredentialsPromise
-    // console.log('credentials: ', credentials)
-    const identityId = credentials._identityId
-    await atHelper.allowLoginIdentityUseIoT(identityId)
-  },
-  async allowLoginIdentityUseIoT (identityId) {
-    const body = { identityId }
+  async allowLoginIdentityUseIoT (identityId, userId, profile) {
+    console.log('profile: ', profile)
+    const body = { identityId, userId, profile }
     const result = await API.post('thingApi', '/iot-allow', { body })
     console.log('allowLoginIdentityUseIoT: ', result)
   },
@@ -298,6 +320,29 @@ export default {
       store.commit('setApis', resultJson.result)
     }
   },
+  async reloadAuthApplications () {
+    const userId = store.getters.userId
+    const resultJson = await API.get('apiApi', '/apps', {
+          'queryStringParameters': {
+               'userId': userId
+          }
+    })
+    if (resultJson.error === null && resultJson.result !== undefined) {
+      store.commit('setApps', resultJson.result)
+    }
+  },
+  async reloadDeviceGroups () {
+    const userId = store.getters.userId
+    const result = await API.get('thingApi', '/device-groups', {
+          'queryStringParameters': {
+               'userId': userId
+          }
+    })
+    // let things = JSON.parse(result)
+    let deviceGroups = result
+    console.log('device groups: ', deviceGroups)
+    store.commit('setDeviceGroups', deviceGroups)
+  },
   async reloadThings () {
     const userId = store.getters.userId
     const result = await API.get('thingApi', '/things', {
@@ -307,8 +352,10 @@ export default {
     })
     // let things = JSON.parse(result)
     let things = result
+    // console.log('things:: ', things)
     store.commit('setThings', things)
   },
+  /*
   async reloadSolutions () {
     let userId = store.getters.userId
     if (userId === null) {
@@ -321,6 +368,7 @@ export default {
     })
     // store.commit('setThings', JSON.parse(result))
   },
+  */
   downloadFile: function (fileName, fileData) {
     // console.log('download File: ', fileName, ': ', fileData)
     let blob = new Blob([fileData], { type: 'text/plain' })

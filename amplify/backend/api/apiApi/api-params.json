@@ -4,9 +4,24 @@
             "name": "/apis",
             "lambdaFunction": "apiFunction",
             "privacy": {
-                "protected": true,
-                "auth": "rw",
-                "unauth": "rw"
+                "private": true,
+                "auth": [
+                    "/POST",
+                    "/GET",
+                    "/DELETE"
+                ]
+            }
+        },
+        {
+            "name": "/apps",
+            "lambdaFunction": "apiFunction",
+            "privacy": {
+                "private": true,
+                "auth": [
+                    "/POST",
+                    "/GET",
+                    "/DELETE"
+                ]
             }
         },
         {
@@ -14,8 +29,12 @@
             "lambdaFunction": "apiFunction",
             "privacy": {
                 "protected": true,
-                "auth": "rw",
-                "unauth": "rw"
+                "auth": [
+                    "/GET"
+                ],
+                "unauth": [
+                    "/GET"
+                ]
             }
         }
     ],
@@ -27,8 +46,8 @@
         }
     ],
     "privacy": {
-        "auth": 2,
-        "unauth": 2,
+        "auth": 3,
+        "unauth": 1,
         "authRoleName": "aiothings-20190217141129-authRole",
         "unAuthRoleName": "aiothings-20190217141129-unauthRole"
     },
@@ -42,5 +61,5 @@
             ]
         }
     ],
-    "uuid": "096d5df5"
+    "uuid": "556d12f5"
 }

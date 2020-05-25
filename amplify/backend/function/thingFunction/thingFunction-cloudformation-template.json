@@ -47,6 +47,9 @@
 					"Variables": {
 						"ENV": {
 							"Ref": "env"
+						},
+						"REGION": {
+							"Ref": "AWS::Region"
 						}
 					}
 				},
@@ -56,11 +59,11 @@
 						"Arn"
 					]
 				},
-				"Runtime": "nodejs8.10",
+				"Runtime": "nodejs10.x",
 				"Timeout": "25",
 				"Code": {
 					"S3Bucket": "aiothings-20190217141129-deployment",
-					"S3Key": "amplify-builds/thingFunction-5a7178745a343643714e-build.zip"
+					"S3Key": "amplify-builds/thingFunction-7862753762424f543653-build.zip"
 				}
 			}
 		},

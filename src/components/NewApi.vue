@@ -353,9 +353,11 @@ export default {
 
         let mservice = this.apiService // mserviceFound[0] // must exist
         this.api.Handler = this.apiService.ServiceName
+        console.log('new api creating:..')
         const result = await API.post('apiApi', '/apis', { body: { api: this.api, handler: mservice } })
         if (result.error === null) {
           this.api = result.result
+          console.log('new API created: ', result)
         }
         this.isCreating = false
         this.$refs.createdNotifyModal.show()

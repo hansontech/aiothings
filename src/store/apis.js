@@ -1,19 +1,29 @@
 
 export default {
   state: {
-    apis: null
+    apis: null,
+    apps: null
   },
   getters: {
-    apis: state => state.apis
+    apis: state => state.apis,
+    apps: state => state.apps
    },
   mutations: {
     setApis: (state, apis) => {
       state.apis = apis
+    },
+    setApps: (state, apps) => {
+      if (apps === null) {
+        state.apps = []
+      } else {
+        state.apps = apps
+      }
     }
   },
   actions: {
     resetLoadedApisCaches: function (context) {
       context.commit('setApis', null)
+      context.commit('setApps', null)
     },
     replaceApi: function (context, newApi) {
       let apis = context.getters.apis
@@ -27,6 +37,19 @@ export default {
       })
       apis = newList
       context.commit('setApis', apis)
+    },
+    replaceApp: function (context, newApp) {
+      let apps = context.getters.apps
+      let newList = apps.map(ms => {
+        if (ms.ClientId !== newApp.ClientId) {
+          return ms
+        } else {
+          let modifiedApp = Object.assign({}, newApp)
+          return modifiedApp
+        }
+      })
+      apps = newList
+      context.commit('setApps', apps)
     }
   }
 }

@@ -36,8 +36,86 @@ let findDataBySerialNumber = ( values,callback ) => {
       });
 }
 
+let deleteAlert = async (thingId) => {
+  let iot = new AWS.Iot();
+  let iotTopicRuleName = thingId.replace(/\-/g, '_') + '_alert_rule';
+  try {
+    await iot.deleteTopicRule({
+      ruleName: iotTopicRuleName, /* required */
+    }).promise()
+  } catch (err) {
+    console.log('deleteTopicRule warn: ', err);
+  }
+}
+let setAlert = async (userId, thingId, isEnableAlert) => {
+  console.log('enableAlert');
+  let lambda = new AWS.Lambda();
+  let iot = new AWS.Iot();
+  let iotTopicRuleName = thingId.replace(/\-/g, '_') + '_alert_rule';
+  let functionName = config.alertFunctionName
+  try {
+    if (isEnableAlert) {
+      let functionData = await lambda.getFunction({
+        FunctionName: functionName
+      }).promise()
+      let addPermissionPromise = lambda.addPermission({
+        Action: "lambda:InvokeFunction", 
+        FunctionName: functionName,
+        Principal: "iot.amazonaws.com", 
+        StatementId: functionName + "_perm_invoke"
+      }).promise()
+      await addPermissionPromise.catch( function (err) { 
+        console.log('addPermission: warning: ', err); // an error occurred
+      });
+      let theFunctionArn = functionData.Configuration.FunctionArn;
+      let getTopicRulePromise = iot.getTopicRule({
+        ruleName: iotTopicRuleName /* required */
+      }).promise()
+      let ruleData = null
+      ruleData = await getTopicRulePromise.catch (async function (err) {
+        console.log('createTopicRule: ');
+        ruleData = await iot.createTopicRule({
+          ruleName: iotTopicRuleName, /* required */
+          topicRulePayload: { /* required */
+            actions: [ /* required */
+              {
+                lambda: {
+                  functionArn: theFunctionArn /* required */
+                }
+              }
+            ],
+            sql: "SELECT *, topic() AS topic, topic(2) AS sender, topic(3) AS fromWhere FROM '" + "aiot/" + userId + "/" + thingId + "/aiot_event/+'", /* required */
+            // , topic() AS MessageTopic
+            ruleDisabled: false,
+            awsIotSqlVersion: '2016-03-23'
+          }
+        }).promise()
+      })
+      console.log('iot rule created or already exist: ', ruleData)
+      await iot.enableTopicRule({
+        ruleName: iotTopicRuleName /* required */
+      }).promise()
+    } else {
+      await iot.disableTopicRule({
+        ruleName: iotTopicRuleName /* required */
+      }).promise()
+    }
+    /*
+         console.log('replaceTopicRule: ', iotTopicRuleParams);
+         iot.replaceTopicRule(iotTopicRuleParams, function(err, data) {
+           if (err) console.log(err); // an error occurred
+           else{
+             gulp.task('version-update-return')();     
+           }
+         });  
+    */
+  } catch (err) {
+    console.log('setAlert warn: ', err)
+  }
+}
+
 // Put IoT cert info into Dynamodb
-let dbInsertCertinfo = ( userId, certId, thingId, thingNameTag, desc, publicKey, privateKey, callback ) => {
+let dbInsertCertinfo = ( userId, certId, thingId, thingNameTag, desc, publicKey, privateKey, alertEnabled, callback ) => {
   let itemList =  {
     'UserId': userId,
     'CertId': certId,
@@ -45,25 +123,27 @@ let dbInsertCertinfo = ( userId, certId, thingId, thingNameTag, desc, publicKey,
     'ThingName': thingNameTag,
     'ThingDesc': desc,
     'PrivateKey': privateKey,
-    'PublicKey': publicKey
+    'PublicKey': publicKey,
+    'AlertEnabled': alertEnabled
   };
   var params = {
     TableName: Device_TABLE_NAME,
     Item: itemList
   };
   // console.log('db item: ', itemList)
-  dynamoDb.put(params, function(err, data) {
+  dynamoDb.put(params, async function(err, data) {
     if (err) {
       console.log(err);
       callback( err );
     } else {
+      await setAlert(userId, thingId, alertEnabled)
       callback( null, itemList );
     }
   });
 }
 
 // Put IoT cert info into Dynamodb
-let dbUpdateCertinfo = ( userId, iotcert, thingNameTag, desc, callback ) => {
+let dbUpdateCertinfo = ( userId, iotcert, thingNameTag, thingId, desc, alertEnabled, callback ) => {
    
   dynamoDb.update({
     TableName: Device_TABLE_NAME,
@@ -71,17 +151,19 @@ let dbUpdateCertinfo = ( userId, iotcert, thingNameTag, desc, callback ) => {
         'UserId': userId,
         'CertId': iotcert
     },
-    UpdateExpression: 'set ThingDesc = :desc, ThingName = :name',
+    UpdateExpression: 'set ThingDesc = :desc, ThingName = :name, AlertEnabled = :alertEnabled',
     ExpressionAttributeValues:{
         ':desc': desc,
-        ':name': thingNameTag 
+        ':name': thingNameTag,
+        ':alertEnabled': alertEnabled
     },
     ReturnValues:'UPDATED_NEW'
-  }, (err, data) => {
+  }, async (err, data) => {
     if (err) {
       console.log(err);
       callback( err );
     } else {
+      await setAlert(userId, thingId, alertEnabled)
       callback( null, data );
     }
   });
@@ -145,7 +227,7 @@ let dbDeleteEdge = async ( userId, iotcert) => {
 }
 
 // Remove IoT cert of the user from Dynamodb
-let dbDeleteCertinfo = ( userId, iotcert, callback ) => {
+let dbDeleteCertinfo = ( userId, thingId, iotcert, callback ) => {
  
   var params = {
     TableName: Device_TABLE_NAME,
@@ -154,11 +236,12 @@ let dbDeleteCertinfo = ( userId, iotcert, callback ) => {
       'CertId': iotcert
     }
   };
-  dynamoDb.delete(params, function(err, data) {
+  dynamoDb.delete(params, async function(err, data) {
     if (err) {
       console.log('dynamoDb delete: error: ', err);
       callback( err );
     } else {
+      await deleteAlert(thingId)
       callback( null,data );
     }
   });
@@ -171,13 +254,15 @@ let dbListCertinfo = ( userId, callback ) => {
   var params = {
     TableName: Device_TABLE_NAME,
     KeyConditionExpression: '#userid = :userid',
+    FilterExpression: 'IsDeviceGroup <> :isDeviceGroup',
     ExpressionAttributeNames:{
         '#userid': 'UserId'
     },
     ExpressionAttributeValues: {
-        ':userid': userId
+        ':userid': userId,
+        ':isDeviceGroup': true
     },
-    ProjectionExpression: "ThingName, ThingDesc, ThingId, CertId, UserId, EdgeData, ThingTimeZone"
+    ProjectionExpression: "ThingName, ThingDesc, ThingId, CertId, UserId, EdgeData, ThingTimeZone, AlertEnabled"
   };
 
   dynamoDb.query(params, function(err, data) {
@@ -213,7 +298,7 @@ let dbGetCertinfo = async ( userId, iotcert, callback ) => {
         callback(err)
     } else {
         console.log('getCertinfo: Query succeeded.');
-        let dataJson = data.Items
+        let dataJson = data.Items[0]
         callback( null, dataJson );
     }
   });  
@@ -291,8 +376,121 @@ let iotPolicyTemplate = {
     }
   ]
 }
+
+let iotProvisioningPolicyTemplate = {
+  "Version": "2012-10-17",
+  "Statement": [
+      {
+          "Effect": "Allow",
+          "Action": ["iot:Connect"],
+          "Resource": "*"
+      },
+      {
+          "Effect": "Allow",
+          "Action": ["iot:Publish","iot:Receive"],
+          "Resource": [
+              "arn:aws:iot:REGION_NAME:ACCOUNT_ID:topic/aiot/system/*/certificates/*"
+          ]
+      },
+      {
+          "Effect": "Allow",
+          "Action": "iot:Subscribe",
+          "Resource": [
+              "arn:aws:iot:REGION_NAME:ACCOUNT_ID:topicfilter/aiot/system/+/certificates/*"
+          ]
+      }
+  ]
+}
+
+let applyDeviceGroupCert = ( userId, deviceGroupName, callback) => {
+  AWS.config.update({region: config.region});
+  var iot = new AWS.Iot();
+  var params = {
+    setAsActive: true
+  };
+  // Create cert
+  iot.createKeysAndCertificate(params, async function(err, certData) {
+    // console.log(certData);
+    if (err){
+      console.log(err, err.stack); // an error occurred
+      callback(err)
+      return
+    } 
+    // else{
+    try {
+      // let datetime = (new Date()).getTime()
+      // console.log('applyThingCert: certData: ', certData)
+      //let thingId = userId + '_' + datetime
+      let thingId = userId + '_device_group_' + deviceGroupName // 2020/01 
+      let policyName = userId + '_device_group_' + deviceGroupName
+      // Create IoT Policy for asbove cert
+      let sts = new AWS.STS()
+      let stsData = await sts.getCallerIdentity({}).promise()
+      let accountId = stsData.Account
+      iotPolicyTemplateStr = JSON.stringify(iotProvisioningPolicyTemplate)
+      iotPolicyTemplateStr = iotPolicyTemplateStr.replace(/ACCOUNT_ID/g, accountId)
+      iotPolicyTemplateStr = iotPolicyTemplateStr.replace(/REGION_NAME/g, config.region)
+      let iotPolicy = JSON.parse(iotPolicyTemplateStr)
+      // console.log('iotPolicy: ', iotPolicy)
+      await iot.createPolicy({
+        policyDocument: iotPolicyTemplateStr, /* required */
+        policyName: policyName /* required */
+      }).promise().catch(function(err) {
+        console.log('warning: ', err); // an error occurred
+      })
+      await iot.attachPolicy( {
+        policyName: policyName, /* required */
+        target: certData.certificateArn /* required */
+      }).promise()
+      await iot.createThing( {
+        thingName: thingId, /* required */
+        attributePayload: {
+          attributes: {
+            'Application': 'AIOT',
+            'UserId': userId,
+            'DeviceGroupName': deviceGroupName                
+          },
+          merge: true || false
+        }
+      }).promise().catch(function(err) {
+        console.log('warning: ', err); // an error occurred
+      })
+      let certArn = certData.certificateArn
+      let certId = certData.certificateId
+      // Attach thing for cert
+      await iot.attachThingPrincipal({
+        principal: certArn, /* required */
+        thingName: thingId /* required */
+      }).promise()
+      callback( null, certId, thingId, certData);
+    } catch (err) {
+      // console.log('createKeysAndCertificate: ', err)
+      callback(err)
+    }              
+  });  
+}
+let getDeviceGroup = async ( deviceGroupName ) => {
+  try {
+    partitionKeyName = 'DeviceGroupName'
+    sortKeyName = 'DeviceId'
+    params[partitionKeyName] = deviceGroupName
+    params[sortKeyName] = ' ' // empty space means the root entry of the device group
+    data = await dynamodb.get({
+        TableName: config.deviceTableName,
+        Key: params
+    }).promise()
+    if (typeof data.Item === 'undefined'){
+        return null
+    }
+    let deviceGroup = data.Item
+    return deviceGroup
+  } catch (err) {
+    console.log('get device group error: ', err)
+    return null
+  }
+}
 // Apply cert & Attach thing, policy
-let applyThingCert = ( userId, thingNameTag, callback ) => {
+let applyThingCert = ( userId, thingNameTag, deviceGroupName, callback ) => {
   console.log('applyCert region: ', config.region)  
   console.log('userId: ', userId)  
   AWS.config.update({region: config.region});
@@ -310,6 +508,10 @@ let applyThingCert = ( userId, thingNameTag, callback ) => {
     } 
     // else{
     try {
+      let deviceGroup = null
+      if (deviceGroupName !== '') {
+        deviceGroup = await getDeviceGroup(deviceGroupName)
+      }
       // let datetime = (new Date()).getTime()
       // console.log('applyThingCert: certData: ', certData)
       //let thingId = userId + '_' + datetime
@@ -334,14 +536,18 @@ let applyThingCert = ( userId, thingNameTag, callback ) => {
         policyName: policyName, /* required */
         target: certData.certificateArn /* required */
       }).promise()
+      let thingAttributes =  {
+        'UserId': userId                  
+      }
+      if (deviceGroup !== null) {
+        thingAttributes.DeviceGroupOwner = deviceGroup.OwnerId
+        thingAttributes.DeviceGroupName = deviceGroupName
+      }
       await iot.createThing( {
         thingName: thingId, /* required */
         attributePayload: {
-          attributes: {
-            'Application': 'AIOT',
-            'UserId': userId                  
-          },
-          merge: true || false
+          attributes: thingAttributes,
+          merge: true
         }
       }).promise()
       let certArn = certData.certificateArn
@@ -688,7 +894,6 @@ let getIoTRootCA = ( callback ) => {
 }
 
 module.exports = {
-  
     findDataBySerialNumber,
     dbInsertCertinfo,
     dbUpdateCertinfo,
@@ -700,10 +905,13 @@ module.exports = {
     dbUpdateEdgeAsync,
     dbDeleteEdge,
     getIoTRootCA,
+    applyDeviceGroupCert,
     applyThingCert,
     updateThingCert,
     cancelThingCert,
     getCertPem,
     allowUserIoT,
-    getThingDesc
+    getThingDesc,
+    deleteAlert,
+    setAlert
 }

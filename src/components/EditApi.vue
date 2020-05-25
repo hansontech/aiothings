@@ -6,13 +6,13 @@
         </b-col>
         <b-col sm="auto" align="end" >
           <b-button variant="success" :disabled="api.UserId !== $store.getters.userId" @click="updateApi()">Update</b-button>
-          <b-button variant="dark" @click="backHome()">Return</b-button>
+          <b-button variant="dark" @click="backHome()">Return<sub><b-badge class="ml-1" variant="warning" v-if="isChangedNotSaved">&nbsp;</b-badge></sub></b-button>
           <b-modal id="modalReturnConfirm"
              ref="modalReturnConfirmRef"
              hide-header
              @ok="returnDiscardChangesOk"
              @cancel="returnCancel">
-             Discard changes and return?
+             Discard the changes and return?
           </b-modal>
         </b-col>
       </b-row>
@@ -82,14 +82,31 @@
               </b-col>
           </b-row>           
           <b-row class="mt-3" v-if="api.ApiName !== null && api.ApiName !== ''">
-                <b-col sm="3" align="start" >
+                <b-col sm="2" align="start" >
                   <h5 id="popoverInvokeUrl"> Invoke URL <i class="fas fa-info-circle"></i></h5>
                 </b-col>
                 <b-col >
                   <h6>https://api.aiothings.com/{{api.ApiName.toLowerCase()}}/{path}</h6>
                 </b-col>
-                <b-popover target="popoverInvokeUrl" triggers="hover focus">
+                <b-popover target="popoverInvokeUrl" triggers="hover focus" placement="bottom">
                     Call the REST API through HTTP methods (GET, POST..) with the URL address
+                </b-popover>
+          </b-row>
+          <b-row class="mt-3" v-if="api.ApiName !== null && api.ApiName !== ''">
+                <b-col sm="2" align="start" >
+                  <h5 id="popoverApiToken">API Token <i class="fas fa-info-circle"></i></h5>
+                </b-col>
+                <b-col>
+                      <h5 class="at-border"><code>{{api.ApiToken}}</code></h5>
+                </b-col>
+                <b-col sm="1" align="left">
+                  <b-button variant="light" v-b-popover.hover.top="'Renew to new API Token'" @click="updateApiToken()"><i class="fas fa-sync"></i></b-button>
+                </b-col>
+                <b-col sm="3" align="left">
+                  <b-button variant="light" @click="copyText(api.ApiToken)"><i class="fas fa-copy"></i></b-button>
+                </b-col>
+                <b-popover target="popoverApiToken" triggers="hover focus" placement="bottom">
+                    Authorization: Bearer {API token}
                 </b-popover>
           </b-row>
           <b-row class="mt-2" align-v="center">
@@ -114,10 +131,12 @@
               </b-container>
               <b-popover target="popoverAuthOption" triggers="hover focus">
                     <template slot="title">Authorization Types</template>
-                    When <strong><span class="text-info">Auth Type</span></strong> is set, Cloud needs to verify the user through login procedure.
+                    When <strong><span class="text-info">Auth Type</span></strong> is set, calling API will check user authentication.
                     <p>
-                    When <strong>Public</strong> is set, the API can be accessed without authentication.
-                    </p>
+                    When <strong>API token</strong> is set, calling API needs to add header Authorization with Bearer {API token}.
+                    <p>
+                    When <strong>Public</strong> is set, the API can be accessed without any authentication.
+                    </p>                   
                 <!--
                     <template slot  ="title">Authorization Types</template>
                     When <strong><span class="text-danger">Auth</span></strong> is set, Cloud verifies the caller's signature. The tokens building this signature are obtained from caller’s login procedure.
@@ -220,9 +239,10 @@ export default {
       showHandlerEmptyAlert: false,
       showPathsEmptyAlert: false,
       funcFilterString: '',
-      authOption: {'NONE': 'Public', 'AUTH-SHARE': 'Auth Share', 'AUTH': 'Auth Owner '},
+      authOption: {'NONE': 'Public', 'API-TOKEN': 'API Token', 'AUTH-SHARE': 'Auth Share', 'AUTH': 'Auth Owner '},
       authOptions: [
           {value: 'NONE', text: 'Public access'},
+          {value: 'API-TOKEN', text: 'API token'},
           {value: 'AUTH-SHARE', text: 'Authenticated access'},
           {value: 'AUTH', text: 'Owner access only'}
       ]
@@ -268,6 +288,9 @@ export default {
       }
       console.log('pathAuth: ', this.api.PathAuth)
     }
+    if (this.api.hasOwnProperty('ApiToken') === false) {
+      this.updateApiToken()
+    }
     console.log('edit api: ', this.api)
   },
   async mounted () {
@@ -297,6 +320,26 @@ export default {
     }
   },
   methods: {
+    updateApiToken () {
+      this.api.ApiToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+      this.isChangedNotSaved = true
+      this.$forceUpdate()
+    },
+    copyText (text) {
+      var input = document.createElement('textarea')
+      input.innerHTML = text
+      document.body.appendChild(input)
+      input.select()
+      var result = document.execCommand('copy')
+      document.body.removeChild(input)
+      this.$bvToast.toast('API Token has been copied to Clipboard', {
+        // title: 'API Token',
+        autoHideDelay: 3000,
+        noCloseButton: true,
+        appendToast: false
+      })
+      return result
+    },
     handleNewPathSubmit () {
       if (this.newPath === null || this.newPath === '') {
         return
@@ -307,6 +350,7 @@ export default {
         this.api.Paths.push(this.newPath)
         this.api.PathAuth[this.newPath] = this.newPathAuth
         console.log('Paths:', this.api.Paths)
+        this.isChangedNotSaved = true
       }
     },
     deletePath (index) {

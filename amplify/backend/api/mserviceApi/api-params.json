@@ -18,27 +18,6 @@
             }
         },
         {
-            "name": "/messagetrees",
-            "lambdaFunction": "mserviceFunction",
-            "privacy": {
-                "protected": true,
-                "auth": [
-                    "/POST",
-                    "/GET",
-                    "/PUT",
-                    "/PATCH",
-                    "/DELETE"
-                ],
-                "unauth": [
-                    "/POST",
-                    "/GET",
-                    "/PUT",
-                    "/PATCH",
-                    "/DELETE"
-                ]
-            }
-        },
-        {
             "name": "/mservices",
             "lambdaFunction": "mserviceFunction",
             "privacy": {
@@ -114,6 +93,16 @@
                     "/DELETE"
                 ]
             }
+        },
+        {
+            "name": "/messagetrees",
+            "lambdaFunction": "mserviceFunction",
+            "privacy": {
+                "private": true,
+                "auth": [
+                    "/GET"
+                ]
+            }
         }
     ],
     "resourceName": "mserviceApi",
@@ -125,7 +114,7 @@
     ],
     "privacy": {
         "auth": 6,
-        "unauth": 5,
+        "unauth": 4,
         "authRoleName": "aiothings-20190217141129-authRole",
         "unAuthRoleName": "aiothings-20190217141129-unauthRole"
     },
@@ -139,5 +128,5 @@
             ]
         }
     ],
-    "uuid": "d7889dbc"
+    "uuid": "d383ee1e"
 }

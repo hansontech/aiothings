@@ -5,7 +5,7 @@
             <h4>REST APIs <small>({{apis.length}})</small></h4>
           </b-col>
           <b-col sm="4">
-            <b-form-input class="at-border" id="publishTopic"
+            <b-form-input class="at-border"
               type="text" 
               v-model="$parent.searchString"
               required

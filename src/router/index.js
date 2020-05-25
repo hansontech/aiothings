@@ -3,6 +3,10 @@ import VueRouter from 'vue-router'
 import Signup from '@/components/Signup'
 import Home from '@/components/Home'
 import User from '@/components/User'
+import NewDeviceGroup from '@/components/NewDeviceGroup'
+import EditDeviceGroup from '@/components/EditDeviceGroup'
+import DeviceGroupDevices from '@/components/DeviceGroupDevices'
+import AddDevice from '@/components/AddDevice'
 import MyThings from '@/components/MyThings'
 import NewThing from '@/components/NewThing'
 import EditThing from '@/components/EditThing'
@@ -10,11 +14,12 @@ import ThingStatus from '@/components/ThingStatus'
 import MyFavorites from '@/components/MyFavorites'
 import MyDashboard from '@/components/MyDashboard'
 import MyConsole from '@/components/MyConsole'
-import MyAuthApplications from '@/components/MyAuthApplications'
-import MyAuthApplicationsList from '@/components/MyAuthApplicationsList'
+// import MyAuthApplications from '@/components/MyAuthApplications'
+// import MyAuthApplicationsList from '@/components/MyAuthApplicationsList'
 import MyMicroservices from '@/components/MyApplications'
 import MyMicroservicesList from '@/components/MyApplicationsList'
 import NewService from '@/components/NewService'
+// import EditAuthApplication from '@/components/EditAuthApplication'
 import EditService from '@/components/EditService'
 import MyApis from '@/components/MyApis'
 import MyApisList from '@/components/MyApisList'
@@ -226,6 +231,7 @@ const router = new VueRouter({
             {
               path: 'newthing',
               name: 'newthing',
+              props: true,
               component: NewThing,
               meta: {
                 title: 'New Thing',
@@ -234,7 +240,7 @@ const router = new VueRouter({
             },
             {
               path: 'edit/:thingIndex',
-              name: 'edit',
+              name: 'edit_thing',
               component: EditThing,
               props: true,
               meta: {
@@ -249,6 +255,46 @@ const router = new VueRouter({
               props: true,
               meta: {
                 title: 'Thing Status',
+                auth: true
+              }
+            },
+            // -- device group
+            {
+              path: 'new_device_group',
+              name: 'new_device_group',
+              component: NewDeviceGroup,
+              meta: {
+                title: 'New Device Group',
+                auth: true
+              }
+            },
+            {
+              path: 'edit_device_group/:deviceGroupIndex',
+              name: 'edit_device_group',
+              component: EditDeviceGroup,
+              props: true,
+              meta: {
+                title: 'Edit Device Group',
+                auth: true
+              }
+            },
+            {
+              path: 'device_group_devices/:deviceGroupIndex',
+              name: 'device_group_devices',
+              component: DeviceGroupDevices,
+              props: true,
+              meta: {
+                title: 'Device Group Devices',
+                auth: true
+              }
+            },
+            {
+              path: 'add_device',
+              name: 'add_device',
+              component: AddDevice,
+              props: true,
+              meta: {
+                title: 'Create Thing for Device',
                 auth: true
               }
             },
@@ -303,6 +349,7 @@ const router = new VueRouter({
             }
           ]
         },
+        /*
         {
           path: 'myapplications',
           component: MyAuthApplications, // required, not change
@@ -319,9 +366,29 @@ const router = new VueRouter({
                 title: 'My Application List',
                 auth: true
               }
+            },
+            {
+              path: 'newauthapp',
+              name: 'newAuthApp',
+              component: EditAuthApplication,
+              props: true,
+              meta: {
+                title: 'New Auth Application',
+                auth: true
+              }
+            },
+            {
+              path: 'edit/:appIndex',
+              name: 'editAuthApp',
+              component: EditAuthApplication,
+              props: true,
+              meta: {
+                title: 'Edit Auth Application',
+                auth: true
+              }
             }
           ]
-        },
+        }, */
         {
           path: 'myapis',
           component: MyApis, // required, not change

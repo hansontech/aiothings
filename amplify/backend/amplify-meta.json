@@ -1,340 +1,319 @@
 {
-	"providers": {
-		"awscloudformation": {
-			"AuthRoleName": "aiothings-20190217141129-authRole",
-			"UnauthRoleArn": "arn:aws:iam::414327512415:role/aiothings-20190217141129-unauthRole",
-			"AuthRoleArn": "arn:aws:iam::414327512415:role/aiothings-20190217141129-authRole",
-			"Region": "ap-southeast-2",
-			"DeploymentBucketName": "aiothings-20190217141129-deployment",
-			"UnauthRoleName": "aiothings-20190217141129-unauthRole",
-			"StackName": "aiothings-20190217141129",
-			"StackId": "arn:aws:cloudformation:ap-southeast-2:414327512415:stack/aiothings-20190217141129/1a476700-326a-11e9-a34c-0667dfb77996"
-		}
-	},
-	"auth": {
-		"aiotAuth": {
-			"service": "Cognito",
-			"providerPlugin": "awscloudformation",
-			"providerMetadata": {
-				"s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/auth/aiotAuth-cloudformation-template.yml",
-				"logicalId": "authaiotAuth"
-			},
-			"lastPushTimeStamp": "2020-01-28T05:14:14.088Z",
-			"output": {
-				"GoogleWebClient": "168989735160-otcg9fqm5d0ip4l0gbjd8n6vg75mguf8.apps.googleusercontent.com",
-				"AppClientSecret": "ph6upbpk031q4foa5pv605eb1e279jeskn9p30lnm3c8j4nvu4v",
-				"UserPoolId": "ap-southeast-2_GETSSHigP",
-				"AppClientIDWeb": "1gsvaos6ahp3brb6899dqput0m",
-				"AppClientID": "3b9j36bl0rqsfkqjhje953hhe3",
-				"HostedUIDomain": "aiothings0528-prod",
-				"FacebookWebClient": "265383824068284",
-				"IdentityPoolId": "ap-southeast-2:3d7b03ba-23cc-4892-83cf-1084e3cc6a2c",
-				"IdentityPoolName": "aiotIdentityPool2__prod",
-				"OAuthMetadata": "{\"AllowedOAuthFlows\":[\"code\"],\"AllowedOAuthScopes\":[\"openid\",\"profile\",\"aws.cognito.signin.user.admin\"],\"CallbackURLs\":[\"https://www.aiothings.com/callback/\"],\"LogoutURLs\":[\"https://www.aiothings.com/signout/\"]}",
-				"UserPoolName": "aiotUserPool2"
-			},
-			"lastPushDirHash": "DY5FP2qsymfaDICZqp/DDazFSLI="
-		}
-	},
-	"hosting": {
-		"S3AndCloudFront": {
-			"service": "S3AndCloudFront",
-			"providerPlugin": "awscloudformation",
-			"providerMetadata": {
-				"s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/hosting/template.json",
-				"logicalId": "hostingS3AndCloudFront"
-			},
-			"lastPushTimeStamp": "2020-01-28T05:14:14.097Z",
-			"output": {
-				"CloudFrontSecureURL": "https://ddhnii0hf5ke.cloudfront.net",
-				"S3BucketSecureURL": "https://aiothings-20190217143527-hostingbucket-prod.s3.amazonaws.com",
-				"WebsiteURL": "http://aiothings-20190217143527-hostingbucket-prod.s3-website-ap-southeast-2.amazonaws.com",
-				"CloudFrontDistributionID": "E3E4UYE3I7GOA9",
-				"Region": "ap-southeast-2",
-				"HostingBucketName": "aiothings-20190217143527-hostingbucket-prod",
-				"CloudFrontDomainName": "ddhnii0hf5ke.cloudfront.net"
-			},
-			"lastPushDirHash": "AlliOkQv2+llCO+b1zJXe6H7rhM="
-		}
-	},
-	"storage": {
-		"aiotStorage": {
-			"service": "S3",
-			"providerPlugin": "awscloudformation",
-			"providerMetadata": {
-				"s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/storage/s3-cloudformation-template.json",
-				"logicalId": "storageaiotStorage"
-			},
-			"lastPushTimeStamp": "2020-01-28T05:14:14.098Z",
-			"output": {
-				"BucketName": "aiot-bucket-prod",
-				"Region": "ap-southeast-2"
-			},
-			"lastPushDirHash": "C5sNp8lZfmKIVh4SdOd6miwQljU="
-		}
-	},
-	"function": {
-		"thingFunction": {
-			"service": "Lambda",
-			"providerPlugin": "awscloudformation",
-			"build": true,
-			"dependsOn": [],
-			"lastBuildTimeStamp": "2019-02-20T00:18:02.095Z",
-			"lastPackageTimeStamp": "2020-01-18T02:42:25.417Z",
-			"distZipFilename": "thingFunction-5a7178745a343643714e-build.zip",
-			"providerMetadata": {
-				"s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/thingFunction-cloudformation-template.json",
-				"logicalId": "functionthingFunction"
-			},
-			"lastPushTimeStamp": "2020-01-28T05:14:14.100Z",
-			"output": {
-				"Region": "ap-southeast-2",
-				"Arn": "arn:aws:lambda:ap-southeast-2:414327512415:function:thingFunction-prod",
-				"Name": "thingFunction-prod"
-			},
-			"lastPushDirHash": "LniztyBNasWydjLY1kErvf34qwU="
-		},
-		"solutionFunction": {
-			"service": "Lambda",
-			"providerPlugin": "awscloudformation",
-			"build": true,
-			"dependsOn": [],
-			"lastBuildTimeStamp": "2019-02-17T09:29:05.609Z",
-			"lastPackageTimeStamp": "2019-02-19T04:11:12.283Z",
-			"distZipFilename": "solutionFunction-1550549470-latest-build.zip",
-			"providerMetadata": {
-				"s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/solutionFunction-cloudformation-template.json",
-				"logicalId": "functionsolutionFunction"
-			},
-			"lastPushTimeStamp": "2020-01-28T05:14:14.101Z",
-			"output": {
-				"Region": "ap-southeast-2",
-				"Arn": "arn:aws:lambda:ap-southeast-2:414327512415:function:solutionFunction-prod",
-				"Name": "solutionFunction-prod"
-			},
-			"lastPushDirHash": "MlpHP2QlQYjTIKbcB129MHhcB0o="
-		},
-		"mserviceFunction": {
-			"service": "Lambda",
-			"providerPlugin": "awscloudformation",
-			"build": true,
-			"dependsOn": [],
-			"lastBuildTimeStamp": "2019-08-28T12:25:01.451Z",
-			"lastPackageTimeStamp": "2020-01-28T05:12:40.836Z",
-			"distZipFilename": "mserviceFunction-4f664e504f2b6f53434d-build.zip",
-			"providerMetadata": {
-				"s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/mserviceFunction-cloudformation-template.json",
-				"logicalId": "functionmserviceFunction"
-			},
-			"lastPushTimeStamp": "2020-01-28T05:14:14.115Z",
-			"output": {
-				"Region": "ap-southeast-2",
-				"Arn": "arn:aws:lambda:ap-southeast-2:414327512415:function:mserviceFunction-prod",
-				"Name": "mserviceFunction-prod"
-			},
-			"lastPushDirHash": "uhd+DTmYPG4IigJkVr4I963Lte8="
-		},
-		"userFunction": {
-			"service": "Lambda",
-			"providerPlugin": "awscloudformation",
-			"build": true,
-			"dependsOn": [],
-			"lastBuildTimeStamp": "2019-02-17T10:06:00.942Z",
-			"lastPackageTimeStamp": "2019-11-29T06:31:34.857Z",
-			"distZipFilename": "userFunction-6a6c383255322f713733-build.zip",
-			"providerMetadata": {
-				"s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/userFunction-cloudformation-template.json",
-				"logicalId": "functionuserFunction"
-			},
-			"lastPushTimeStamp": "2020-01-28T05:14:14.103Z",
-			"output": {
-				"Region": "ap-southeast-2",
-				"Arn": "arn:aws:lambda:ap-southeast-2:414327512415:function:userFunction-prod",
-				"Name": "userFunction-prod"
-			},
-			"lastPushDirHash": "PK+kjbWxhtOXeihIA/VzCor9I7w="
-		},
-		"apiFunction": {
-			"service": "Lambda",
-			"providerPlugin": "awscloudformation",
-			"build": true,
-			"dependsOn": [],
-			"lastBuildTimeStamp": "2019-10-18T08:39:21.753Z",
-			"lastPackageTimeStamp": "2019-12-24T09:12:58.094Z",
-			"distZipFilename": "apiFunction-41773058672b39493757-build.zip",
-			"providerMetadata": {
-				"s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/apiFunction-cloudformation-template.json",
-				"logicalId": "functionapiFunction"
-			},
-			"lastPushTimeStamp": "2020-01-28T05:14:14.105Z",
-			"output": {
-				"Region": "ap-southeast-2",
-				"Arn": "arn:aws:lambda:ap-southeast-2:414327512415:function:apiFunction-prod",
-				"Name": "apiFunction-prod"
-			},
-			"lastPushDirHash": "QCCNSWvYted1n7cDw+5jRzWMuBQ="
-		},
-		"apiAuthorizerFunction": {
-			"service": "Lambda",
-			"providerPlugin": "awscloudformation",
-			"build": true,
-			"dependsOn": [],
-			"lastBuildTimeStamp": "2019-10-17T04:14:13.092Z",
-			"lastPackageTimeStamp": "2019-10-31T02:12:30.897Z",
-			"distZipFilename": "apiAuthorizerFunction-553767352f4d686a414a-build.zip",
-			"providerMetadata": {
-				"s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/apiAuthorizerFunction-cloudformation-template.json",
-				"logicalId": "functionapiAuthorizerFunction"
-			},
-			"lastPushTimeStamp": "2020-01-28T05:14:14.106Z",
-			"output": {
-				"Region": "ap-southeast-2",
-				"Arn": "arn:aws:lambda:ap-southeast-2:414327512415:function:apiAuthorizerFunction-prod",
-				"Name": "apiAuthorizerFunction-prod"
-			},
-			"lastPushDirHash": "EeS7a7PlQuM6QqYsZFcEM9knR4k="
-		},
-		"aiotSignupChecker": {
-			"service": "Lambda",
-			"providerPlugin": "awscloudformation",
-			"build": true,
-			"lastBuildTimeStamp": "2019-12-23T06:03:28.096Z",
-			"lastPackageTimeStamp": "2019-12-23T06:03:28.134Z",
-			"distZipFilename": "aiotSignupChecker-4e6f4854733266795979-build.zip",
-			"providerMetadata": {
-				"s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/aiotSignupChecker-cloudformation-template.json",
-				"logicalId": "functionaiotSignupChecker"
-			},
-			"lastPushTimeStamp": "2020-01-28T05:14:14.108Z",
-			"output": {
-				"Region": "ap-southeast-2",
-				"Arn": "arn:aws:lambda:ap-southeast-2:414327512415:function:aiotSignupChecker-prod",
-				"Name": "aiotSignupChecker-prod",
-				"LambdaExecutionRole": "aiothingsLambdaRole071f5db0-prod"
-			},
-			"lastPushDirHash": "wI7cZlZTIPH+SMW0PnfkxRdtYMM="
-		}
-	},
-	"api": {
-		"thingApi": {
-			"service": "API Gateway",
-			"providerPlugin": "awscloudformation",
-			"dependsOn": [
-				{
-					"category": "function",
-					"resourceName": "thingFunction",
-					"attributes": [
-						"Name",
-						"Arn"
-					]
-				}
-			],
-			"providerMetadata": {
-				"s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/api/thingApi-cloudformation-template.json",
-				"logicalId": "apithingApi"
-			},
-			"lastPushTimeStamp": "2020-01-28T05:14:14.109Z",
-			"output": {
-				"ApiName": "thingApi",
-				"RootUrl": "https://vx1xuy1ns4.execute-api.ap-southeast-2.amazonaws.com/prod"
-			},
-			"lastPushDirHash": "ebiXAppAqKQApB2bFmvmQKl3JZo="
-		},
-		"solutionApi": {
-			"service": "API Gateway",
-			"providerPlugin": "awscloudformation",
-			"dependsOn": [
-				{
-					"category": "function",
-					"resourceName": "solutionFunction",
-					"attributes": [
-						"Name",
-						"Arn"
-					]
-				}
-			],
-			"providerMetadata": {
-				"s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/api/solutionApi-cloudformation-template.json",
-				"logicalId": "apisolutionApi"
-			},
-			"lastPushTimeStamp": "2020-01-28T05:14:14.110Z",
-			"output": {
-				"ApiName": "solutionApi",
-				"RootUrl": "https://ylxg3tjwa9.execute-api.ap-southeast-2.amazonaws.com/prod"
-			},
-			"lastPushDirHash": "KQITdlZx4yfHQLMl2uMs6RYjnXo="
-		},
-		"mserviceApi": {
-			"service": "API Gateway",
-			"providerPlugin": "awscloudformation",
-			"dependsOn": [
-				{
-					"category": "function",
-					"resourceName": "mserviceFunction",
-					"attributes": [
-						"Name",
-						"Arn"
-					]
-				}
-			],
-			"lastPushTimeStamp": "2020-01-28T05:14:14.111Z",
-			"providerMetadata": {
-				"s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/api/mserviceApi-cloudformation-template.json",
-				"logicalId": "apimserviceApi"
-			},
-			"output": {
-				"ApiName": "mserviceApi",
-				"RootUrl": "https://3bb7hxew9g.execute-api.ap-southeast-2.amazonaws.com/prod"
-			},
-			"lastPushDirHash": "Ju/01+1Fmnyjilql8+X6crPPKUs="
-		},
-		"userApi": {
-			"service": "API Gateway",
-			"providerPlugin": "awscloudformation",
-			"dependsOn": [
-				{
-					"category": "function",
-					"resourceName": "userFunction",
-					"attributes": [
-						"Name",
-						"Arn"
-					]
-				}
-			],
-			"providerMetadata": {
-				"s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/api/userApi-cloudformation-template.json",
-				"logicalId": "apiuserApi"
-			},
-			"lastPushTimeStamp": "2020-01-28T05:14:14.112Z",
-			"output": {
-				"ApiName": "userApi",
-				"RootUrl": "https://7709s8s2n6.execute-api.ap-southeast-2.amazonaws.com/prod"
-			},
-			"lastPushDirHash": "ZT0TZYwm0gmFLKawEFAu7ZxanYI="
-		},
-		"apiApi": {
-			"service": "API Gateway",
-			"providerPlugin": "awscloudformation",
-			"dependsOn": [
-				{
-					"category": "function",
-					"resourceName": "apiFunction",
-					"attributes": [
-						"Name",
-						"Arn"
-					]
-				}
-			],
-			"providerMetadata": {
-				"s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/api/apiApi-cloudformation-template.json",
-				"logicalId": "apiapiApi"
-			},
-			"lastPushTimeStamp": "2020-01-28T05:14:14.112Z",
-			"output": {
-				"ApiName": "apiApi",
-				"RootUrl": "https://2dlkdca3ud.execute-api.ap-southeast-2.amazonaws.com/prod"
-			},
-			"lastPushDirHash": "+yfqRr4317aFyzb8qEsJIbWJzI0="
-		}
-	}
+    "providers": {
+        "awscloudformation": {
+            "AuthRoleName": "aiothings-20190217141129-authRole",
+            "UnauthRoleArn": "arn:aws:iam::414327512415:role/aiothings-20190217141129-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::414327512415:role/aiothings-20190217141129-authRole",
+            "Region": "ap-southeast-2",
+            "DeploymentBucketName": "aiothings-20190217141129-deployment",
+            "UnauthRoleName": "aiothings-20190217141129-unauthRole",
+            "StackName": "aiothings-20190217141129",
+            "StackId": "arn:aws:cloudformation:ap-southeast-2:414327512415:stack/aiothings-20190217141129/1a476700-326a-11e9-a34c-0667dfb77996",
+            "AmplifyAppId": "d97zrv0j1odfv"
+        }
+    },
+    "auth": {
+        "aiotAuth": {
+            "service": "Cognito",
+            "providerPlugin": "awscloudformation",
+            "providerMetadata": {
+                "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/auth/aiotAuth-cloudformation-template.yml",
+                "logicalId": "authaiotAuth"
+            },
+            "lastPushTimeStamp": "2020-05-22T00:49:55.828Z",
+            "output": {
+                "GoogleWebClient": "168989735160-otcg9fqm5d0ip4l0gbjd8n6vg75mguf8.apps.googleusercontent.com",
+                "AppClientSecret": "ph6upbpk031q4foa5pv605eb1e279jeskn9p30lnm3c8j4nvu4v",
+                "UserPoolId": "ap-southeast-2_GETSSHigP",
+                "AppClientIDWeb": "1gsvaos6ahp3brb6899dqput0m",
+                "AppClientID": "3b9j36bl0rqsfkqjhje953hhe3",
+                "HostedUIDomain": "aiothings0528-prod",
+                "FacebookWebClient": "265383824068284",
+                "IdentityPoolId": "ap-southeast-2:3d7b03ba-23cc-4892-83cf-1084e3cc6a2c",
+                "IdentityPoolName": "aiotIdentityPool2__prod",
+                "OAuthMetadata": "{\"AllowedOAuthFlows\":[\"code\"],\"AllowedOAuthScopes\":[\"openid\",\"profile\",\"aws.cognito.signin.user.admin\"],\"CallbackURLs\":[\"https://www.aiothings.com/callback/\"],\"LogoutURLs\":[\"https://www.aiothings.com/signout/\"]}",
+                "UserPoolName": "aiotUserPool2"
+            },
+            "lastPushDirHash": "CmpZf9no7o8webPhn2riGQg/KhA="
+        }
+    },
+    "hosting": {
+        "S3AndCloudFront": {
+            "service": "S3AndCloudFront",
+            "providerPlugin": "awscloudformation",
+            "providerMetadata": {
+                "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/hosting/template.json",
+                "logicalId": "hostingS3AndCloudFront"
+            },
+            "lastPushTimeStamp": "2020-05-22T00:49:55.840Z",
+            "output": {
+                "CloudFrontSecureURL": "https://ddhnii0hf5ke.cloudfront.net",
+                "S3BucketSecureURL": "https://aiothings-20190217143527-hostingbucket-prod.s3.amazonaws.com",
+                "WebsiteURL": "http://aiothings-20190217143527-hostingbucket-prod.s3-website-ap-southeast-2.amazonaws.com",
+                "CloudFrontDistributionID": "E3E4UYE3I7GOA9",
+                "Region": "ap-southeast-2",
+                "HostingBucketName": "aiothings-20190217143527-hostingbucket-prod",
+                "CloudFrontDomainName": "ddhnii0hf5ke.cloudfront.net"
+            },
+            "lastPushDirHash": "AlliOkQv2+llCO+b1zJXe6H7rhM="
+        }
+    },
+    "storage": {
+        "aiotStorage": {
+            "service": "S3",
+            "providerPlugin": "awscloudformation",
+            "providerMetadata": {
+                "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/storage/s3-cloudformation-template.json",
+                "logicalId": "storageaiotStorage"
+            },
+            "lastPushTimeStamp": "2020-05-22T00:49:55.841Z",
+            "output": {
+                "BucketName": "aiot-bucket-prod",
+                "Region": "ap-southeast-2"
+            },
+            "lastPushDirHash": "C5sNp8lZfmKIVh4SdOd6miwQljU="
+        }
+    },
+    "function": {
+        "thingFunction": {
+            "service": "Lambda",
+            "providerPlugin": "awscloudformation",
+            "build": true,
+            "dependsOn": [],
+            "lastBuildTimeStamp": "2020-05-21T07:00:03.975Z",
+            "lastPackageTimeStamp": "2020-05-21T07:00:16.781Z",
+            "distZipFilename": "thingFunction-7862753762424f543653-build.zip",
+            "providerMetadata": {
+                "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/thingFunction-cloudformation-template.json",
+                "logicalId": "functionthingFunction"
+            },
+            "lastPushTimeStamp": "2020-05-22T00:49:55.842Z",
+            "output": {
+                "Region": "ap-southeast-2",
+                "Arn": "arn:aws:lambda:ap-southeast-2:414327512415:function:thingFunction-prod",
+                "Name": "thingFunction-prod"
+            },
+            "lastPushDirHash": "CIMwLycY327BKnMsTCCc6WDrH/8="
+        },
+        "solutionFunction": {
+            "service": "Lambda",
+            "providerPlugin": "awscloudformation",
+            "build": true,
+            "dependsOn": [],
+            "lastBuildTimeStamp": "2019-02-17T09:29:05.609Z",
+            "lastPackageTimeStamp": "2019-02-19T04:11:12.283Z",
+            "distZipFilename": "solutionFunction-1550549470-latest-build.zip",
+            "providerMetadata": {
+                "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/solutionFunction-cloudformation-template.json",
+                "logicalId": "functionsolutionFunction"
+            },
+            "lastPushTimeStamp": "2020-05-22T00:49:55.843Z",
+            "output": {
+                "Region": "ap-southeast-2",
+                "Arn": "arn:aws:lambda:ap-southeast-2:414327512415:function:solutionFunction-prod",
+                "Name": "solutionFunction-prod"
+            },
+            "lastPushDirHash": "nEDSI9W5+hI6jvtHwQK5X8P81IM="
+        },
+        "mserviceFunction": {
+            "service": "Lambda",
+            "providerPlugin": "awscloudformation",
+            "build": true,
+            "dependsOn": [],
+            "lastBuildTimeStamp": "2019-08-28T12:25:01.451Z",
+            "lastPackageTimeStamp": "2020-04-23T04:34:56.115Z",
+            "distZipFilename": "mserviceFunction-505871675a3442707343-build.zip",
+            "providerMetadata": {
+                "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/mserviceFunction-cloudformation-template.json",
+                "logicalId": "functionmserviceFunction"
+            },
+            "lastPushTimeStamp": "2020-05-22T00:49:55.844Z",
+            "output": {
+                "Region": "ap-southeast-2",
+                "Arn": "arn:aws:lambda:ap-southeast-2:414327512415:function:mserviceFunction-prod",
+                "Name": "mserviceFunction-prod"
+            },
+            "lastPushDirHash": "jRwL9luEvFUqbtnKjcmUUQUBP9o="
+        },
+        "userFunction": {
+            "service": "Lambda",
+            "providerPlugin": "awscloudformation",
+            "build": true,
+            "dependsOn": [],
+            "lastBuildTimeStamp": "2019-02-17T10:06:00.942Z",
+            "lastPackageTimeStamp": "2019-11-29T06:31:34.857Z",
+            "distZipFilename": "userFunction-6a6c383255322f713733-build.zip",
+            "providerMetadata": {
+                "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/userFunction-cloudformation-template.json",
+                "logicalId": "functionuserFunction"
+            },
+            "lastPushTimeStamp": "2020-05-22T00:49:55.844Z",
+            "output": {
+                "Region": "ap-southeast-2",
+                "Arn": "arn:aws:lambda:ap-southeast-2:414327512415:function:userFunction-prod",
+                "Name": "userFunction-prod"
+            },
+            "lastPushDirHash": "jvQYGTAifPGW5A4KP8N2NkcgaQs="
+        },
+        "apiFunction": {
+            "service": "Lambda",
+            "providerPlugin": "awscloudformation",
+            "build": true,
+            "dependsOn": [],
+            "lastBuildTimeStamp": "2020-04-25T08:15:41.516Z",
+            "lastPackageTimeStamp": "2020-04-25T08:15:42.990Z",
+            "distZipFilename": "apiFunction-356945704938595a6175-build.zip",
+            "providerMetadata": {
+                "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/apiFunction-cloudformation-template.json",
+                "logicalId": "functionapiFunction"
+            },
+            "lastPushTimeStamp": "2020-05-22T00:49:55.845Z",
+            "output": {
+                "Region": "ap-southeast-2",
+                "Arn": "arn:aws:lambda:ap-southeast-2:414327512415:function:apiFunction-prod",
+                "Name": "apiFunction-prod"
+            },
+            "lastPushDirHash": "rRXzQhziaRQSP5AXmNYj7LgenQM="
+        },
+        "apiAuthorizerFunction": {
+            "service": "Lambda",
+            "providerPlugin": "awscloudformation",
+            "build": true,
+            "dependsOn": [],
+            "lastBuildTimeStamp": "2019-10-17T04:14:13.092Z",
+            "lastPackageTimeStamp": "2020-04-22T07:01:31.907Z",
+            "distZipFilename": "apiAuthorizerFunction-644748666c68794c5064-build.zip",
+            "providerMetadata": {
+                "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/apiAuthorizerFunction-cloudformation-template.json",
+                "logicalId": "functionapiAuthorizerFunction"
+            },
+            "lastPushTimeStamp": "2020-05-22T00:49:55.847Z",
+            "output": {
+                "Region": "ap-southeast-2",
+                "Arn": "arn:aws:lambda:ap-southeast-2:414327512415:function:apiAuthorizerFunction-prod",
+                "Name": "apiAuthorizerFunction-prod"
+            },
+            "lastPushDirHash": "xiejHnB31ICnTPeF1Z8C1jyS3hM="
+        },
+        "aiotSignupChecker": {
+            "service": "Lambda",
+            "providerPlugin": "awscloudformation",
+            "build": true,
+            "lastBuildTimeStamp": "2019-12-23T06:03:28.096Z",
+            "lastPackageTimeStamp": "2019-12-23T06:03:28.134Z",
+            "distZipFilename": "aiotSignupChecker-4e6f4854733266795979-build.zip",
+            "providerMetadata": {
+                "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/aiotSignupChecker-cloudformation-template.json",
+                "logicalId": "functionaiotSignupChecker"
+            },
+            "lastPushTimeStamp": "2020-05-22T00:49:55.847Z",
+            "output": {
+                "Region": "ap-southeast-2",
+                "Arn": "arn:aws:lambda:ap-southeast-2:414327512415:function:aiotSignupChecker-prod",
+                "Name": "aiotSignupChecker-prod",
+                "LambdaExecutionRole": "aiothingsLambdaRole071f5db0-prod"
+            },
+            "lastPushDirHash": "wI7cZlZTIPH+SMW0PnfkxRdtYMM="
+        }
+    },
+    "api": {
+        "thingApi": {
+            "service": "API Gateway",
+            "providerPlugin": "awscloudformation",
+            "dependsOn": [
+                {
+                    "category": "function",
+                    "resourceName": "thingFunction",
+                    "attributes": [
+                        "Name",
+                        "Arn"
+                    ]
+                }
+            ],
+            "providerMetadata": {
+                "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/api/thingApi-cloudformation-template.json",
+                "logicalId": "apithingApi"
+            },
+            "lastPushTimeStamp": "2020-05-22T00:49:55.848Z",
+            "output": {
+                "ApiName": "thingApi",
+                "RootUrl": "https://vx1xuy1ns4.execute-api.ap-southeast-2.amazonaws.com/prod",
+                "ApiId": "vx1xuy1ns4"
+            },
+            "lastPushDirHash": "1HoS9KfVadLENWyxup9gVHcQpr4="
+        },
+        "mserviceApi": {
+            "service": "API Gateway",
+            "providerPlugin": "awscloudformation",
+            "dependsOn": [
+                {
+                    "category": "function",
+                    "resourceName": "mserviceFunction",
+                    "attributes": [
+                        "Name",
+                        "Arn"
+                    ]
+                }
+            ],
+            "lastPushTimeStamp": "2020-05-22T00:49:55.849Z",
+            "providerMetadata": {
+                "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/api/mserviceApi-cloudformation-template.json",
+                "logicalId": "apimserviceApi"
+            },
+            "output": {
+                "ApiName": "mserviceApi",
+                "RootUrl": "https://3bb7hxew9g.execute-api.ap-southeast-2.amazonaws.com/prod"
+            },
+            "lastPushDirHash": "UXXwanjsi6otWZx8VmsaIabr7fU="
+        },
+        "userApi": {
+            "service": "API Gateway",
+            "providerPlugin": "awscloudformation",
+            "dependsOn": [
+                {
+                    "category": "function",
+                    "resourceName": "userFunction",
+                    "attributes": [
+                        "Name",
+                        "Arn"
+                    ]
+                }
+            ],
+            "providerMetadata": {
+                "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/api/userApi-cloudformation-template.json",
+                "logicalId": "apiuserApi"
+            },
+            "lastPushTimeStamp": "2020-05-22T00:49:55.850Z",
+            "output": {
+                "ApiName": "userApi",
+                "RootUrl": "https://7709s8s2n6.execute-api.ap-southeast-2.amazonaws.com/prod"
+            },
+            "lastPushDirHash": "ZT0TZYwm0gmFLKawEFAu7ZxanYI="
+        },
+        "apiApi": {
+            "service": "API Gateway",
+            "providerPlugin": "awscloudformation",
+            "dependsOn": [
+                {
+                    "category": "function",
+                    "resourceName": "apiFunction",
+                    "attributes": [
+                        "Name",
+                        "Arn"
+                    ]
+                }
+            ],
+            "providerMetadata": {
+                "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/api/apiApi-cloudformation-template.json",
+                "logicalId": "apiapiApi"
+            },
+            "lastPushTimeStamp": "2020-05-22T00:49:55.851Z",
+            "output": {
+                "ApiName": "apiApi",
+                "RootUrl": "https://2dlkdca3ud.execute-api.ap-southeast-2.amazonaws.com/prod",
+                "ApiId": "2dlkdca3ud"
+            },
+            "lastPushDirHash": "Bx6v4+hmVbmxy5v5ympzH+schpc="
+        }
+    }
 }

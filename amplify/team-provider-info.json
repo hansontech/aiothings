@@ -8,7 +8,8 @@
             "DeploymentBucketName": "aiothings-20190217141129-deployment",
             "UnauthRoleName": "aiothings-20190217141129-unauthRole",
             "StackName": "aiothings-20190217141129",
-            "StackId": "arn:aws:cloudformation:ap-southeast-2:414327512415:stack/aiothings-20190217141129/1a476700-326a-11e9-a34c-0667dfb77996"
+            "StackId": "arn:aws:cloudformation:ap-southeast-2:414327512415:stack/aiothings-20190217141129/1a476700-326a-11e9-a34c-0667dfb77996",
+            "AmplifyAppId": "d97zrv0j1odfv"
         },
         "categories": {
             "auth": {

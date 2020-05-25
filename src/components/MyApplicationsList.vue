@@ -5,7 +5,7 @@
             <p class="h4">Microservices <small>({{mservicesCounter}})</small></p>
           </b-col>
           <b-col sm="4">
-            <b-form-input class="at-border" id="publishTopic"
+            <b-form-input class="at-border"
               type="text" 
               v-model="$parent.searchString"
               required
@@ -318,7 +318,7 @@ export default {
         console.log('invalid JSON')
         return false
       }
-      // console.log('message: ', message)
+      console.log('message: ', message)
       if (message.hasOwnProperty('topic') === false) {
         return false
       }
@@ -475,7 +475,8 @@ export default {
         const result = await API.post('mserviceApi', '/mservices', { body })
         console.log('updateService: result: ', result)
         if (result.hasOwnProperty('success')) {
-          this.$store.dispatch('replaceMservice', {replacingService: mservice, services: this.mservices})
+          let newMservice = result.microservice.Attributes
+          this.$store.dispatch('replaceMservice', {replacingService: newMservice, services: this.services})
         }
         this.isLoading = false
     },

@@ -4,7 +4,7 @@ This node.js Lambda function code creates certificate, attaches an IoT policy, I
 It also activates the certificate. 
 **/
 // const config = require('./config');
-const applyModel = require("utility");
+const applyModel = require("./utility");
 const AWS = require('aws-sdk');
 const config = require('./config');
 
@@ -303,6 +303,19 @@ let deployEdge = async (edgeData) => {
 
 let getDeployStatus = async (deployId, edgeData) => {
   try {
+    if (deployId === null) {
+      let listData = await greengrass.listDeployments({ GroupId: edgeData.ggGroup.created.Id}).promise()
+      console.log('list deploy: ', listData)
+      if (listData.error !== undefined) {
+        console.log('list deploy error: ', listData.error)
+        return null
+      }
+      if (listData.Deployments.length === 0) {
+        return null
+      }
+      deployId =listData.Deployments[0].DeploymentId
+      // console.log('deploy list 0: ',listData.Deployments[0])
+    }
     let deployData = await greengrass.getDeploymentStatus({
       DeploymentId: deployId, /* required */
       GroupId: edgeData.ggGroup.created.Id /* required */

@@ -1,0 +1,7 @@
+{ 
+    "thingName": "",
+    "endpoint": "a3vgppxo7lddg8-ats.iot.ap-southeast-2.amazonaws.com",
+    "rootCAPath": "/root/aiothings/aiot-root-CA.crt",
+    "certificatePath": "/root/aiothings/aiot-7b1f9785-68e7-4332-9490-a590c7c03773_SBC700au6-certificate.crt",
+    "privateKeyPath": "/root/aiothings/cert-SBC700au6/aiot-7b1f9785-68e7-4332-9490-a590c7c03773_SBC700au6-private.key"
+}

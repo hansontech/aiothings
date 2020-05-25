@@ -12,6 +12,7 @@ exports.handler =  async function(event, context, callback) {
   /*
   https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-lambda-authorizer-input.html
   */
+  console.log('event: ', event)
   try {
     let authStr = event.authorizationToken
     let authList = authStr.split(' ')
@@ -19,48 +20,58 @@ exports.handler =  async function(event, context, callback) {
     if (authList.length > 1 && authList[0] === 'Bearer') {
       token = authList[1]
     }
-    // console.log('event: ', event)
-    // console.log('token: ', token)
+    // event.methodArn example:
+    // 'arn:aws:execute-api:ap-southeast-2:414327512415:omeb3fvsq7/prod/POST/actions/publish_message'
+    let restApiId = event.methodArn.split(':')[5].split('/')[0]
+    let stage = event.methodArn.split(':')[5].split('/')[1]
+    let apiPath = (event.methodArn.split(':')[5].split('/')).slice(3).join('/')
+    // console.log('apiPath: ', apiPath)
+    // console.log('restApiId: ', restApiId)
+    let apigateway = new aws.APIGateway({apiVersion: '2015-07-09'});
+    let apiData = await apigateway.getRestApi( {
+      restApiId: restApiId /* required */
+    }).promise();
+    let dynamodb = new aws.DynamoDB.DocumentClient();
+    let apiQueryData = await dynamodb.query({
+      TableName: 'atApiTable',
+      IndexName: 'ApiName-index',
+      KeyConditions: {
+        'ApiName': {
+          'ComparisonOperator': 'EQ',
+          'AttributeValueList': { 
+            'S' : apiData.name 
+          }
+        }
+      }
+    }).promise()
+    if (apiQueryData === null || apiQueryData.Items.length === 0) {
+      // cannot find the api from database
+      callback(null, generatePolicy('anonymous', 'Deny', event.methodArn))
+      return
+    }
+    let api = apiQueryData.Items[0]
+    let apiPathAuth = api.PathAuth[apiPath]
+    console.log('apiPathAuth: ', apiPathAuth)
+    if (apiPathAuth === 'API-TOKEN' && api.ApiToken === token) {
+      callback(null, generatePolicy('anonymous', 'Allow', event.methodArn))
+      return
+    }
+    let action = 'Deny' // set default
+    // get caller user info from the received access token
     let cognitoidentityserviceprovider = new aws.CognitoIdentityServiceProvider()
     let userData = null
     userData = await cognitoidentityserviceprovider.getUser({
       AccessToken: token /* required */
     }).promise()
     if (userData === null) {
-      // callback('Error: Invalid token'); // Return a 500 Invalid token response
-      console.log('anonymous access is denied.')
-      callback(null, generatePolicy('anonymous', 'Deny', event.methodArn));
-    } else {
-      let restApiId = event.methodArn.split(':')[5].split('/')[0]
-      console.log('restApiId: ', restApiId)
-      let apigateway = new aws.APIGateway({apiVersion: '2015-07-09'});
-      let apiData = await apigateway.getRestApi( {
-        restApiId: restApiId /* required */
-      }).promise();
-      console.log('apiName: ', apiData.name)
-      let dynamodb = new aws.DynamoDB.DocumentClient();
-      let apiQueryData = await dynamodb.query({
-        TableName: 'atApiTable',
-        IndexName: 'ApiName-index',
-        KeyConditions: {
-          'ApiName': {
-            'ComparisonOperator': 'EQ',
-            'AttributeValueList': { 
-              'S' : apiData.name 
-            }
-          }
-        }
-      }).promise()
-      let action = 'Deny'
-      if (apiQueryData !== null && apiQueryData.Items.length > 0) {
-        let api = apiQueryData.Items[0]
-        if (api.UserId === userData.Username || api.AuthorizationType === 'AUTH-SHARE') {
-          action = 'Allow'
-        }
-      }
-      console.log('access is set to: ', action)
-      callback(null, generatePolicy(userData.Username, action, event.methodArn))
+      action = 'Deny'
+    } else if (apiPathAuth === 'AUTH-SHARE') {
+      action = 'Allow'
+    } else if (apiPathAuth === 'AUTH' && api.UserId === userData.Username) {
+      action = 'Allow'
     }
+    console.log('access is set to: ', action)
+    callback(null, generatePolicy(userData.Username, action, event.methodArn))
   } catch (e) {
     console.log('error: ', e)
     callback(null, generatePolicy('anonymous', 'Deny', event.methodArn));

@@ -5,8 +5,12 @@ var environment = {"DynamoDB_TABLE_NAME":"atThingTable","REGION":"ap-southeast-2
 var config = {
     DynamoDB_TABLE_NAME: environment.DynamoDB_TABLE_NAME,
     DYNAMODB_TABLE_REGION: environment.REGION,
+    deviceTableName: 'atDeviceTable',
+    deviceOwnerIndexName: 'OwnerId-DeviceGroupName-index',
     region: environment.REGION,
-    aiotIotActionRole: 'arn:aws:iam::414327512415:role/aiot-iot-default'
+    aiotIotActionRole: 'arn:aws:iam::414327512415:role/aiot-iot-default',
+    alertFunctionName: 'aiotAlertActivate',
+    mserviceS3bucketName: "aiot-bucket" + '-' + process.env.ENV
 };
 
 

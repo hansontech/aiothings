@@ -8,7 +8,7 @@
         <b-button size=" " :variant="reachRoute('mythings','')" @click="toMyThings()">IoT Devices</b-button>
         <b-button size=" " :variant="reachRoute('mymicroservices')" @click="toMyMicroservices()">Microservices</b-button> <!-- My &#181;Services -->
         <b-button size=" " :variant="reachRoute('myapis')" @click="toMyApis()">REST APIs </b-button>
-        <b-button size=" " :variant="reachRoute('myapplications')" @click="toMyApps()">Applications </b-button>
+        <!-- <b-button size=" " :variant="reachRoute('myapplications')" @click="toMyApps()">Applications </b-button> -->
         <!-- &#160&#160&#160&#160&#160 -->
         <b-button size=" " :variant="reachRoute('myfavorites')" v-b-popover.hover.bottom="'Shared services marked favorite'" @click="toMyFavorites()">Favorites</b-button>
         <!-- <b-button :variant="reachRoute('recommended')" @click="toRecommended()">Recommended</b-button> -->
@@ -24,10 +24,11 @@
         <b-button size=" " :variant="reachRoute('mydashboard')" @click="toMyDashboard()">Dashboard</b-button>
         <b-button size=" " v-b-popover.hover.bottom="'Console input output for test'" :variant="reachRoute('myconsole')" @click="toMyConsole()">Test Console</b-button>
       </b-button-group> 
-      <!-- Depreciated, not recommended anymore 2019/12/22 -->
+      <!-- Depreciated, not recommended anymore 2019/12/22
       <b-button-group vertical class="at-sidebar-button" style="width:100%">
         <b-button size=" " variant="info" v-b-popover.hover.bottom="'Download App configuration files'" v-b-modal.modalDownloadConfigConfirm>Configuration</b-button>
       </b-button-group>
+      -->
       <b-modal id="modalDownloadConfigConfirm"
             hide-header 
             size="sm"
@@ -187,13 +188,6 @@ export default {
       this.$router.replace('/user/myapplications')
     },
     async toMyMicroservices () {
-      /*
-      console.log('to my IoT')
-      const username = 'denniskung123'
-      const body = { username }
-      const result = await API.post('thingApi', '/things', { body })
-      console.log('result: ', result)
-      */
       this.$router.replace('/user/mymicroservices')
     },
     async toMyApis () {

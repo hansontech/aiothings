@@ -36,11 +36,28 @@ var config = {
 aws.config.region = config.region;
 const dynamodb = new aws.DynamoDB.DocumentClient();
 const apigateway = new aws.APIGateway({apiVersion: '2015-07-09'});
+const cognitoidentityserviceprovider = new aws.CognitoIdentityServiceProvider()
+
 let lambda = new aws.Lambda();
 
 /**********************
  * Example get method *
  **********************/
+
+app.get('/apps', async function(req, res) {
+  // Add your code here
+  let event = req.apiGateway.event
+  let query = event.queryStringParameters
+  console.log('app query: ', query)
+  try {
+    let data = await cognitoidentityserviceprovider.listUserPoolClients({
+      UserPoolId: config.UserPoolId, /* required */
+    }).promise()
+    res.json({error: null, result: data.UserPoolClients})
+  } catch (err) {
+    res.json({error: err, result: null})
+  }
+});
 
 app.get('/apis', function(req, res) {
   // Add your code here
@@ -128,11 +145,15 @@ async function deleteApi (apiName, restApiId, deploymentId) {
     await apigateway.deleteStage({
       restApiId: restApiId,
       stageName: 'prod' 
-    }).promise()  // must be deleted first
+    }).promise().catch((err) => {
+      console.log('warn: ', err)
+    })  // must be deleted first
     await apigateway.deleteDeployment({
       deploymentId: deploymentId,
       restApiId: restApiId
-    }).promise()
+    }).promise().catch((err) => {
+      console.log('warn: '. err)
+    })
     /* -- No need to delete resources seperately
     let resourcesData = await apigateway.getResources({
       restApiId: restApiId
@@ -178,24 +199,29 @@ app.post('/apis', async function(req, res) {
     // check if paths is equal to that before, then no need to do following
     let existingPathsStr = JSON.stringify(existingApiObject.Paths)
     let newPathStr = JSON.stringify(apiObject.Paths)
+    console.log('')
     if ((existingPathsStr !== newPathStr) || 
-          existingApiObject.Handler !== apiObject.Handler ||
-          existingApiObject.AuthorizationType != apiObject.AuthorizationType) {
+        JSON.stringify(existingApiObject.PathAuth) !== JSON.stringify(apiObject.PathAuth) ||
+          existingApiObject.Handler !== apiObject.Handler) {
          // release resources from previous the definition
       let deleteResult = await deleteApi(existingApiObject.ApiName, existingApiObject.RestApiId, existingApiObject.DeploymentId)
       isCreateNewApi = true
       if (deleteResult !== null && deleteResult.hasOwnProperty('error')) {
         // console.log('error: ', deleteResult.error.message)
+        // Ignore error
+        /*
         if (deleteResult.error.message.includes('Invalid API identifier')) {
         } else {
           res.json(deleteResult);
           return
         }
+        */
       }
     }
   }
   console.log('continue creating api..')
   if (isCreateNewApi === true) {
+    console.log('do create new api')
     // create an Api Gateway structure  
     try {
       // console.log('before updateFunction')
@@ -345,6 +371,9 @@ app.post('/apis', async function(req, res) {
           case 'AUTH-SHARE':
             authType = 'CUSTOM'
             break
+          case 'API-TOKEN':
+            authType = 'CUSTOM'
+            break      
           default:
             console.log('Error: invalid path auth type: ', pathAuth)
             break
@@ -468,6 +497,40 @@ app.post('/apis/*', function(req, res) {
   res.json({success: 'post call succeed!', url: req.url, body: req.body})
 });
 
+app.post('/apps', async function(req, res) {
+  // Add your code here
+  // TODO, Not finished yet 20200424
+  const inputs = req.body
+  let app = inputs.app
+  let clientParameters = {
+    UserPoolId: config.awsUserPoolId,
+    AllowedOAuthFlows: ['code', 'implicit'],
+    AllowedOAuthFlowsUserPoolClient: true,
+    AllowedOAuthScopes: ['email', 'profile', 'openid'],
+    CallbackURLs: [],
+    LogoutURLs: [],
+    SupportedIdentityProviders: [
+      'COGNITO', 'Azure-Personal', 'Google', 'Facebook', 'SignInWithApple' 
+      /* more items */
+    ]
+  }
+  Object.assign(app, clientParameters)
+  try {
+    let clientData = null
+    if (app.ClientId === '') {
+      // create client
+      clientData = await cognitoidentityserviceprovider.createUserPoolClient(app).promise()
+    } else {
+      clientData = await cognitoidentityserviceprovider.updateUserPoolClient(app).promise()
+    }
+    let userPoolClient = clientData.UserPoolClient
+    res.json({error: null, result: userPoolClient})
+  } catch (err) {
+    console.log('app error: ', err)
+    res.json({error: err, result: null})
+  }
+});
+
 /****************************
 * Example post method *
 ****************************/
@@ -539,6 +602,26 @@ app.delete('/apis', async function(req, res) {
 app.delete('/apis/*', function(req, res) {
   // Add your code here
   res.json({success: 'delete call succeed!', url: req.url});
+});
+
+app.delete('/apps', async function(req, res) {
+  // Add your code here
+  let event = req.apiGateway.event;
+  let query = event.queryStringParameters;
+  let app = JSON.parse(query.app)
+  if (app === undefined) {
+    res.json({error: 'need APP object provided'})
+    return
+  }
+  try {
+    await cognitoidentityserviceprovider.deleteUserPoolClient({
+      ClientId: app.ClientId, /* required */
+      UserPoolId: config.awsUserPoolId /* required */
+    }).promise()
+    res.json({error: null})
+  } catch (err) {
+    res.json({error: err})
+  }
 });
 
 app.listen(3000, function() {

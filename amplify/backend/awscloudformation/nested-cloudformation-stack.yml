@@ -263,33 +263,6 @@
 				}
 			}
 		},
-		"apisolutionApi": {
-			"Type": "AWS::CloudFormation::Stack",
-			"Properties": {
-				"TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/api/solutionApi-cloudformation-template.json",
-				"Parameters": {
-					"authRoleName": {
-						"Ref": "AuthRoleName"
-					},
-					"unauthRoleName": {
-						"Ref": "UnauthRoleName"
-					},
-					"functionsolutionFunctionName": {
-						"Fn::GetAtt": [
-							"functionsolutionFunction",
-							"Outputs.Name"
-						]
-					},
-					"functionsolutionFunctionArn": {
-						"Fn::GetAtt": [
-							"functionsolutionFunction",
-							"Outputs.Arn"
-						]
-					},
-					"env": "prod"
-				}
-			}
-		},
 		"apimserviceApi": {
 			"Type": "AWS::CloudFormation::Stack",
 			"Properties": {
@@ -434,7 +407,7 @@
 					}
 				},
 				"Handler": "index.handler",
-				"Runtime": "nodejs8.10",
+				"Runtime": "nodejs10.x",
 				"Timeout": "300",
 				"Role": {
 					"Fn::GetAtt": [

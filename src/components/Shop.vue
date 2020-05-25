@@ -1,9 +1,9 @@
 <template>
 <div> 
   <App/>
-  <b-container class="mt-2" style="min-height: 620px; margin-top: 65px">
+  <b-container class="mt-2" style="min-height: 620px;">
       <font color="white">
-        <vue-markdown id="ShopBegin" style="background-color: darkcyan; padding: 20px">
+        <vue-markdown id="ShopBegin" style=" margin-top: 65px; background-color: darkcyan; padding: 20px">
 
 ### Shop
 

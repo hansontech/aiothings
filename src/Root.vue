@@ -13,7 +13,8 @@ export default {
     return {
       consoleSub: null,
       loggingSub: null,
-      servicesLogging: {}
+      servicesLogging: {},
+      consoleSubscribeTopic: 'console/output'
     }
   },
   created () {
@@ -22,6 +23,13 @@ export default {
   mounted () {
     eventBus.$on('login', this.onLogin)
     eventBus.$on('logout', this.onLogout)
+    eventBus.$on('consoleSubscribe', this.onConsoleSubscribe)
+    if (this.$store.getters.consoleSubscribeTopic === null) {
+      this.$store.commit('setConsoleSubscribeTopic', this.consoleSubscribeTopic)
+    } else {
+      this.consoleSubscribeTopic = this.$store.getters.consoleSubscribeTopic
+    }
+    this.onConsoleSubscribe(this.consoleSubscribeTopic)
   },
   beforeDestroy () {
     this.logoutClean()
@@ -41,14 +49,22 @@ export default {
       console.log('onLogout')
       this.logoutClean()
     },
-    onLogin () {
-      console.log('onLogin')
-      this.logoutClean()
-      // Subscribe
-      let subscribeConsoleOutputTopic = 'aiot/' + this.$store.getters.userId + '/+/console/output'
+    onConsoleSubscribe (subscribeTopic) {
+      if (subscribeTopic === '' || subscribeTopic === null) {
+        subscribeTopic = 'console/output'
+      }
+      this.consoleSubscribeTopic = subscribeTopic
+      this.$store.commit('setConsoleSubscribeTopic', this.consoleSubscribeTopic)
+      let subscribeConsoleOutputTopic = 'aiot/' + this.$store.getters.userId + '/+/' + subscribeTopic
+      console.log('subscribe topic: ', subscribeConsoleOutputTopic)
+      if (this.consoleSub !== null) {
+        this.consoleSub.unsubscribe()
+        this.consoleSub = null
+      }
+      console.log('subscribe')
       this.consoleSub = PubSub.subscribe(subscribeConsoleOutputTopic).subscribe({
           next: data => {
-              // console.log('console output:', data)
+              console.log('console output:', data)
               const topic = data.value[Object.getOwnPropertySymbols(data.value)[0]]
               let consoleOutputs = this.$store.getters.consoleOutputs
               let inputMessage = {}
@@ -77,6 +93,12 @@ export default {
           error: error => console.error('user subscribe console error: ', error),
           close: () => console.log('Done')
       })
+      console.log('consoleSubL ', this.consoleSub)
+    },
+    onLogin () {
+      console.log('onLogin')
+      this.logoutClean()
+      // Subscribe
       this.loggingSub = PubSub.subscribe('aiot/+/+/logging/output').subscribe({
             next: data => {
               // console.log('logging output:', data)

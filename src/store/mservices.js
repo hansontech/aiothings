@@ -50,6 +50,7 @@ export default {
     },
     replaceMservice: function (context, newData) {
       // only one parameter is allowed for actions.?
+      console.log('replacing: ', newData)
       let newMs = newData.replacingService
       let mservices = newData.services
       console.log('replaceM mservices: ', mservices)

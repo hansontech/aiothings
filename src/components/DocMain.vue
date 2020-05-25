@@ -400,8 +400,8 @@ With the Edge Setting tab of AIoThings IoT Device window, users can define three
                           Download <a v-b-tooltip.hover="'that enable secure communications between AWS IoT'">security certificates</a> and <a v-b-tooltip.hover="'that contains configuration information specific to your AWS IoT Greengrass core and the AWS IoT endpoint.'">the config.json file of this device as a zipped setup file.</a>
                         </li>
                         <li>Move and decompress the downloaded files of [1] amd [2] to the Edge device, under the same path.
-                          <pre class="at-code"><code>sudo tar -xzvf greengrass-OS-architecture-1.7.0.tar.gz -C /
-sudo unzip thing-id-setup.zip -d /greengrass</code></pre>
+                          <pre class="at-code"><code>sudo tar -xzvf greengrass-OS-architecture-x.x.x.tar.gz -C /
+sudo unzip thing_id-edge-setup.zip -d /greengrass</code></pre>
                         <li>Start AWS IoT Greengrass on your core device. 
                           <pre class="at-code"><code>cd /greengrass/ggc/core/
 sudo ./greengrassd start</code></pre>
@@ -506,22 +506,53 @@ AIoThings only allow messages complying to its message header format to be recei
 
 </vue-markdown>
 <vue-markdown id="DocThingProvisioning">
-### Just-in-time provisioning
+### Device Provisioning
 
-For an IoT device manufacturer, it requires to provision a lot of devices in a secure and scalable manner connecting to the cloud, rather than manually creating a thing object and thing certificates.
-The just-in-time provisioning allows devices registering to AIoThings without requiring human intervention.
+For IoT device manufacturers or IoT service providers, they often require to provision a lot (thousands) of devices in a secure and scalable manner connecting to their managed clouds and to avoid manual configurations done by users.
+The just-in-time provisioning automates devices' registering to clouds **Zero Configuration**.
+At the same time, device manufacturers and IoT operators also share the responsibilities of managing devices - **Device Management** with users, such as firmware upgrades, status watchdog and event alerts.
+AIoThings introduces **Device Group** for these provisioning and management needs.
 
-As we mentioned previously, the communication between IoT devices and AIoThings cloud is secured by TLS. And it needs PKI (Public Key Infrastructure) certificates to authenticate each other, in two ways, during MQTT connections.
+IoT operators create Device Groups where each group is a product line with common management attributes (for instance, hardware and applications).
+A Device Group owns its unique set of X.509 certificates that will be used by all devices assigned to this group to connect to AIoThings cloud initially.
+As we mentioned previously, connections between IoT devices and AIoThings cloud are secured by MQTT over TLS protocol. And it needs PKI (Public Key Infrastructure) certificates to authenticate each other in two ways.
+The initial certificates (Group Certificates) of each Device Group have limited access rights that only allow devices to authenticate themselves from the cloud and later to request dedicated certificates with full access rights.
+A Device Group also includes a number of unique Device IDs that are created by the IoT operator owner. Therefore, an IoT device can be uniquely defined and managed by its belonging Device Group.
 
-First of all, AIoThings users (manufacturers) need to register a series of device serial numbers to database tables and then assigning a set of certificates to the serial numbers.
-Next, the serial number will be uniquely assigned to each of the provisioning devices.
-Device provisioning API is the REST API, either through system provides or through user defines, that receives a pair of user-ID and serial number as the request, and responses with the information required for secured MQTT connections, including certificates.
-Lastly, the provisioned device now has enough data to set up a secured MQTT connection with AIoThings.
+IoT devices have factory settings for device provisioning and management.
+1. Initial certificates are required to build secure connections with the cloud before obtaining permanent certificates dedicated to each device.
+2. **Cloud service software** connects to AIoThings using the certificates. If it found that it doesn't have Thing Object assigned yet, then use the message topic **aiot/system/devices/certificates/create** to request AIoThings for creating a Thing Object and obtaining permanent certificates. Cloud replies **aiot/system/+/certificates/create/response** message to the software with certificates as the body. The replied message body includes JSON keys of ***thingName***, ***certificatePem***, and ***privateKey***.
+3. **Device service software** is responsible to interface with the device to collect device status or to control the device directly. It communicates with Cloud service software to interact according to requests from Cloud service software. 
 
-And the entire process is carefully guarded to prevent man-in-the-middle attacks. For example, data returned from the provisioning REST API should be signed with the user's signature.
+IoT device users need to create IoT Thing Object at AIoThings and bind the Thing object (and also the user's account) to the device IDs first.
+AIoThings has the URL path **/user/mythings/add_device?group={Device Group name}&id={Device ID}** for this step. Practically, IoT devices often come with their QR codes to address these links. By scanning the QR codes, users are able to complete this process easily.
+The next step is to power on the device, if the device has been bound to a user already, it will complete the process to receive the certificates of the binding Thing Object, and reboot itself.
 
 </vue-markdown>
 <b-img style="padding:30px;" src="/static/jit-provisioning.png" fluid align=center />
+<vue-markdown id="DocThingBSP">
+
+#### Board support package
+
+Board support package is a set of software, in a zipped file, including the **cloud service** and **device service** functions as descrbed above and an installation guide.
+This BSP file is uploaded to Device Group, usually for interfacing between the manufacturer and the IoT service operator.
+</vue-markdown>
+
+<vue-markdown id="DocThingNotification">
+#### Alert and Notification
+
+When devices show abnormal behaviours or alert events are detected from their connections to the cloud, such like an unexpected disconnection, by enabling the Notification option from Thing's edit console, device owners will be notified by the system.
+User's registered email addresses are used for these notifications.
+
+Additionally, users can add their own event handlers with their microservices by subscribing the message topic of 
+```
+aiot_event/disconnected   ; specific for the event type of disconnected 
+aiot_event/+  ; for all event types 
+```
+
+For example, a custom handler can be used to forward the event notifications to IFTTT or Zapier services, to trigger other applications and services available on these platforms.
+
+</vue-markdown>
 
 <vue-markdown class="chapterSpace" id="DocMicroservice">
 
@@ -702,9 +733,14 @@ AIoThings provide REST API editor and gateway for developers to create their own
 A REST API is defined to include following parts:
 1. **API Name**: Name of the API
 2. **Description**: to describe what this API stands for and how to use it. It may include the HTTP methods in support, their query parameters, and also the expected responses.
-3. **Path**: The list of paths supported. For REST API requests with supported paths, the gateway will pass the request to the REST API's predefined backend handler (a microservice).
-4. **Handler**: The backend handler that handles this API request. Handlers are actually microservices capable to process HTTP requests.
-5. **Authorization**: The authorization option for this REST API. If set it to 'Authenticated access', then the API requires the autorization check from the gateway before passing the request to the handler. 'Owner access only' means that the API is only authorized to the owner of the API. or 'Public access' allows anonymous access and no need of authorization information. The authorization data is obtained through user's login process, and is used to sign the HTTP requests. 
+3. **API Token**: For API paths with 'API token' authorization method selected, this value needs to assigned to the header.Authorization field of HTTP API calls. 
+4. **Path**: The list of paths supported. For REST API requests with supported paths, the gateway will pass the request to the REST API's predefined backend handler (a microservice).
+5. **Handler**: The backend handler that handles this API request. Handlers are actually microservices capable to process HTTP requests.
+6. **Authorization**: The authorization option of each path of this REST API. 
+  6.1. If set it to 'Authenticated access', then the API requires the autorization check from the gateway before passing the request to the handler. 
+  6.2. 'Owner access only' means that the API is only authorized to the owner of the API. or
+  6.3. 'API token' use API token value as the authorization, or
+  6.4. 'Public access' allows anonymous access and no need of authorization information. The authorization data is obtained through user's login process, and is used to sign the HTTP requests. 
 
 For authorization required options, the API request needs to provide the 'authorization' parameter in the request header, and the value is the access token of the user authentication data which is replied by the authentication server.
 </vue-markdown>
@@ -733,8 +769,9 @@ AIoThings defines a set of REST API available for users to access, for exameple 
 <vue-markdown id="DocAppAuth">
 ### Application Authentication
 
-When users' Internet applications want to use AIoThings REST APIs that require user authentication, AIoThings needs go through OAuth - an open standard protocol, every time to grant the application and the user.
-After the whole authentication process completed, eventually applications will receive access tokens that is required to be added to the headers of REST API requests.
+When users' Internet applications want to use AIoThings REST APIs that need authorization, AIoThings has two methods to authorize them.
+1. API token: Each API is assigned a API token. If an API path is set to use 'API Token' as the authorization method, then the API call must include the header.Authorization token equals to this API token value.
+2. OAuth 2.0 - an open standard protocol, is used every time to grant an AIoThings user for accessing the API path. After the user authentication process is completed, user applications will receive access tokens that are set to the header.Authorization token of the REST API requests.
 
 As the first step of OAuth authentication, users need to register their applications here in AIoThings console with a pair of Application Client ID and Client Secret keys. Later then, the OAuth requests from applications will use these client keys as their HTTP parameters to request for the tokens.
  
@@ -810,13 +847,13 @@ The window also show other type of shared resources such as Node-RED Node and Fl
 <vue-markdown id="DocConsole">
 ### Console
 
-The Console Window is used for debug and test purposes. 
+The Console Window is used for debugging and testing purposes. 
+
+User is able to subscribe to message topics and then the console will display the newly published messages with these topics. 
 
 Developers can use it to:
-1. Embed console-output codes inside microservice code blocks to output debug messages to this console window.
-2. Send an input message (topic and payload) as a trigger.
-
-Any messages with the topic format of +/{user id}/console/output will be displayed on this window.
+1. Insert console-output codes inside microservice code blocks to output debug messages to this console window.
+2. Send (Publish) messages with topics and payloads to trigger other microservices.
 
 User can use [consoleOutput](#DocNodejsConsoleOutput) API to output debug messages during the execution of microservices. In this case, {user id} will be automatically added ahead of the 'console/output' topic.
 
@@ -1153,6 +1190,7 @@ In order to properly configure the AWS SDK to use the AIoThings resource, AIoThi
 
 The configuration files can be downloaded through **App Config** button of [User's main page](/user).
 
+For iOS app, place awsconfiguration.json into the folder containing the info.plist file in the Xcode project. 
 Once the configuration file is properly installed, a typical application scenario will first sign in to the AIoThings user identity and use the authenticated identity to access the AIoThings resources, such as calling a REST API, or subscribing and publishing messages.
 
 ***JavaScript example for user sign-in and calling a REST API***
@@ -1274,7 +1312,7 @@ export default {
       this.checkDocLocation()
     },
     checkDocLocation () {
-      console.log('wheel: ')
+      // console.log('wheel: ')
       // let that = this
       // let currentDocElement = null
       for (let el of this.idDocs) {

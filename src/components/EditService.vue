@@ -14,7 +14,7 @@
              hide-header
              @ok="returnDiscardChangesOk"
              @cancel="returnCancel">
-             Discard changes and return?
+             Discard the changes and return?
           </b-modal>
         </b-col>
       </b-row>
@@ -169,8 +169,8 @@
                 breakpoint="md"
                 label-size="lg"
                 
-                label="Input microservice:"
-                description="Optional, limit the input message only from this microservice"
+                label="Input microservice or thing:"
+                description="Optional, limit the input message only from this microservice or thing device"
                 label-for="inputHorizontal">
               <b-form-input v-model="inputMicroservice" placeholder="Input message microservice name"></b-form-input>
             </b-form-group>
@@ -447,7 +447,7 @@ export default {
       let userId = this.mservice.UserId
       let that = this
       reader.onload = function (event) {
-         // dispatch fileAttached to state UI postEditor with event.target.result as read dataURL
+        // dispatch fileAttached to state UI postEditor with event.target.result as read dataURL
         let content = event.target.result
         // still save to project bucket Storage.configure({level: 'public', bucket: this.ggS3BucketName})
         let fileName = userId + '_' + that.mservice.ServiceName + '.zip'
@@ -458,6 +458,7 @@ export default {
           // console.log(result)
           // s3://bucket/key
           that.mservice.CodeFileName = fileName
+          that.isChangedNotSaved = true
           that.$forceUpdate()
         })
         .catch(err => {

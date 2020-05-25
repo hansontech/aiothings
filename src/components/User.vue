@@ -29,7 +29,8 @@ export default {
         mservice: '',
         api: '',
         thing: ''
-      }
+      },
+      mythingsTabIndex: 0
     }
   },
   computed: {

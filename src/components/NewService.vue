@@ -215,8 +215,8 @@
                     breakpoint="md"
                     label-size="lg"
                     
-                    label="Input microservice:"
-                    description="Optional, limit the input message only from this microservice"
+                    label="Input microservice or thing:"
+                    description="Optional, limit the input message only from this microservice or thing device"
                     label-for="inputHorizontal">
                   <b-form-input v-model="inputMicroservice" placeholder="Input message microservice name"></b-form-input>
                 </b-form-group>

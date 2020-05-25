@@ -8,12 +8,25 @@
       <b-row>
         <b-col sm="6">  <!-- left half -->
           <b-row align-v="center">
-            <b-col sm="6" align="start">
-              <h5>Console output</h5>
+            <b-col sm="8" align="start">
+              <b-form inline @submit.prevent="onSubscribeMessageTopicSubmit" @reset="onSubscribeMessageTopicReset">
+                <b-form-group id="subscribeMessageTopicGroup"
+                        label-for="subscribeTopic"
+                        >
+                  <b-form-input class="at-border" id="subscribeTopic"
+                          type="text" 
+                          v-model="subscribeMessageTopic"
+                          required
+                          placeholder="console/output">
+                  </b-form-input>
+                  <b-button v-if="currentSubscribeTopic !== subscribeMessageTopic" type="submit" variant="primary">Subscribe</b-button>
+                  <b-button type="reset" size="sm" variant="danger">Reset</b-button>
+                </b-form-group>
+              </b-form>
             </b-col>
-            <b-col sm="6" align="end">
-              <b-button variant="info" @click="scrollToEnd()" v-b-popover.hover.bottom="'Scroll to the end'">To end</b-button>
-              <b-button variant="info" @click="resetConsoleOutput()">Clear</b-button> 
+            <b-col sm="4" align="end">
+              <b-button variant="info" @click="scrollToEnd()" size="sm" v-b-popover.hover.bottom="'Scroll to the end'">To end</b-button>
+              <b-button variant="info" @click="resetConsoleOutput()" size="sm">Clear</b-button> 
             </b-col>
           </b-row>
           <b-row class="mt-2 ml-0 mr-0" style="height:440px;" >
@@ -41,7 +54,22 @@
             </b-col>
           </b-row>
           <b-row class="mt-2">
-            <b-col>
+            <b-col cols="5">
+              <b-form @submit.prevent="onSubmit" @reset="onReset">
+                <b-form-group id="publishMessageTopicGroup"
+                        label="Service from"
+                        label-for="publishServiceFrom"
+                        >
+                  <b-form-input class="at-border" id="publishServiceFrom"
+                          type="text" 
+                          v-model="inputMessage.fromService"
+                          required
+                          placeholder="service ID (e.g. console)">
+                  </b-form-input>
+                </b-form-group>
+              </b-form>
+            </b-col>
+            <b-col cols="7">
               <b-form @submit.prevent="onSubmit" @reset="onReset">
                 <b-form-group id="publishMessageTopicGroup"
                         label="Message topic"
@@ -51,12 +79,15 @@
                           type="text" 
                           v-model="inputMessage.topic"
                           required
-                          placeholder="Enter topic ( e.g. console/output )">
+                          placeholder="topic (e.g. console/output">
                   </b-form-input>
                 </b-form-group>
               </b-form>
             </b-col>
           </b-row>
+          <b-modal ref="missingInputTopicModal" ok-only title="Failed to publish message" >
+                The message topic and service id cannot be empty.
+          </b-modal>
           <b-modal ref="missJsonModal" ok-only title="Failed to publish message" >
                 The message body is not a JSON.
           </b-modal>
@@ -90,9 +121,12 @@ export default {
   data: function () {
     return {
       inputMessage: {
+        fromService: 'console',
         topic: '',
         body: ''
       },
+      subscribeMessageTopic: '',
+      currentSubscribeTopic: '',
       consoleOutputs: []
     }
   },
@@ -115,21 +149,42 @@ export default {
     }
   },
   created () {
+    this.inputMessage.fromService = this.$store.getters.consoleInputFrom
     this.inputMessage.topic = this.$store.getters.consoleInputTopic
     this.inputMessage.body = this.$store.getters.consoleInputBody
     eventBus.$on('newConsoleOutput', this.onNewConsoleOutput)
-     this.consoleOutputs = this.$store.getters.consoleOutputs
+    this.consoleOutputs = this.$store.getters.consoleOutputs
+    this.subscribeMessageTopic = this.$store.getters.consoleSubscribeTopic
+    this.currentSubscribeTopic = this.subscribeMessageTopic
   },
   beforeDestroy () {
   },
   methods: {
     scrollToEnd () {
       var container = this.$el.querySelector('#consoleOutputContainer')
-      container.scrollTop = container.scrollHeight
+      if (container !== null) {
+        container.scrollTop = container.scrollHeight
+      }
+    },
+    onSubscribeMessageTopicSubmit () {
+      console.log('subscribe submit')
+      this.currentSubscribeTopic = this.subscribeMessageTopic
+      // eventBus.$emit('consoleSubscribe', this.subscribeMessageTopic)
+      this.$parent.$parent.onConsoleSubscribe(this.subscribeMessageTopic)
+      this.$router.go() // only through reload page able to let take effect
+    },
+    onSubscribeMessageTopicReset () {
+      this.subscribeMessageTopic = ''
+      this.currentSubscribeTopic = this.subscribeMessageTopic
+      // eventBus.$emit('consoleSubscribe', this.subscribeMessageTopic)
+      this.$parent.$parent.onConsoleSubscribe(this.subscribeMessageTopic)
+      this.$router.go() // only through reload page able to let take effect
     },
     onSubmit () {
+      console.log('submit')
     },
     onReset () {
+      console.log('reset')
     },
     resetConsoleOutput () {
       this.consoleOutputs = null
@@ -141,7 +196,8 @@ export default {
       // this.$forceUpdate()
     },
     async publishMessage () {
-      if (this.inputMessage.topic && this.inputMessage.topic !== ' ' && this.inputMessage.topic !== '') {
+      if ((this.inputMessage.fromService && this.inputMessage.fromService !== ' ' && this.inputMessage.fromService !== '') &&
+          (this.inputMessage.topic && this.inputMessage.topic !== ' ' && this.inputMessage.topic !== '')) {
         let bodyJson = null
         try {
           bodyJson = JSON5.parse(this.inputMessage.body)
@@ -149,9 +205,11 @@ export default {
           this.$refs.missJsonModal.show()
           return
         }
-        let topic = 'aiot/' + this.$store.getters.userId + '/console/' + this.inputMessage.topic
+        let topic = 'aiot/' + this.$store.getters.userId + '/' + this.inputMessage.fromService + '/' + this.inputMessage.topic
         await PubSub.publish(topic, bodyJson)
         console.log('message sent: ', topic)
+      } else {
+        this.$refs.missingInputTopicModal.show()
       }
     }
   }
