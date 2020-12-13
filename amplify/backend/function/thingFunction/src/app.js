@@ -18,6 +18,7 @@ var awsServerlessExpressMiddleware = require('aws-serverless-express/middleware'
 const thing = require('./thing')
 const edge = require('./edge')
 const config = require('./config')
+const applyModel = require("./utility")
 
 // declare a new express app
 var app = express()
@@ -32,6 +33,7 @@ app.use(function(req, res, next) {
 });
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
+
 
 /**********************
  * Example get method *
@@ -52,6 +54,32 @@ app.get('/things', function(req, res) {
           res.json(result)
         }
       })      
+    } else if (query.command !== undefined) { 
+      if (query.command === 'get_properties') {
+        const iot = new AWS.Iot()
+        iot.describeEndpoint({endpointType: 'iot:Data-ATS'}, function(err, data) {
+            if (err) {
+              console.log(err, err.stack); // an error occurred
+              res.json({})
+            } else {
+              const endpointAddress = data.endpointAddress
+              console.log('endpoint: ', endpointAddress)
+              const iotdata = new AWS.IotData({endpoint: endpointAddress})
+              iotdata.getThingShadow({
+                thingName: query.thingName /* required */
+                // shadowName: 'STRING_VALUE'
+              }, function(err, data) {
+                if (err) {
+                  console.log(err, err.stack); // an error occurred
+                  res.json({})
+                } else {
+                  console.log(data.payload);           // successful response
+                  res.json(data.payload)
+                }
+              });
+            }
+        })
+      }
     } else {
       thing.getThingDetail(query.userId, query.certId, query.thingName, query.thingId, req.apiGateway.context, function(err,result) {
         res.json(result)
@@ -252,10 +280,17 @@ app.post('/things', function(req, res) {
   // let event = req.apiGateway.event
   // console.log('event :', event)
   console.log('userId: ', req.body.userId)
-
+  let firmware = null
+  if (req.body.firmware !== undefined) {
+    firmware = req.body.firmware
+  }
   if (req.body.certId !== undefined) {
-    thing.updateThing(req.body.userId, req.body.certId, req.body.name, req.body.thingId, req.body.desc, req.body.alertEnabled, req.apiGateway.context, function(err,result) {
-      res.json(result)
+    thing.updateThing(req.body.userId, req.body.certId, req.body.name, req.body.thingId, req.body.desc, req.body.alertEnabled, firmware, req.apiGateway.context, function(err,result) {
+      if (err !== null) {
+        res.json({error: err})
+      } else {
+        res.json(result)
+      }
     })
   }else {
     thing.createThing(req.body.userId, req.body.thingNameTag, req.body.desc, req.body.deviceGroupName, req.body.alertEnabled, req.apiGateway.context, function(err,result) {
@@ -433,6 +468,14 @@ app.put('/device-groups', async function(req, res) {
     attrValues[':bspFileName'] = deviceGroup.BspFileName
   }
   try {
+    if ((typeof deviceGroup === 'object') && deviceGroup.Firmware !== undefined && deviceGroup.Firmware.Desired !== undefined) {
+      let firmware = deviceGroup.Firmware
+      await applyModel.updateFirmware(null, null, firmware, 'fw_group_' + deviceGroup.DeviceGroupName, 'thinggroup', deviceGroup.DeviceGroupName)
+      deviceGroup.Firmware.Processing = deviceGroup.Firmware.Desired
+      delete deviceGroup.Firmware.Desired
+      updateExpression = updateExpression + ', Firmware = :firmware'
+      attrValues[':firmware'] = deviceGroup.Firmware
+    } 
     let updatedData = await dynamodb.update({
       TableName: config.deviceTableName,
       Key:{
@@ -443,7 +486,8 @@ app.put('/device-groups', async function(req, res) {
       ExpressionAttributeValues: attrValues,
       ReturnValues:'ALL_NEW'
     }).promise()
-    res.json(updatedData)
+    console.log('DeviceGroup New: ', updatedData.Attributes)
+    res.json(updatedData.Attributes)
   } catch(err) {
     res.json({error: err})
   }
@@ -512,6 +556,11 @@ app.delete('/device-groups', function(req, res) {
           }
           let deletedData = null
           try {
+             await iot.deleteThingGroup({
+                thingGroupName: deviceGroupName, /* required */
+             }).promise().catch(function(err) {
+                console.log('warning: ', err); // an error occurred
+             })
              deletedData = dynamodb.delete({
               TableName: config.deviceTableName,
               Key: {

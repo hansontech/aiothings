@@ -4,7 +4,7 @@
         <b-tab  title="IoT Devices">
           <b-row align-v="center" class="at-bottombar">
               <b-col align="start" sm="4">
-                <h4>IoT Devices <small>({{things.length}})</small></h4>
+                <h4>IoT Devices <small>({{(things !== null) ? things.length : 0}})</small></h4>
               </b-col>
             <b-col sm="4">
                 <b-form-input class="at-border"
@@ -15,8 +15,8 @@
                 </b-form-input>
               </b-col>          
               <b-col sm="4" align="end">
-                <b-button variant="info" @click="refreshThings()">Refresh</b-button>
-                <b-button variant="success" @click="createThing()" v-b-popover.hover.bottom="'Create new IoT device'" >Create</b-button>
+                <b-button variant="info" @click="refreshThings()"><i class="fas fa-sync-alt" /></b-button>
+                <b-button variant="success" class="ml-1" @click="createThing()" v-b-popover.hover.bottom="'Create new IoT device'" ><i class="fas fa-plus" /></b-button>
               </b-col>
               <!--  <qrcode-stream @decode="onQRCodeDecode"></qrcode-stream> -->
           </b-row>
@@ -34,7 +34,7 @@
               </b-col>
             </b-row>
           </div>
-          <div class="text-center mt-5" v-if="things.length === 0">
+          <div class="text-center mt-5" v-if="things === null || things.length === 0">
                   No IoT devices available.
           </div>
           <b-row class="mt-2">
@@ -65,7 +65,7 @@
                         <!-- VUE reference: https://vuejs.org/v2/guide/events.html -->
                         <b-dropdown-item @click.stop="showThingStatus(things.indexOf(thing))">Dashboard</b-dropdown-item>
                         <b-dropdown-item @click.stop="showThingDetail(things.indexOf(thing))">Edit</b-dropdown-item>
-                        <b-dropdown-item v-b-modal.modalDeleteConfirm @click="deletingThingIndex=things.indexOf(thing)">Delete</b-dropdown-item>
+                        <b-dropdown-item v-b-modal.modalDeleteConfirm @click="deletingThingIndex=things.indexOf(thing)" :disabled="$store.getters.isGuestLoggedin">Delete</b-dropdown-item>
                       </b-dropdown>
                     </b-col>
                   </b-row>
@@ -77,7 +77,7 @@
                   </b-row>
                   <b-row class="ml-0 mt-1">
                     <b-col class="at-border at-desc-display">
-                      <vue-markdown>{{thing.ThingDesc}}</vue-markdown>
+                      <markdown-it-vue :content="thing.ThingDesc" />
                     </b-col>               
                   </b-row>
                 </b-card>
@@ -88,7 +88,7 @@
         <b-tab  title="Provisioning">
           <b-row align-v="center" class="at-bottombar">
             <b-col align="start" sm="4">
-                <h4>Device Groups <small>({{deviceGroups.length}})</small></h4>
+                <h4>Device Groups <small>({{(deviceGroups !== null) ? deviceGroups.length : 0}})</small></h4>
             </b-col>
             <b-col sm="4">
                 <b-form-input class="at-border"
@@ -99,8 +99,8 @@
                 </b-form-input>
               </b-col>        
               <b-col sm="4" align="end">
-                <b-button variant="info" @click="refreshDeviceGroups()">Refresh</b-button>
-                <b-button variant="success" @click="createDeviceGroup()" v-b-popover.hover.bottom="'Create new Device Group'" >Create</b-button>
+                <b-button variant="info" @click="refreshDeviceGroups()"><i class="fas fa-sync-alt" /></b-button>
+                <b-button variant="success" class="ml-1" @click="createDeviceGroup()" v-b-popover.hover.bottom="'Create new Device Group'" ><i class="fas fa-plus" /></b-button>
                 <!-- <b-button variant="light" v-b-modal.scanDeviceModal v-b-popover.hover.bottom="'Add new device from QR Code'" >Scan</b-button> -->
               </b-col>
               <!--  <qrcode-stream @decode="onQRCodeDecode"></qrcode-stream> -->
@@ -115,7 +115,7 @@
               </b-col>
             </b-row>
           </div>
-          <div class="text-center mt-5" v-if="deviceGroups.length === 0">
+          <div class="text-center mt-5" v-if="deviceGroups === null || deviceGroups.length === 0">
               No device group is available.
           </div>
           <b-row class="mt-2">
@@ -147,13 +147,13 @@
                         <!-- VUE reference: https://vuejs.org/v2/guide/events.html -->
                         <b-dropdown-item @click.stop="showDeviceGroupStatus(deviceGroups.indexOf(deviceGroup))">Manage Devices</b-dropdown-item>
                         <b-dropdown-item @click.stop="showDeviceGroupDetail(deviceGroups.indexOf(deviceGroup))">Edit</b-dropdown-item>
-                        <b-dropdown-item v-b-modal.modalDeleteDeviceGroupConfirm @click="deletingDeviceGroupIndex=deviceGroups.indexOf(deviceGroup)">Delete</b-dropdown-item>
+                        <b-dropdown-item v-b-modal.modalDeleteDeviceGroupConfirm @click="deletingDeviceGroupIndex=deviceGroups.indexOf(deviceGroup)" :disabled="$store.getters.isGuestLoggedin">Delete</b-dropdown-item>
                       </b-dropdown>
                     </b-col>
                   </b-row>
                   <b-row class="ml-0 mt-1">
                     <b-col class="at-border at-desc-display">
-                      <vue-markdown>{{deviceGroup.DeviceGroupDesc}}</vue-markdown>
+                      <markdown-it-vue style="color:white;" :content="deviceGroup.DeviceGroupDesc" />
                     </b-col>               
                   </b-row>
                 </b-card>
@@ -240,7 +240,6 @@ export default {
     tabIndex: {
       handler: function (newValue, oldValue) {
         this.$parent.mythingsTabIndex = newValue
-        console.log('tab:', newValue)
       }
     },
     things: {

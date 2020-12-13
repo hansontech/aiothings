@@ -1,5 +1,5 @@
 // this is an auto generated file. This will be overwritten
-import gql from "graphql-tag";
+import gql from 'graphql-tag'
 
 export const GetEvent = gql`
   query GetEvent($id: ID!) {
@@ -14,7 +14,7 @@ export const GetEvent = gql`
       }
     }
   }
-`;
+`
 export const ListEvents = gql`
   query ListEvents(
     $filter: TableEventFilterInput
@@ -32,4 +32,4 @@ export const ListEvents = gql`
       nextToken
     }
   }
-`;
+`

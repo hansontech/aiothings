@@ -8,6 +8,11 @@
       <b-row>
         <b-col sm="6">  <!-- left half -->
           <b-row align-v="center">
+            <b-col sm="6" align="start">
+              <h5>Subscribe</h5>
+            </b-col>
+          </b-row>
+          <b-row align-v="center">
             <b-col sm="8" align="start">
               <b-form inline @submit.prevent="onSubscribeMessageTopicSubmit" @reset="onSubscribeMessageTopicReset">
                 <b-form-group id="subscribeMessageTopicGroup"
@@ -20,13 +25,13 @@
                           placeholder="console/output">
                   </b-form-input>
                   <b-button v-if="currentSubscribeTopic !== subscribeMessageTopic" type="submit" variant="primary">Subscribe</b-button>
-                  <b-button type="reset" size="sm" variant="danger">Reset</b-button>
+                  <b-button class="ml-1" type="reset"  variant="info"><i class="fas fa-times" /></b-button>
                 </b-form-group>
               </b-form>
             </b-col>
             <b-col sm="4" align="end">
-              <b-button variant="info" @click="scrollToEnd()" size="sm" v-b-popover.hover.bottom="'Scroll to the end'">To end</b-button>
-              <b-button variant="info" @click="resetConsoleOutput()" size="sm">Clear</b-button> 
+              <b-button variant="info" @click="scrollToEnd()"  v-b-popover.hover.bottom="'Scroll to the end'"><i class="fas fa-angle-double-down" /></b-button>
+              <b-button class="ml-1" variant="info" @click="resetConsoleOutput()" ><i class="fas fa-trash-alt" /></b-button> 
             </b-col>
           </b-row>
           <b-row class="mt-2 ml-0 mr-0" style="height:440px;" >
@@ -47,10 +52,10 @@
         <b-col sm="6">  <!-- right half -->
           <b-row align-v="center">
             <b-col sm="6" align="start">
-              <h5>Console input</h5>
+              <h5>Publish</h5>
             </b-col>
             <b-col sm="6" align="end">
-              <b-button variant="info" @click="publishMessage()">Publish Message</b-button>
+              <b-button variant="info" v-b-popover.hover.bottom="'Publish message'" @click="publishMessage()"><i class="fas fa-play" /></b-button>
             </b-col>
           </b-row>
           <b-row class="mt-2">

@@ -14,8 +14,8 @@
           </b-col>  
           <b-col sm="4" align="end">
             <!-- <b-button variant="info" @click="testApi()">Test</b-button> -->
-            <b-button variant="info" @click="reloadApis()">Refresh</b-button>
-            <b-button variant="success" @click="createApi()" >Create</b-button>
+            <b-button variant="info" @click="reloadApis()"><i class="fas fa-sync-alt" /></b-button>
+            <b-button variant="success" class="ml-1" @click="createApi()" ><i class="fas fa-plus" /></b-button>
           </b-col>
         </b-row>
         <div v-if="isApiReloading" class="mb-2">
@@ -65,13 +65,13 @@
                           <!-- VUE reference: https://vuejs.org/v2/guide/events.html -->
                           <b-dropdown-item @click = "showApiDetail(apis.indexOf(api))" >Edit</b-dropdown-item>
                           <b-dropdown-item @click = "copyApi(apis.indexOf(api))" >Copy</b-dropdown-item>
-                          <b-dropdown-item v-b-modal.modalDeleteConfirm @click="deletingApiIndex=apis.indexOf(api)" >Delete</b-dropdown-item>
+                          <b-dropdown-item v-b-modal.modalDeleteConfirm @click="deletingApiIndex=apis.indexOf(api)" :disabled="$store.getters.isGuestLoggedin">Delete</b-dropdown-item>
                         </b-dropdown>
                       </b-col>
                     </b-row>
                     <b-row class="ml-0 mt-1">  
                       <b-col class="at-border">
-                        <vue-markdown>{{api.Desc}}</vue-markdown>
+                        <markdown-it-vue :content="api.Desc" />
                       </b-col>
                     </b-row>
                     <b-row class="ml-0 mt-2" style="border-bottom: 1px solid green; padding-bottom: 5px;">  

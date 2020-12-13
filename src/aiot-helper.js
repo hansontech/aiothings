@@ -220,7 +220,7 @@ export default {
     // let users = JSON.parse(result)
     let users = result
     for (let user of users) {
-      console.log('user: ', user.Username)
+      console.log('user: ', user)
       const username = user.Username
       let userData = {}
       for (let attrs of user.Attributes) {
@@ -232,10 +232,14 @@ export default {
       if (loadedUsers === null) {
           loadedUsers = {}
       }
-      loadedUsers[username] = userData
+      loadedUsers[userId] = userData
       store.commit('setAtusers', loadedUsers)
     }
-    return loadedUsers[userId]
+    if (loadedUsers.hasOwnProperty(userId)) {
+      return loadedUsers[userId]
+    } else {
+      return null
+    }
   },
   async checkMserviceNameIsUsed (msName) {
     const result = await API.get('mserviceApi', '/checkname', {

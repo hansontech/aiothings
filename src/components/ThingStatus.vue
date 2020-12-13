@@ -6,7 +6,7 @@
             <h4>IoT Device : {{thingName}}</h4>
         </b-col>
         <b-col sm="auto" align="end">
-          <b-button variant="dark" @click="backHome()">Return</b-button>
+          <b-button variant="dark" @click="backHome()"><i class="fas fa-arrow-left" /></b-button>
         </b-col>
       </b-row>
       <b-tabs card>
@@ -14,7 +14,7 @@
         <b-tab title="State" active>
           <b-row>
             <b-col align="end"> 
-              <b-button variant="light" @click="updateThingStatus()"><i class="fas fa-sync" style='font-size:20px'></i></b-button>
+              <b-button variant="light" :disabled="isUpdatingStatus" @click="$router.go() /* updateThingStatus() */"><i class="fas fa-sync" style='font-size:20px'></i></b-button>
             </b-col>
           </b-row>
           <div v-if="deviceStatus === null">
@@ -37,6 +37,11 @@
                     {{key}}
                   </b-col>
                   <b-col>
+                    <!--
+                    {{JSON.stringify(deviceStatus[key], undefined, 4)}}
+                    <pre :id="'status_' + key"></pre>
+                    {{syntaxHighlight(deviceStatus[key])}}
+                    -->
                     {{deviceStatus[key]}}
                   </b-col>
                 </b-row>
@@ -124,7 +129,7 @@
 
 <script>
 
-import { PubSub } from 'aws-amplify'
+import { PubSub, API } from 'aws-amplify'
 // -- dashboard
 import { GChart } from 'vue-google-charts'
 // import { PubSub } from 'aws-amplify'
@@ -141,6 +146,7 @@ export default {
       // -- dashboard
       chartInterval: 'Day',
       isLoading: false,
+      isUpdatingStatus: false,
       chartSubscribe: null,
       thingStatusSubscribe: null,
       deviceStatus: null,
@@ -289,6 +295,28 @@ export default {
     }
    },
   methods: {
+    syntaxHighlight (json) {
+      if (typeof json != 'string') {
+          json = JSON.stringify(json, undefined, 2);
+      }
+      json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+          var cls = 'number';
+          if (/^"/.test(match)) {
+              if (/:$/.test(match)) {
+                  cls = 'key';
+              } else {
+                  cls = 'string';
+              }
+          } else if (/true|false/.test(match)) {
+              cls = 'boolean';
+          } else if (/null/.test(match)) {
+              cls = 'null';
+          }
+          match = match.replace(/\"/g, '');
+          return '<span class="' + cls + '">' + match + '</span>';
+      });
+    }, 
     imageFromBase64 (imageBase64) {
       return 'data:image/jpeg;base64,' + imageBase64
     },
@@ -393,7 +421,7 @@ export default {
               }
               this.chartDataCollect(responseMessage, collectedDataItems)
               // transform from intermediate data to Google Chart requred format
-              console.log('Number of newly collected data: ', collectedDataItems)
+              // console.log('Number of newly collected data: ', collectedDataItems)
               if (collectedDataItems.length > 0) {
                 let numberOfKeys = 0
                 for (let item of collectedDataItems) {
@@ -557,19 +585,68 @@ export default {
         }
       }
     },
+    async loadThingStatus () {
+      console.log('thing: ', this.thing.ThingId)
+      const shadow = await API.get('thingApi', '/things', {
+            'queryStringParameters': {
+                'userId': this.thing.UserId,
+                'certId': this.thing.CertId,
+                'thingId': this.thing.ThingId,
+                'thingName': this.thing.ThingId,
+                'command': 'get_properties'
+            }
+      })
+      if (shadow.hasOwnProperty('state') && shadow.state.hasOwnProperty('reported')) {
+        console.log('loadThingStatus: ', shadow.state.reported)
+        this.retrieveDeviceStatusData(shadow.state.reported)
+      } else {
+        this.deviceStatus = {}
+      }
+      this.isUpdatingStatus = false
+      this.$forceUpdate()
+    },
+    retrieveDeviceStatusData (responseMessage) {
+      let that = this
+      let collectedDataItems = {}
+      that.deviceStatusCollect(responseMessage, collectedDataItems)
+      if (that.deviceStatus === null) {
+        that.deviceStatus = {}
+      }
+      for (let key of Object.keys(collectedDataItems)) {
+        that.deviceStatus[key] = collectedDataItems[key]
+      }
+      /*
+      that.$forceUpdate()
+      let docStatus = document.getElementById('status')
+      console.log('docStatus: ', that.deviceStatus)
+      docStatus.innerHTML = that.syntaxHighlight(that.deviceStatus)
+      for (let key of Object.keys(that.deviceStatus)) {
+        if (key !== 'aiot_image') {
+          let docStatus = document.getElementById('status_' + key)
+          docStatus.innerHTML = that.syntaxHighlight(that.deviceStatus[key])
+        }
+      }
+      */
+      // that.isUpdatingStatus = false
+      that.$forceUpdate()
+    },
     async updateThingStatus () {
       let that = this
-      this.deviceStatus = null
+      that.isUpdatingStatus = true
+      await this.loadThingStatus()
+      let timer = setInterval(async function () {
+          that.isUpdatingStatus = false
+          that.$forceUpdate()
+          clearInterval(timer)
+      }, 10000) // in ms, run every 6 seconds
+      // this.deviceStatus = null
       if (this.thingStatusSubscribe === null) {
         this.thingStatusSubscribe = PubSub.subscribe('aiot/' + this.thing.UserId + '/' + this.thing.ThingId + '/aiot_device/response').subscribe({
           next: data => {
+            console.log('data received:')
             if (typeof data.value === 'object' && data.value !== null) {
               let responseMessage = data.value
-              let collectedDataItems = {}
-              that.deviceStatusCollect(responseMessage, collectedDataItems)
-              that.deviceStatus = collectedDataItems
-              // console.log(that.deviceStatus)
-              that.$forceUpdate()
+              that.retrieveDeviceStatusData(responseMessage)
             }
           },
           error: error => console.error(error),

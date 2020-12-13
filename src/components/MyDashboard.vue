@@ -5,7 +5,7 @@
         <h4>Dashboard</h4>
       </b-col>
       <b-col sm="auto" align="end">
-        <b-button variant="info" @click="refreshDashboard()">Refresh</b-button>
+        <b-button variant="info" @click="refreshDashboard()"><i class="fas fa-sync-alt" /></b-button>
       </b-col>
     </b-row>
     <b-row>

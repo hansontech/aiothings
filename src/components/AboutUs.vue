@@ -1,67 +1,96 @@
 <template>
 <div>
   <App/>
-  <b-container> 
-    <div style="min-height: 500px">
-<b-row class="mt-4">
-  <b-col>
-<vue-markdown>
-### About Us
-</vue-markdown>
-</b-col>
-</b-row>
-<b-row>
-  <b-col>
+  <b-container style="min-height: 800px; margin-top: 85px; padding-bottom: 60px;"> 
+    <b-row class="mt-4" >
+      <b-col>
+        <markdown-it-vue  content="
+## Vision
 
-   <img width="250" height="250" title="Load Options" src="/static/dennis-photo.png" style="float: right; margin-left: 20px; margin-right: 20px; margin-bottom: 20 px;">
-   <vue-markdown>
+To build the best intelligent system for IoT creators, to be the place where people can find and participate in the realization of their IoT ideas.  
+ 
+## Our approach
 
-Hi, I am Dennis, the founder of AIoThings. In 2017 I moved to Brisbane, after many years working for the other startup (Hanson Technology). It gave me the opportunity to review my previous electronics and software business. AIoThings is the result, kind of, from this review. 
+Creators are excellent at sensing new product opportunities that often come from emerging and sometimes fragmented markets. Many of these new products need to integrate hardware, software, electronics, cloud services, and AI as a complete IoT solution. 
+By connecting industrial resources from design to manufacturing, from proof of concept to mass production, AIoThings goes along with creators together to realize their innovations. 
 
+## The founder
+        " />
+      </b-col>
+    </b-row>
+    <b-row class="mt-2">
+      <b-col md="8">
+        <markdown-it-vue  content="
+Dennis Kung has 30 years of experience working in software and electronics industries, took multiple roles of engineering, product, sales, and management in Motorola, Quanta Computer, and the startups of Esmertec AG and Hanson Technology. 
+        " />
+      </b-col>
+      <b-col md="4">
+        <b-img alt="Dennis Kung" src="/static/dennis-photo.png" class="mr-2" fluid rounded style="max-width:250px; max-height:250px; padding: 20px;"></b-img>
+      </b-col>
+    </b-row>
+    <b-row class="mt-3">
+      <b-col>
+        <markdown-it-vue  content="
+## The team
 
-I have worked in semiconductors, microprocessors, factory automation, networking, mobile phones, navigation device, smart TV, wearables, etc. for more than 20 years (they are also my favorites)... But more and more, I was tired of facing the challenges of time to market, production scale and short life cycles that are making this business extremely difficult to sustain. 
+* Product development: market research, product plan, project management, mobile, consumer, and IoT products. 
 
-At that time, I was also a capable mobile app and cloud backend developer. This inspired me to think about how to build a sustainable model to carry forward these skills together.
+* System and electronics: microprocessors, realtime system, networking, digital system design, and manufacturing. 
 
-I created AIoThings as an **easy-to-use Cloud for IoT**.
-
-
-I found the cute innovations from DIY electronics - Raspberry Pi, Arduino, and ESP32/8266 based ecosystems. Thanks to their passion and continuity, they have large developer communities and engineering assets. The successors are getting more powerful, and many of which are even widely used in real industrial projects.
-
-
-In line with this trend, AIoThings delivers **Cloud for DIY** to IoT devices. 
-
-
-Not only does it provide a friendly cloud extension to the DIY electronics and IoT devices, but it is also a space for developers to **Develop and Share** their Cloud works for others to leverage.
-
-In this way, AIoThings users will be able to connect to each other and each other's IoT data and algorithms easily, collaboratively and collectively - which means **DIY Spirit** to me too.
-    </vue-markdown>
-  </b-col>
-  </b-row>
-  <div>
-    <p/>
-     <p/>
-      <p/>
-  </div>
-  <div>
-  </div> 
-    </div>
+* Software development: cloud services, microservice, IoT, embedded system, DevOps, web and mobile apps. 
+        " />
+      </b-col>
+    </b-row>  
+    <b-row class="mt-2">
+      <b-col>
+        <markdown-it-vue  content="
+## The service
+        " />
+      </b-col>
+    </b-row>  
+    <b-row class="mt-2">
+      <b-col md="4">
+        <markdown-it-vue  class="mt-3" content="
+  **Hardware design**
+* Microprocessor and controller based digital system
+* Semiconductor component selection
+* Proof-of-Concept and manufacturing
+        " />
+      </b-col>
+      <b-col md="4">
+        <markdown-it-vue  class="mt-3" content="
+  **Applications**
+* Automation
+* Networking
+* Wireless
+* Location base
+* Wearable
+* Payment
+* Other IoT enabling devices
+        " />
+      </b-col>
+      <b-col md="4">
+        <markdown-it-vue  class="mt-3" content="
+  **Software**
+* AWS, Azure-based cloud and IoT services
+* Web applications
+* Native mobile apps
+* Machine learning
+        " /> 
+      </b-col>
+    </b-row>
   </b-container>
-  <at-footer/>
+  <at-footer class="mt-3" />
 </div>
 </template>
-<script>
 
-import VueMarkdown from 'vue-markdown'
+<script>
 
 export default {
   name: 'aboutus',
   data: function () {
     return {
     }
-  },
-  components: {
-    VueMarkdown
   }
 }
 </script>

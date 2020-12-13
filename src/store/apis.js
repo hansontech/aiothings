@@ -27,11 +27,11 @@ export default {
     },
     replaceApi: function (context, newApi) {
       let apis = context.getters.apis
-      let newList = apis.map(ms => {
+      const newList = apis.map(ms => {
         if (ms.ApiName !== newApi.ApiName) {
           return ms
         } else {
-          let modifiedApi = Object.assign({}, newApi)
+          const modifiedApi = Object.assign({}, newApi)
           return modifiedApi
         }
       })
@@ -40,11 +40,11 @@ export default {
     },
     replaceApp: function (context, newApp) {
       let apps = context.getters.apps
-      let newList = apps.map(ms => {
+      const newList = apps.map(ms => {
         if (ms.ClientId !== newApp.ClientId) {
           return ms
         } else {
-          let modifiedApp = Object.assign({}, newApp)
+          const modifiedApp = Object.assign({}, newApp)
           return modifiedApp
         }
       })

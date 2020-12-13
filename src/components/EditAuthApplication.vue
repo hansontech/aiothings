@@ -5,8 +5,8 @@
             <h4>Edit Application </h4>
         </b-col>
         <b-col sm="auto" align="end" >
-          <b-button variant="success"  @click="updateApp()">Update</b-button>
-          <b-button variant="dark" @click="backHome()">Return</b-button>
+          <b-button variant="success"  @click="updateApp()" :disabled="$store.getters.isGuestLoggedin">Update</b-button>
+          <b-button variant="dark" class="ml-1" @click="backHome()"><i class="fas fa-arrow-left" /></b-button>
           <b-modal id="modalReturnConfirm"
              ref="modalReturnConfirmRef"
              hide-header

@@ -98,13 +98,30 @@ let deleteThing = (userId, certId, thingId, context, callback) => {
   });
 };
 
-let updateThing = (userId, certId, thingNameTag, thingId, desc, alertEnabled, context, callback) => {
+let updateThing = (userId, certId, thingNameTag, thingId, desc, alertEnabled, firmware, context, callback) => {
   // After the verification is complete, you can apply for a certificate for the device.
-  applyModel.updateThingCert(userId, certId, thingId, thingNameTag, (err) => {
-    if (err) callback(null, 'updateThing: updateThingCert: error: '+err);
-    applyModel.dbUpdateCertinfo(userId, certId, thingNameTag, thingId, desc, alertEnabled, (err, data) => {
-      if (err) callback(null, 'updateThing: dbUpdateCertinfo: error: '+err);    
-      callback(null, 'success');
+  applyModel.updateThingCert(userId, certId, thingId, thingNameTag, firmware, (err) => {
+    if (err) callback('updateThing: updateThingCert: error: '+err);
+    if (firmware !== undefined && firmware !== null && (typeof firmware === 'object') && firmware.Desired !== undefined) {
+      // The firmware update job has been assigned from updateThingCert
+      firmware.Processing = firmware.Desired
+      delete firmware.Desired
+      console.log('firmware updated: ', firmware)
+    } else {
+      firmware = null
+    }
+    applyModel.dbUpdateCertinfo(userId, certId, thingNameTag, thingId, desc, alertEnabled, firmware, (err, data) => {
+      if (err) {
+        callback('updateThing: dbUpdateCertinfo: error: '+err);
+      } else {
+        getThingGeneral(userId, certId, context, function(err,result) {
+          if (err) {
+            callback(err)
+          } else {
+            callback(null, result)
+          }
+        })
+      }
     });
   })
 };

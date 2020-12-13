@@ -143,21 +143,27 @@ let dbInsertCertinfo = ( userId, certId, thingId, thingNameTag, desc, publicKey,
 }
 
 // Put IoT cert info into Dynamodb
-let dbUpdateCertinfo = ( userId, iotcert, thingNameTag, thingId, desc, alertEnabled, callback ) => {
-   
+let dbUpdateCertinfo = ( userId, iotcert, thingNameTag, thingId, desc, alertEnabled, firmware, callback ) => {
+  
+  let setFields = 'set ThingDesc = :desc, ThingName = :name, AlertEnabled = :alertEnabled'
+  let setAttrs = {
+    ':desc': desc,
+    ':name': thingNameTag,
+    ':alertEnabled': alertEnabled
+  }
+  if (firmware !== null && (typeof firmware === 'object')) {
+    setFields = setFields + ', Firmware = :firmware'
+    setAttrs[':firmware'] = firmware
+  }
   dynamoDb.update({
     TableName: Device_TABLE_NAME,
     Key:{
         'UserId': userId,
         'CertId': iotcert
     },
-    UpdateExpression: 'set ThingDesc = :desc, ThingName = :name, AlertEnabled = :alertEnabled',
-    ExpressionAttributeValues:{
-        ':desc': desc,
-        ':name': thingNameTag,
-        ':alertEnabled': alertEnabled
-    },
-    ReturnValues:'UPDATED_NEW'
+    UpdateExpression: setFields,
+    ExpressionAttributeValues: setAttrs,
+    ReturnValues:'ALL_NEW'
   }, async (err, data) => {
     if (err) {
       console.log(err);
@@ -262,7 +268,7 @@ let dbListCertinfo = ( userId, callback ) => {
         ':userid': userId,
         ':isDeviceGroup': true
     },
-    ProjectionExpression: "ThingName, ThingDesc, ThingId, CertId, UserId, EdgeData, ThingTimeZone, AlertEnabled"
+    ProjectionExpression: "ThingName, ThingDesc, ThingId, CertId, UserId, EdgeData, ThingTimeZone, AlertEnabled, Firmware"
   };
 
   dynamoDb.query(params, function(err, data) {
@@ -409,6 +415,8 @@ let applyDeviceGroupCert = ( userId, deviceGroupName, callback) => {
     setAsActive: true
   };
   // Create cert
+  // The pair of Certificate and Thing are used for intermediate purpose installed in devices
+  // Being used to connect to IoT Hub before the provisioning of permanent certificate/things
   iot.createKeysAndCertificate(params, async function(err, certData) {
     // console.log(certData);
     if (err){
@@ -418,6 +426,11 @@ let applyDeviceGroupCert = ( userId, deviceGroupName, callback) => {
     } 
     // else{
     try {
+      await iot.createThingGroup({
+        thingGroupName: deviceGroupName, /* required */
+      }).promise().catch(function(err) {
+        console.log('warning: ', err); // an error occurred
+      })
       // let datetime = (new Date()).getTime()
       // console.log('applyThingCert: certData: ', certData)
       //let thingId = userId + '_' + datetime
@@ -550,6 +563,13 @@ let applyThingCert = ( userId, thingNameTag, deviceGroupName, callback ) => {
           merge: true
         }
       }).promise()
+      if (deviceGroup !== null) {
+        await iot.addThingToThingGroup({
+          overrideDynamicGroups: false,
+          thingGroupName: deviceGroupName,
+          thingName: thingId
+        }).promise()
+      }
       let certArn = certData.certificateArn
       let certId = certData.certificateId
       // Attach thing for cert
@@ -585,21 +605,137 @@ let applyThingCert = ( userId, thingNameTag, deviceGroupName, callback ) => {
     }              
   });
 }
+let updateFirmware = async (userId, certId, firmware, jobName, targetType, targetName) => {
+  let iot = new AWS.Iot()
+  let s3 = new AWS.S3()
+  try {
+    // firmware update job
+    console.log('start firmware')
+    if (firmware !== undefined && firmware.Desired !== undefined) {
+      if (firmware.Processing !== undefined) {
+        // deleting job takes time, in order to avoid waiting the completion of deletion
+        // create a new job with timestamped name without the need of time delay.
+        console.log('delete previous fw job')
+        let processingJobId = jobName + '_' + firmware.Processing.DateStamp
+        await iot.deleteJob({
+          jobId: processingJobId, /* required */
+          force: true, // true || false,
+        }).promise().catch( function(error) {
+          console.log('deleteJob: ', error)
+        })
+      }
+      let newFirmware = firmware.Desired
+      let jobId = jobName + '_' + newFirmware.DateStamp
+      let jobData = await iot.createJob({
+        jobId: jobId,
+        targets: [
+          "arn:aws:iot:" + config.region + ':' + config.awsAccountId + ':' + targetType + '/' + targetName
+        ],
+        document: JSON.stringify(
+          {
+            "userId": userId,
+            "certId": certId,
+            "target": targetName,
+            "operation": "install",
+            "packageName": "firmwareUpdate",
+            "workDirectory": "/root/aiothings",
+            "launchCommand": "node jobs-example.js -f ~/certs -H <PREFIX>.iot.<REGION>.amazonaws.com -T thingName",
+            "autoStart": "true",
+            "files": [
+              {
+                "fileName": newFirmware.FileName,
+                "fileVersion": "1.0.2.10",
+                "bucketKey": newFirmware.StorageKey,
+                "fileSource": {
+                  "url": config.s3publicUrlBase + '/' + newFirmware.StorageKey
+                }
+              }
+            ]
+          }
+        ),
+        abortConfig: {
+          criteriaList: [ /* required */
+            {
+              action: "CANCEL", /* required */
+              failureType: "ALL", // FAILED | REJECTED | TIMED_OUT | ALL, /* required */
+              minNumberOfExecutedThings: 1, /* required */
+              thresholdPercentage: 50.0 /* required */
+            },
+            /* more items */
+          ]
+        },
+        targetSelection: "SNAPSHOT", // CONTINUOUS | SNAPSHOT,
+        /*
+        tags: [
+          {
+            Key: 'FIRMWARE_URL',
+            Value: newFirmware.FirmwareURL
+          }
+        ] 
+        */
+      }).promise()
+      await s3.putObjectAcl({
+        Bucket: config.aiotS3bucketName, 
+        Key: "public/" + newFirmware.StorageKey,
+        ACL: "public-read"    
+      }).promise()
+      let topicRuleData = await iot.getTopicRule({
+        ruleName: config.firmwareProcessTopicRule /* required */
+      }).promise().catch( async function(err) {
+        // if not exist
+        console.log('getTopicRule err: ', err)
+        await iot.createTopicRule({
+          ruleName: config.firmwareProcessTopicRule, /* required */
+          topicRulePayload: { /* required */
+            actions: [ /* required */
+              {
+                lambda: {
+                  functionArn: 'arn:aws:lambda:' + config.region + ':' + config.awsAccountId + ':function:' + config.aiotFirmwareJobHandler + '-' + process.env.ENV /* required */
+                }
+              }
+            ],
+            sql: "SELECT *  FROM \"$aws/events/job/+/completed\"", /* required */
+            ruleDisabled: false,
+            awsIotSqlVersion: '2016-03-23'
+          }
+        }).promise().catch( async function(err) {
+          console.log('reateTopicRule err: ', err)
+        })
+      })
+      // make sure to control which event types are published
+      await iot.updateEventConfigurations({
+        eventConfigurations: {
+          'JOB': {
+            Enabled: true
+          }
+          /* '<EventType>': ... */
+        }
+      }).promise()
+    } // end of if firmware
+    console.log('finished firmware job')
+  } catch (err) {
+    console.log('updateFirmware: ', err)
+  }   
+}
 
 // Apply cert & Attach thing, policy
-let updateThingCert = ( userId, certId, thingId, thingNameTag, callback ) => {
+let updateThingCert = ( userId, certId, thingId, thingNameTag, firmware, callback ) => {
   AWS.config.update({region: config.region});
   var iot = new AWS.Iot();
+  
   // get cert
   iot.describeCertificate({
     certificateId: certId
   }, async function (err, certData) {
-      if (err){
-      console.log(err, err.stack); // an error occurred
+     if (err){
+      console.log('describe cert error: ', err); // an error occurred
       callback(err)
       return
     }
     try {
+      if (firmware !== undefined && firmware !== null && (typeof firmware === 'object') && firmware.Desired !== undefined) {
+        await updateFirmware(userId, certId, firmware, 'fw_thing_' + thingNameTag, 'thing', thingId)
+      }
       let policyName = userId + '_' + thingNameTag
       await iot.detachPolicy({
         policyName: policyName,
@@ -907,6 +1043,7 @@ module.exports = {
     getIoTRootCA,
     applyDeviceGroupCert,
     applyThingCert,
+    updateFirmware,
     updateThingCert,
     cancelThingCert,
     getCertPem,

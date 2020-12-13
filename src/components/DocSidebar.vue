@@ -67,6 +67,7 @@ export default {
                 },
                 { 'text': 'Device Provisioning', data: { 'link': 'DocThingProvisioning' } },
                 { 'text': 'Board Support Package', data: { 'link': 'DocThingBSP' } },
+                { 'text': 'Firmware Update', data: { 'link': 'DocThingFirmware' } },
                 { 'text': 'Event Notification', data: { 'link': 'DocThingNotification' } }
               ]
             },
@@ -95,7 +96,12 @@ export default {
             { 'text': 'Console', data: { 'link': 'DocConsole' } },
             { 'text': 'Running Log', data: { 'link': 'DocLog' } },
             { 'text': 'IoT Data Access',
-                  data: { 'link': 'DocIotData' }
+              data: { 'link': 'DocIotData' },
+              state: { expanded: false },
+              children: [
+                { 'text': 'Write to IoT Database', data: { 'link': 'DocIotDataWrite' } },
+                { 'text': 'REST API IoT Query', data: { 'link': 'DocIotDataRestApi' } }
+              ]
             }
           ]
         },

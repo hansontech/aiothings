@@ -15,8 +15,8 @@
           <b-col sm="4" align="end">
             <!-- <b-button variant="info" @click="testApplications()">Test</b-button> -->
             
-            <b-button variant="info" @click="reloadApplications()">Refresh</b-button>
-            <b-button variant="success" @click="createApplication()" >Create</b-button>
+            <b-button variant="info" @click="reloadApplications()"><i class="fas fa-sync-alt" /></b-button>
+            <b-button variant="success" class="ml-1" @click="createApplication()" ><i class="fas fa-plus" /></b-button>
             
           </b-col>
         </b-row>

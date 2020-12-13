@@ -32,11 +32,11 @@ export default {
   },
   actions: {
     removeFavorite: function (context, serviceName) {
-      let favoriteList = context.getters.favoriteMserviceList
+      const favoriteList = context.getters.favoriteMserviceList
       delete favoriteList[serviceName]
       context.commit('setFavoriteMserviceList', favoriteList)
-      let favoriteMservices = context.getters.favoriteMservices
-      let updatedFavoriteMservices = favoriteMservices.filter(function (service) {
+      const favoriteMservices = context.getters.favoriteMservices
+      const updatedFavoriteMservices = favoriteMservices.filter(function (service) {
         // console.log('inside filer: ', service.ServiceName, '::', serviceName)
         return (service.ServiceName !== serviceName)
       })
@@ -51,15 +51,15 @@ export default {
     replaceMservice: function (context, newData) {
       // only one parameter is allowed for actions.?
       console.log('replacing: ', newData)
-      let newMs = newData.replacingService
-      let mservices = newData.services
+      const newMs = newData.replacingService
+      const mservices = newData.services
       console.log('replaceM mservices: ', mservices)
       console.log('replaceM mservices: ', context)
-      let newList = mservices.map(ms => {
+      const newList = mservices.map(ms => {
         if (ms.ServiceName !== newMs.ServiceName) {
           return ms
         } else {
-          let modifiedService = Object.assign({}, newMs)
+          const modifiedService = Object.assign({}, newMs)
           modifiedService.ServiceCode = ms.ServiceCode
           return modifiedService
         }

@@ -236,6 +236,15 @@
 				}
 			}
 		},
+		"functionjobFunction": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/jobFunction-cloudformation-template.json",
+				"Parameters": {
+					"env": "prod"
+				}
+			}
+		},
 		"apithingApi": {
 			"Type": "AWS::CloudFormation::Stack",
 			"Properties": {

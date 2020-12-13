@@ -23,8 +23,8 @@
         <!-- <b-button v-if="!isShowEdit" v-b-popover.hover.bottom="'toggle to edit mode'" v-b-toggle.collapseEdit.collapseShow variant="info" @click="isChangedNotSaved = false">Edit</b-button>
         <b-button v-if="isShowEdit" v-b-popover.hover.bottom="'toggle to display only'" v-b-toggle.collapseEdit.collapseShow variant="info">Show</b-button> -->
         <b-button variant="light" @click="reloadDevices()"><i class="fas fa-sync" style='font-size:20px'></i></b-button>
-        <b-button variant="info" v-b-modal.scanDeviceModal @click="newDeviceId = null" v-b-popover.hover.bottom="'Add new device IDs to the group'">Add Device</b-button>
-        <b-button variant="dark" @click="backHome()">Return<sub><b-badge class="ml-1" variant="warning" v-if="isChangedNotSaved">&nbsp;</b-badge></sub></b-button>
+        <b-button variant="info" class="ml-1" v-b-modal.scanDeviceModal @click="newDeviceId = null" v-b-popover.hover.bottom="'Add new device IDs to the group'">Add Device</b-button>
+        <b-button variant="dark" class="ml-1" @click="backHome()"><i class="fas fa-arrow-left" /><sub><b-badge class="ml-1" variant="warning" v-if="isChangedNotSaved">:&nbsp;</b-badge></sub></b-button>
       </b-col>
     </b-row>
     <b-modal id="scanDeviceModal" ref="scanDeviceModalRef" title="Scan or Input Device ID" ok-only ok-variant="secondary" ok-title="Close">

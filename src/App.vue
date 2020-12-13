@@ -1,5 +1,5 @@
 <template>
-
+  <div id="app">
     <!-- for fixed-top  https://mdbootstrap.com/docs/vue/utilities/position/ --> 
     <b-navbar toggleable="md" type="dark" variant="dark" fixed="top"> <!--  class="fixed-top"> -->
       <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
@@ -56,7 +56,7 @@
             <b-dropdown-item  :active="reachRoute('mythings','') === 'primary'" :to="{ path: '/user/mythings' }">IoT Devices</b-dropdown-item>
             <b-dropdown-item  :active="reachRoute('mymicroservices') === 'primary'" :to="{ path: '/user/mymicroservices' }">Microservices</b-dropdown-item>
             <b-dropdown-item  :active="reachRoute('myapis') === 'primary'" :to="{ path: '/user/myapis' }">REST APIs </b-dropdown-item>
-            <b-dropdown-item  :active="reachRoute('myapplications') === 'primary'" :to="{ path: '/user/myapplications' }">Applications </b-dropdown-item>
+            <!-- <b-dropdown-item  :active="reachRoute('myapplications') === 'primary'" :to="{ path: '/user/myapplications' }">Applications </b-dropdown-item> -->
             <b-dropdown-item  :active="reachRoute('myfavorites') === 'primary'" :to="{ path: '/user/myfavorites' }" v-b-popover.hover.bottom="'Shared services marked favorite'">Favorites</b-dropdown-item>
             <b-dropdown-item  :active="reachRoute('solutions') === 'primary'" :to="{ path: '/solutions' }" v-b-popover.hover.bottom="'Shared microservices and Node-RED flows'">Shared Solutions</b-dropdown-item>
             <b-dropdown-divider />   
@@ -74,7 +74,7 @@
       <!-- <router-view></router-view>  -->
     <!-- </div> -->
     <!-- <at-footer v-if="isDocumentPath" class="modal__footer"/> -->
-
+  </div>
 </template>
 
 <script>
@@ -297,6 +297,7 @@ export default {
 </style>
 
 <style>
+/*
 body {
   margin: 0;
 }
@@ -312,6 +313,7 @@ main {
   text-align: center;
   margin-top: 40px;
 }
+
 
 header {
   margin: 0;
@@ -335,7 +337,7 @@ header span {
 img.at-imageRound {
     border-radius: 50%;
 }
-
+*/
 .at-card-thing .card-header {   /* multiple classes together */
     background-color: var(--color-at-card-header);
     height: var(--height-at-card-header);
@@ -365,6 +367,7 @@ img.at-imageRound {
   box-shadow : 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   /* box-shadow: 1px -1px teal; */
 }
+
 </style>
 <style scoped>
 /* https://www.w3schools.com/cssref/css_selectors.asp */

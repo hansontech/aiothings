@@ -5,11 +5,9 @@
             <h4>New REST API</h4>
           </b-col>
           <b-col sm="auto" align="end" >
-            <b-button variant="success" @click="createApi()"
-                  v-b-popover.hover.bottom="'Create new api'">
-                    Create
-            </b-button>
-            <b-button variant="dark" @click="$router.go(-1)">Cancel</b-button>
+            <b-button variant="success" @click="createApi()" class="mr-1"
+                  v-b-popover.hover.bottom="'Create new api'">Save</b-button>
+            <b-button variant="dark" @click="$router.go(-1)"><i class="fas fa-arrow-left" /></b-button>
           </b-col>
       </b-row>
       <spinner v-if="isCreating === true" size="medium" />
@@ -93,7 +91,7 @@
             </b-row>
             <b-row v-else>
                 <b-col>
-                  <vue-markdown class="at-desc-display">{{api.Desc}}</vue-markdown>
+                  <markdown-it-vue class="at-desc-display" :contnet="api.Desc" />
                 </b-col>
             </b-row>             
             <b-row class="mt-3" v-if="api.ApiName !== null && api.ApiName !== ''">

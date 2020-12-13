@@ -20,7 +20,7 @@
                 "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/auth/aiotAuth-cloudformation-template.yml",
                 "logicalId": "authaiotAuth"
             },
-            "lastPushTimeStamp": "2020-05-22T00:49:55.828Z",
+            "lastPushTimeStamp": "2020-11-06T14:07:22.328Z",
             "output": {
                 "GoogleWebClient": "168989735160-otcg9fqm5d0ip4l0gbjd8n6vg75mguf8.apps.googleusercontent.com",
                 "AppClientSecret": "ph6upbpk031q4foa5pv605eb1e279jeskn9p30lnm3c8j4nvu4v",
@@ -45,7 +45,7 @@
                 "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/hosting/template.json",
                 "logicalId": "hostingS3AndCloudFront"
             },
-            "lastPushTimeStamp": "2020-05-22T00:49:55.840Z",
+            "lastPushTimeStamp": "2020-11-06T14:07:22.330Z",
             "output": {
                 "CloudFrontSecureURL": "https://ddhnii0hf5ke.cloudfront.net",
                 "S3BucketSecureURL": "https://aiothings-20190217143527-hostingbucket-prod.s3.amazonaws.com",
@@ -66,7 +66,7 @@
                 "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/storage/s3-cloudformation-template.json",
                 "logicalId": "storageaiotStorage"
             },
-            "lastPushTimeStamp": "2020-05-22T00:49:55.841Z",
+            "lastPushTimeStamp": "2020-11-06T14:07:22.332Z",
             "output": {
                 "BucketName": "aiot-bucket-prod",
                 "Region": "ap-southeast-2"
@@ -80,20 +80,20 @@
             "providerPlugin": "awscloudformation",
             "build": true,
             "dependsOn": [],
-            "lastBuildTimeStamp": "2020-05-21T07:00:03.975Z",
-            "lastPackageTimeStamp": "2020-05-21T07:00:16.781Z",
-            "distZipFilename": "thingFunction-7862753762424f543653-build.zip",
+            "lastBuildTimeStamp": "2020-11-05T21:14:03.456Z",
+            "lastPackageTimeStamp": "2020-11-05T21:14:07.558Z",
+            "distZipFilename": "thingFunction-4f33613177366247684c-build.zip",
             "providerMetadata": {
                 "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/thingFunction-cloudformation-template.json",
                 "logicalId": "functionthingFunction"
             },
-            "lastPushTimeStamp": "2020-05-22T00:49:55.842Z",
+            "lastPushTimeStamp": "2020-11-06T14:07:22.333Z",
             "output": {
                 "Region": "ap-southeast-2",
                 "Arn": "arn:aws:lambda:ap-southeast-2:414327512415:function:thingFunction-prod",
                 "Name": "thingFunction-prod"
             },
-            "lastPushDirHash": "CIMwLycY327BKnMsTCCc6WDrH/8="
+            "lastPushDirHash": "S3qecap4C40SsiwA61HJXM0di4I="
         },
         "solutionFunction": {
             "service": "Lambda",
@@ -107,7 +107,7 @@
                 "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/solutionFunction-cloudformation-template.json",
                 "logicalId": "functionsolutionFunction"
             },
-            "lastPushTimeStamp": "2020-05-22T00:49:55.843Z",
+            "lastPushTimeStamp": "2020-11-06T14:07:22.333Z",
             "output": {
                 "Region": "ap-southeast-2",
                 "Arn": "arn:aws:lambda:ap-southeast-2:414327512415:function:solutionFunction-prod",
@@ -127,7 +127,7 @@
                 "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/mserviceFunction-cloudformation-template.json",
                 "logicalId": "functionmserviceFunction"
             },
-            "lastPushTimeStamp": "2020-05-22T00:49:55.844Z",
+            "lastPushTimeStamp": "2020-11-06T14:07:22.339Z",
             "output": {
                 "Region": "ap-southeast-2",
                 "Arn": "arn:aws:lambda:ap-southeast-2:414327512415:function:mserviceFunction-prod",
@@ -140,20 +140,20 @@
             "providerPlugin": "awscloudformation",
             "build": true,
             "dependsOn": [],
-            "lastBuildTimeStamp": "2019-02-17T10:06:00.942Z",
-            "lastPackageTimeStamp": "2019-11-29T06:31:34.857Z",
-            "distZipFilename": "userFunction-6a6c383255322f713733-build.zip",
+            "lastBuildTimeStamp": "2020-06-22T01:36:08.413Z",
+            "lastPackageTimeStamp": "2020-06-22T01:36:09.261Z",
+            "distZipFilename": "userFunction-2f64724272656f366234-build.zip",
             "providerMetadata": {
                 "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/userFunction-cloudformation-template.json",
                 "logicalId": "functionuserFunction"
             },
-            "lastPushTimeStamp": "2020-05-22T00:49:55.844Z",
+            "lastPushTimeStamp": "2020-11-06T14:07:22.341Z",
             "output": {
                 "Region": "ap-southeast-2",
                 "Arn": "arn:aws:lambda:ap-southeast-2:414327512415:function:userFunction-prod",
                 "Name": "userFunction-prod"
             },
-            "lastPushDirHash": "jvQYGTAifPGW5A4KP8N2NkcgaQs="
+            "lastPushDirHash": "ZSF+6zJvsN7p5NZIXEExd8Ac3NM="
         },
         "apiFunction": {
             "service": "Lambda",
@@ -167,7 +167,7 @@
                 "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/apiFunction-cloudformation-template.json",
                 "logicalId": "functionapiFunction"
             },
-            "lastPushTimeStamp": "2020-05-22T00:49:55.845Z",
+            "lastPushTimeStamp": "2020-11-06T14:07:22.343Z",
             "output": {
                 "Region": "ap-southeast-2",
                 "Arn": "arn:aws:lambda:ap-southeast-2:414327512415:function:apiFunction-prod",
@@ -187,7 +187,7 @@
                 "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/apiAuthorizerFunction-cloudformation-template.json",
                 "logicalId": "functionapiAuthorizerFunction"
             },
-            "lastPushTimeStamp": "2020-05-22T00:49:55.847Z",
+            "lastPushTimeStamp": "2020-11-06T14:07:22.345Z",
             "output": {
                 "Region": "ap-southeast-2",
                 "Arn": "arn:aws:lambda:ap-southeast-2:414327512415:function:apiAuthorizerFunction-prod",
@@ -206,7 +206,7 @@
                 "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/aiotSignupChecker-cloudformation-template.json",
                 "logicalId": "functionaiotSignupChecker"
             },
-            "lastPushTimeStamp": "2020-05-22T00:49:55.847Z",
+            "lastPushTimeStamp": "2020-11-06T14:07:22.346Z",
             "output": {
                 "Region": "ap-southeast-2",
                 "Arn": "arn:aws:lambda:ap-southeast-2:414327512415:function:aiotSignupChecker-prod",
@@ -214,6 +214,26 @@
                 "LambdaExecutionRole": "aiothingsLambdaRole071f5db0-prod"
             },
             "lastPushDirHash": "wI7cZlZTIPH+SMW0PnfkxRdtYMM="
+        },
+        "jobFunction": {
+            "build": true,
+            "providerPlugin": "awscloudformation",
+            "service": "Lambda",
+            "lastBuildTimeStamp": "2020-10-06T05:06:27.648Z",
+            "lastPackageTimeStamp": "2020-10-06T05:06:27.707Z",
+            "distZipFilename": "jobFunction-517978636248345a3248-build.zip",
+            "providerMetadata": {
+                "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/function/jobFunction-cloudformation-template.json",
+                "logicalId": "functionjobFunction"
+            },
+            "lastPushTimeStamp": "2020-11-06T14:07:22.349Z",
+            "output": {
+                "Region": "ap-southeast-2",
+                "Arn": "arn:aws:lambda:ap-southeast-2:414327512415:function:jobFunction-prod",
+                "Name": "jobFunction-prod",
+                "LambdaExecutionRole": "aiothingsLambdaRoleedc3f35e-prod"
+            },
+            "lastPushDirHash": "fcIavjO5MCuUFEwvXddbpWoWzjg="
         }
     },
     "api": {
@@ -234,7 +254,7 @@
                 "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/api/thingApi-cloudformation-template.json",
                 "logicalId": "apithingApi"
             },
-            "lastPushTimeStamp": "2020-05-22T00:49:55.848Z",
+            "lastPushTimeStamp": "2020-11-06T14:07:22.350Z",
             "output": {
                 "ApiName": "thingApi",
                 "RootUrl": "https://vx1xuy1ns4.execute-api.ap-southeast-2.amazonaws.com/prod",
@@ -255,7 +275,7 @@
                     ]
                 }
             ],
-            "lastPushTimeStamp": "2020-05-22T00:49:55.849Z",
+            "lastPushTimeStamp": "2020-11-06T14:07:22.351Z",
             "providerMetadata": {
                 "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/api/mserviceApi-cloudformation-template.json",
                 "logicalId": "apimserviceApi"
@@ -283,7 +303,7 @@
                 "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/api/userApi-cloudformation-template.json",
                 "logicalId": "apiuserApi"
             },
-            "lastPushTimeStamp": "2020-05-22T00:49:55.850Z",
+            "lastPushTimeStamp": "2020-11-06T14:07:22.354Z",
             "output": {
                 "ApiName": "userApi",
                 "RootUrl": "https://7709s8s2n6.execute-api.ap-southeast-2.amazonaws.com/prod"
@@ -307,7 +327,7 @@
                 "s3TemplateURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/api/apiApi-cloudformation-template.json",
                 "logicalId": "apiapiApi"
             },
-            "lastPushTimeStamp": "2020-05-22T00:49:55.851Z",
+            "lastPushTimeStamp": "2020-11-06T14:07:22.356Z",
             "output": {
                 "ApiName": "apiApi",
                 "RootUrl": "https://2dlkdca3ud.execute-api.ap-southeast-2.amazonaws.com/prod",

@@ -8,9 +8,14 @@ var config = {
     deviceTableName: 'atDeviceTable',
     deviceOwnerIndexName: 'OwnerId-DeviceGroupName-index',
     region: environment.REGION,
+    awsAccountId: '414327512415',
+    firmwareProcessTopicRule: 'aiotFirmwareTopicRule',
+    aiotFirmwareJobHandler: 'jobFunction',
     aiotIotActionRole: 'arn:aws:iam::414327512415:role/aiot-iot-default',
     alertFunctionName: 'aiotAlertActivate',
-    mserviceS3bucketName: "aiot-bucket" + '-' + process.env.ENV
+    aiotS3bucketName: "aiot-bucket" + '-' + process.env.ENV,
+    mserviceS3bucketName: "aiot-bucket" + '-' + process.env.ENV,
+    s3publicUrlBase: "https://s3-" + environment.REGION + '.amazonaws.com/' + 'aiot-bucket' + '-' + process.env.ENV + '/public'
 };
 
 

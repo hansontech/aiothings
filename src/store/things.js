@@ -28,11 +28,11 @@ export default {
     },
     replaceThing: function (context, newThing) {
       let things = context.getters.things
-      let newList = things.map(th => {
+      const newList = things.map(th => {
         if (th.ThingId !== newThing.ThingId) {
           return th
         } else {
-          let modifiedThing = Object.assign({}, newThing)
+          const modifiedThing = Object.assign({}, newThing)
           return modifiedThing
         }
       })
@@ -41,11 +41,11 @@ export default {
     },
     replaceDeviceGroup: function (context, newDeviceGroup) {
       let deviceGroups = context.getters.deviceGroups
-      let newList = deviceGroups.map(th => {
-        if (th.DeviceGroupId !== newDeviceGroup.DeviceGroupId) {
+      const newList = deviceGroups.map(th => {
+        if (th.DeviceGroupName !== newDeviceGroup.DeviceGroupName) {
           return th
         } else {
-          let modifiedDeviceGroup = Object.assign({}, newDeviceGroup)
+          const modifiedDeviceGroup = Object.assign({}, newDeviceGroup)
           return modifiedDeviceGroup
         }
       })

@@ -62,7 +62,7 @@ CognitoAuth.userhandler = {
 } */
 
 export default {
-  name: 'auth callback',
+  name: 'authcallback',
   data () {
     return {
       isWaitingAuthFinish: true,

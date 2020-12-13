@@ -15,10 +15,10 @@
         <b-col sm="auto" align="end">
           <!-- <b-button v-if="!isShowEdit" v-b-popover.hover.bottom="'toggle to edit mode'" v-b-toggle.collapseEdit.collapseShow variant="info" @click="isChangedNotSaved = false">Edit</b-button>
           <b-button v-if="isShowEdit" v-b-popover.hover.bottom="'toggle to display only'" v-b-toggle.collapseEdit.collapseShow variant="info">Show</b-button> -->
-          <b-button variant="info" @click="updateThing()">Update</b-button>
-          <b-button v-if="isEdgeAbleToDeploy" v-b-popover.hover.bottom="'To deploy, make sure the edge device is online and edge daemon is running'" :variant="(isDeployed) ? 'success' : 'info'" @click="deployEdge()">Edge Deploy</b-button>
-          <b-button v-if="isEdgeAbleToDelete" variant="info" @click="deleteEdge()">Delete Edge</b-button>
-          <b-button variant="dark" @click="backHome()">Return<sub><b-badge class="ml-1" variant="warning" v-if="isChangedNotSaved">&nbsp;</b-badge></sub></b-button>
+          <b-button variant="info" @click="updateThing()" :disabled="$store.getters.isGuestLoggedin">Update</b-button>
+          <b-button class="ml-1" v-if="isEdgeAbleToDeploy" v-b-popover.hover.bottom="'To deploy, make sure the edge device is online and edge daemon is running'" :variant="(isDeployed) ? 'success' : 'info'" @click="deployEdge()" :disabled="$store.getters.isGuestLoggedin">Edge Deploy</b-button>
+          <b-button class="ml-1" v-if="isEdgeAbleToDelete" variant="info" @click="deleteEdge()" :disabled="$store.getters.isGuestLoggedin">Delete Edge</b-button>
+          <b-button class="ml-1" variant="dark" @click="backHome()"><i class="fas fa-arrow-left" /><sub><b-badge class="ml-1" v-if="isChangedNotSaved" variant="warning">:&nbsp;</b-badge></sub></b-button>
         </b-col>
       </b-row>
       <b-row v-if="isDeploying === true">
@@ -59,7 +59,7 @@
           </b-row>
           <b-row v-else>
             <b-col>
-              <vue-markdown class="at-desc-display">{{thingDesc}}</vue-markdown>
+              <markdown-it-vue class="at-desc-display" :content="thingDesc" />
             </b-col>
           </b-row> 
           <b-row class="mt-3">
@@ -94,8 +94,8 @@
                 <b-button variant="light" small v-b-modal.modalCertificateHelpConfirm><i class="fas fa-info-circle"></i></b-button>
             </b-col>
             <b-col sm="9">
-                <b-button style="display: inline;" id="downloadButton" variant="info" @click="downloadCert()">Download</b-button>
-                <b-button variant="light" v-b-toggle.collapseSetup>?</b-button>
+                <b-button style="display: inline;" id="downloadButton" variant="info" @click="downloadCert()" :disabled="$store.getters.isGuestLoggedin">Download</b-button>
+                <b-button variant="light" v-b-toggle.collapseSetup>!</b-button>
             </b-col>
           </b-row>
           <spinner v-if="isDownloading === true" size="medium" />
@@ -183,8 +183,63 @@
                   </b-form-checkbox>           
             </b-col>
           </b-row>
+          <b-row class="mt-2" align-v="center">
+            <b-col sm="3">
+              <h5 style="display: inline;">Firmware</h5>
+            </b-col>
+            <b-col sm="6">
+                {{(thing.Firmware !== undefined && typeof thing.Firmware === 'object' && thing.Firmware.FileName !== undefined) ? 'Installed: ' + thing.Firmware.FileName + ',  ' + (new Date(thing.Firmware.DateStamp)).toLocaleString() : '-- -- --' }}
+            </b-col>
+            <b-col align="start">
+                <b-button variant="info" class="ml-1" v-b-toggle.collapseUploadFirmware v-b-popover.hover.left="'Update firmware'">Update</b-button>
+            </b-col>
+          </b-row>
+          <b-row class="mt-2" align-v="center">
+            <b-col sm="3">
+            </b-col>
+            <b-col>
+                {{(thing.Firmware !== undefined && typeof thing.Firmware === 'object' && thing.Firmware.Processing !== undefined) ? 'Progressing: ' + thing.Firmware.Processing.FileName + ',  ' + (new Date(thing.Firmware.Processing.DateStamp)).toLocaleString() : '' }}
+            </b-col>
+          </b-row>
+          <b-row v-if="isFirmwareUpdating === true" class="mt-3">
+            <b-col align="center">
+              <spinner size="medium" />
+            </b-col>
+          </b-row>
+          <b-collapse id="collapseUploadFirmware" class="mt-2">
+            <b-row align-v="center">
+              <b-col sm="3" />
+              <b-col sm="6">
+                  <b-form-file
+                    v-model="firmwareFile"
+                    :state="Boolean(firmwareFile)"
+                    placeholder="New firmware ..."
+                    drop-placeholder="Drop file here..."
+                  ></b-form-file>
+              </b-col>
+              <b-col>
+                <b-button variant="success" class="ml-1" v-b-toggle.collapseUploadFirmware @click="uploadFirmwareFile(firmwareFile)">Confirm</b-button>
+              </b-col>
+            </b-row>
+          </b-collapse>
+          <b-row class="mt-2" align-v="center">
+            <b-col sm="3">
+              <h5 style="display: inline;">System Reset</h5>
+            </b-col>
+            <b-col align="start">
+                <b-button variant="info" class="ml-1" v-b-popover.hover.left="'Reboot the device'" @click="rebootDevice()">Reboot</b-button>
+            </b-col>
+          </b-row>
+          <b-row class="mt-2" align-v="center">
+            <b-col sm="3">
+              <h5 style="display: inline;">System Logs</h5>
+            </b-col>
+            <b-col align="start">
+                <b-button variant="info" class="ml-1" v-b-popover.hover.left="'Upload device logs'" @click="uploadDeviceLogs()">Upload logs</b-button>
+            </b-col>
+          </b-row>
         </b-tab>
-        <b-popover target="propsTabBtn___BV_tab_button__" placement="right" triggers="hover focus" content="An Edge device is more than a Thing, able to run microservices locally."></b-popover>
+        <b-popover target="propsTabBtn___BV_tab_button__" placement="bottom" triggers="hover focus" content="An Edge device is more than a Thing, able to run microservices locally."></b-popover>
         <b-tab title="Edge" id="propsTabBtn">
          <spinner v-if="isEdgeUpdating === true" size="medium" />
          <b-row class="mt-1">
@@ -294,7 +349,7 @@
                       <h5>Microservices running on this edge device</h5>
                   </b-col>
                   <b-col align="end">
-                    <b-button v-b-modal.addEdgeServiceModal v-b-popover.hover.bottom="'Add new microservice to run on this edge'" variant="info" @click="addNewEdgeService()">Add New</b-button>
+                    <b-button v-b-modal.addEdgeServiceModal v-b-popover.hover.bottom="'Add new microservice to run on this edge'" variant="info" @click="addNewEdgeService()" :disabled="$store.getters.isGuestLoggedin">Add New</b-button>
                   </b-col>
                 </b-row> 
                 <b-row class="mt-1" align-v="center" style="border-bottom: 1px solid grey; margin-bottom: 5px;">
@@ -334,7 +389,7 @@
                           </b-row>
                           <b-row class="mt-2" v-if="edgeFunctionToService(edgeFunction) !== null" >
                             <b-col class="at-desc-display">
-                              <vue-markdown>{{edgeFunctionToService(edgeFunction).ServiceDesc}}</vue-markdown>
+                              <markdown-it-vue :content="edgeFunctionToService(edgeFunction).ServiceDesc" />
                             </b-col>
                           </b-row>
                           <!--
@@ -548,7 +603,7 @@ inside the container that the function runs in.</p>
                       <h5>Resources defined on this edge device</h5>
                   </b-col>
                   <b-col align="end">
-                    <b-button v-b-modal.addResourceModal v-b-popover.hover.bottom="'Add new resource of this edge'" variant="info" @click="addNewResource()">Add New</b-button>
+                    <b-button v-b-modal.addResourceModal v-b-popover.hover.bottom="'Add new resource of this edge'" variant="info" @click="addNewResource()" :disabled="$store.getters.isGuestLoggedin">Add New</b-button>
                   </b-col>
                 </b-row> 
                 <b-row class="mt-1" align-v="center" style="border-bottom: 1px solid grey; margin-bottom: 5px;">
@@ -862,7 +917,7 @@ inside the container that the function runs in.</p>
                       <h5>Connectors running on this edge device</h5>
                   </b-col>
                   <b-col align="end">
-                    <b-button v-b-modal.addConnectorModal v-b-popover.hover.bottom="'Add new connector to run on this edge'" variant="info" @click="addNewConnector()">Add New</b-button>
+                    <b-button v-b-modal.addConnectorModal v-b-popover.hover.bottom="'Add new connector to run on this edge'" variant="info" @click="addNewConnector()" :disabled="$store.getters.isGuestLoggedin">Add New</b-button>
                   </b-col>
                 </b-row> 
                 <b-row class="mt-1" align-v="center" style="border-bottom: 1px solid grey; margin-bottom: 5px;">
@@ -920,7 +975,7 @@ inside the container that the function runs in.</p>
                       <ol>
                         <li>Download <a target="_blank" href="https://github.com/awsdocs/aws-greengrass-developer-guide/blob/master/doc_source/what-is-gg.md#gg-downloads">AWS IoT Greengrass Core software</a> that runs on this core device.</li>
                         <li>
-                          <b-button style="display: inline;" id="downloadEdgeSetupButton" variant="info" @click="downloadEdgeCoreSetup()">Download</b-button>
+                          <b-button style="display: inline;" id="downloadEdgeSetupButton" variant="info" @click="downloadEdgeCoreSetup()" :disabled="$store.getters.isGuestLoggedin">Download</b-button>
                           <a v-b-tooltip.hover="'that enable secure communications between AWS IoT'">security certificates</a> and <a v-b-tooltip.hover="'that contains configuration information specific to your AWS IoT Greengrass core and the AWS IoT endpoint.'">the config.json file of this device as a zipped setup file.</a>
                         </li>
                         <li>Move and decompress the downloaded files of [1] amd [2] to the Edge device, under the same path.
@@ -952,8 +1007,7 @@ sudo ./greengrassd start</code></pre>
  </template>
 
 <script>
-
-import { API, Storage } from 'aws-amplify'
+import { API, Storage, PubSub } from 'aws-amplify'
 import atHelper from '../aiot-helper'
 import config from '../config'
 
@@ -966,16 +1020,19 @@ export default {
       thing: {},
       errorMessage: {header: '', message: ''},
       funcFilterString: '',
+      firmwareFile: null,
       thingBackup: null,
       isChangedNotSaved: false,
       isDownloading: false,
       isEdgeUpdating: false,
+      isFirmwareUpdating: false,
       isDeploying: false,
       deployingStatus: '',
       isDeployed: false,
       isEditDesc: true,
       thingDesc: null,
       thingName: null,
+      thingLogsSubscribe: null,
       isShowEdit: false,
       testList: {},
       cboxColor: 'blue',
@@ -1382,8 +1439,8 @@ export default {
           }
           let isEqual = this.$_.isEqual(compareOld, compareNew)
           if (isEqual === false && this.isChangedNotSaved !== true) {
-            console.log('new: ', compareNew)
-            console.log('old: ', compareOld)
+            // console.log('new: ', compareNew)
+            // console.log('old: ', compareOld)
             this.isChangedNotSaved = true
           }
         }
@@ -1832,6 +1889,60 @@ export default {
         console.log(err)
       }
     },
+    uploadFirmwareFile (file) {
+      console.log('file: ', file)
+      if (file === null) return
+      this.firmwareFile = null
+      this.isFirmwareUpdating = true
+      let reader = new window.FileReader() // if window is not used it says File READER is not defined
+      let userId = this.thing.UserId
+      let that = this
+      reader.onload = function (event) {
+        // dispatch fileAttached to state UI postEditor with event.target.result as read dataURL
+        let content = event.target.result
+        // still save to project bucket Storage.configure({level: 'public', bucket: this.ggS3BucketName})
+        let currentTime = (new Date()).getTime()
+        let fileName = userId + '_' + file.name + '_' + currentTime
+        Storage.put(fileName, content, {
+            contentType: 'binary/octet-stream'
+        })
+        .then(async (result) => {
+          console.log(result, fileName)
+          // s3://bucket/key
+          let newFirmware = {
+            FileName: file.name,
+            DateStamp: currentTime,
+            StorageKey: fileName
+          }
+          if ((that.thing.Firmware === undefined) || (typeof that.thing.Firmware !== 'object')) {
+            that.thing.Firmware = {}
+          }
+          that.thing.Firmware.Desired = newFirmware
+          // that.isChangedNotSaved = true
+          await that.updateThing()
+          that.isFirmwareUpdating = false
+          // for some reason, need programatically close the collapse
+          // https://github.com/bootstrap-vue/bootstrap-vue/tree/dev/src/components/collapse#v-model-support
+          that.$root.$emit('bv::toggle::collapse', 'collapseUploadFirmware')
+          that.isChangedNotSaved = false
+          that.$forceUpdate()
+        })
+        .catch(err => {
+          console.log(err)
+          that.zipFile = null // means not successful
+          that.isFirmwareUpdating = false
+          that.isChangedNotSaved = false
+        })
+        // console.log('content: ', content)
+      }
+      // https://developer.mozilla.org/en-US/docs/Web/API/FileReader
+      /*
+      .readAsDataURL() return a URL representing the file's data as a base64 encoded string
+      .readAsArrayBuffer() return an ArrayBuffer representing the file's data
+      .readAsText() return the file's data as a text string.
+      */
+      reader.readAsArrayBuffer(file)
+    },
     uploadModelFile (file) {
       let reader = new window.FileReader() // if window is not used it says File READER is not defined
       let userId = this.thing.UserId
@@ -2098,11 +2209,21 @@ export default {
         const name = this.thing.ThingName
         const desc = this.thing.ThingDesc
         const alertEnabled = this.thing.AlertEnabled
-        const body = { userId, certId, thingId, name, desc, alertEnabled }
+        let firmware = {}
+        if (this.thing.Firmware !== undefined) {
+          firmware = this.thing.Firmware
+        }
+        const body = { userId, certId, thingId, name, desc, alertEnabled, firmware }
         const result = await API.post('thingApi', '/things', { body })
         console.log('updateThing: result: ', result)
-        this.$store.dispatch('replaceThing', this.thing)
+        if (result.error === undefined) {
+          this.thing = result
+          console.log('result firmware: ', result.Firmware)
+          this.$store.dispatch('replaceThing', this.thing)
+          console.log('update firmware: ', this.thing.Firmware)
+        }
         this.isChangedNotSaved = false
+        this.$forceUpdate()
       // }
     },
     async downloadEdgeCoreSetup () {
@@ -2139,6 +2260,27 @@ export default {
       console.log('result: ', resultJson)
       await atHelper.downloadCertKey(resultJson)
       this.isDownloading = false
+    },
+    async rebootDevice () {
+      await PubSub.publish('aiot/' + this.thing.ThingId + '/aiot_device/reboot', {})
+    },
+    async uploadDeviceLogs () {
+      if (this.thingLogsSubscribe === null) {
+        this.thingLogsSubscribe = PubSub.subscribe('aiot/' + this.thing.UserId + '/' + this.thing.ThingId + '/aiot_device/logs/response').subscribe({
+          next: data => {
+            console.log('log received:')
+            if (typeof data.value === 'object' && data.value !== null) {
+              let responseMessage = data.value
+              // TODO
+            }
+            this.thingLogsSubscribe.unsubscribe()
+            this.thingLogsSubscribe = null
+          },
+          error: error => console.error(error),
+          close: () => console.log('Done')
+        })
+      }
+      await PubSub.publish('aiot/' + this.thing.ThingId + '/aiot_device/logs/request', { command: 'status' })
     },
     returnDiscardChangesOk (evt) {
       // Prevent modal from closing

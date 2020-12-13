@@ -14,6 +14,7 @@ import ThingStatus from '@/components/ThingStatus'
 import MyFavorites from '@/components/MyFavorites'
 import MyDashboard from '@/components/MyDashboard'
 import MyConsole from '@/components/MyConsole'
+import QueryProduct from '@/components/QueryProduct'
 // import MyAuthApplications from '@/components/MyAuthApplications'
 // import MyAuthApplicationsList from '@/components/MyAuthApplicationsList'
 import MyMicroservices from '@/components/MyApplications'
@@ -31,7 +32,6 @@ import Solutions from '@/components/Solutions'
 import Login from '@/components/Login'
 import Signout from '@/components/Signout'
 import Documents from '@/components/Documents'
-// import DocIntroduction from '@/components/DocIntroduction'
 import DocMain from '@/components/DocMain'
 import Shop from '@/components/Shop'
 import AboutUs from '@/components/AboutUs'
@@ -77,6 +77,15 @@ const router = new VueRouter({
       component: Home,
       meta: {
         title: 'AIoT: Home',
+        auth: false
+      }
+    },
+    {
+      path: '/query-product',
+      name: 'queryProduct',
+      component: QueryProduct,
+      meta: {
+        title: 'New IoT Product',
         auth: false
       }
     },

@@ -15,8 +15,8 @@
         <b-col sm="auto" align="end">
           <!-- <b-button v-if="!isShowEdit" v-b-popover.hover.bottom="'toggle to edit mode'" v-b-toggle.collapseEdit.collapseShow variant="info" @click="isChangedNotSaved = false">Edit</b-button>
           <b-button v-if="isShowEdit" v-b-popover.hover.bottom="'toggle to display only'" v-b-toggle.collapseEdit.collapseShow variant="info">Show</b-button> -->
-          <b-button variant="info" @click="updateDeviceGroup()">Update</b-button>
-          <b-button variant="dark" @click="backHome()">Return<sub><b-badge class="ml-1" variant="warning" v-if="isChangedNotSaved">&nbsp;</b-badge></sub></b-button>
+          <b-button variant="info" @click="updateDeviceGroup()" v-b-popover.hover.left="'Update the Device Group'">Update</b-button>
+          <b-button variant="dark" class="ml-1" @click="backHome()"><i class="fas fa-arrow-left" /><sub><b-badge class="ml-1" variant="warning" v-if="isChangedNotSaved">:&nbsp;</b-badge></sub></b-button>
         </b-col>
       </b-row>
       <b-row class="mt-3" align-v="center">
@@ -38,7 +38,7 @@
       </b-row>
       <b-row v-else>
         <b-col>
-          <vue-markdown class="at-desc-display">{{deviceGroupDesc}}</vue-markdown>
+          <markdown-it-vue class="at-desc-display" :content="deviceGroupDesc" />
         </b-col>
       </b-row> 
       <b-modal id="modalCertificateHelpConfirm"
@@ -58,7 +58,7 @@
             <b-button variant="light" small v-b-modal.modalCertificateHelpConfirm><i class="fas fa-info-circle"></i></b-button>
         </b-col>
         <b-col sm="8">
-            <b-button style="display: inline;" id="downloadButton" variant="info" v-b-popover.hover.bottom="'Group certificates and configuration for the factory setting of Device Group devices'" @click="downloadCert()">Download</b-button>
+            <b-button style="display: inline;" id="downloadButton" variant="info" v-b-popover.hover.bottom="'Group certificates and configuration for the factory setting of Device Group devices'" @click="downloadCert()" :disabled="$store.getters.isGuestLoggedin">Download</b-button>
         </b-col>
       </b-row>
       <b-modal id="modalBspHelp"
@@ -78,28 +78,75 @@
           <h5 style="display: inline;">Board support package</h5>
           <b-button variant="light" small v-b-modal.modalBspHelp><i class="fas fa-info-circle"></i></b-button>
         </b-col>
-        <b-col sm="8" v-if="deviceGroup !== null && deviceGroup.BspFileName !== undefined && deviceGroup.BspFileName !== ' ' && isLoading === false">
-          {{deviceGroup.BspFileName}} &ensp;
-          <b-button style="display: inline;" id="downloadbspFileButton" variant="info" @click="downloadBspFile()">Download</b-button>
+        <b-col sm="5" v-if="deviceGroup !== null && deviceGroup.BspFileName !== undefined && deviceGroup.BspFileName !== ' ' && isLoading === false">
+          <b-button style="display: inline;" id="downloadbspFileButton" variant="info" @click="downloadBspFile()" :disabled="$store.getters.isGuestLoggedin">Download</b-button>
+          &ensp;
+          {{deviceGroup.BspFileName}}
+        </b-col>
+        <b-col align="start">
+            <b-button variant="info" class="ml-1" v-b-toggle.collapseUploadBSP v-b-popover.hover.left="'Upgload new BSP'">Upload</b-button>
         </b-col>
       </b-row>
       <b-row v-if="isLoading === true" class="mt-3">
-        <spinner size="medium" />
+        <b-col align="center">
+          <spinner size="medium" />
+        </b-col>
       </b-row>
-      <b-row class="mt-3">
+      <b-collapse id="collapseUploadBSP" class="mt-3">
+        <b-row>
+          <b-col sm="4">
+          </b-col>
+          <b-col sm="5">
+            <b-form-file
+              v-model="bspFile"
+              :state="Boolean(bspFile)"
+              placeholder="Choose a file to upload"
+              drop-placeholder="Drop file here..."
+            ></b-form-file>
+            <!-- accept=".zip" -->
+            <!-- <div class="mt-3">Selected zip file: {{ bspFile ? bspFile.name : '' }}</div> -->
+          </b-col>
+        </b-row>
+      </b-collapse>
+      <b-row class="mt-2" align-v="center">
+        <b-col sm="4">
+          <h5 style="display: inline;">Firmware</h5>
+        </b-col>
+        <b-col sm="5">
+            {{(deviceGroup !== null && deviceGroup.Firmware !== undefined && typeof deviceGroup.Firmware === 'object' && deviceGroup.Firmware.FileName !== undefined) ? 'Installed: ' + deviceGroup.Firmware.FileName + ',  ' + (new Date(deviceGroup.Firmware.DateStamp)).toLocaleString() : '-- -- --' }}
+        </b-col>
+        <b-col align="start">
+            <b-button variant="info" class="ml-1" v-b-toggle.collapseUploadFirmware v-b-popover.hover.left="'Update firmware to installed devices'">Update</b-button>
+        </b-col>
+      </b-row>
+      <b-row class="mt-2" align-v="center">
         <b-col sm="4">
         </b-col>
-        <b-col sm="8">
-          <b-form-file
-            v-model="bspFile"
-            :state="Boolean(bspFile)"
-            placeholder="Choose a file to add or replace ..."
-            drop-placeholder="Drop file here..."
-          ></b-form-file>
-          <!-- accept=".zip" -->
-          <!-- <div class="mt-3">Selected zip file: {{ bspFile ? bspFile.name : '' }}</div> -->
+        <b-col>
+            {{(deviceGroup !== null && deviceGroup.Firmware !== undefined && typeof deviceGroup.Firmware === 'object' && deviceGroup.Firmware.Processing !== undefined) ? 'Progressing: ' + deviceGroup.Firmware.Processing.FileName + ',  ' + (new Date(deviceGroup.Firmware.Processing.DateStamp)).toLocaleString() : '' }}
         </b-col>
       </b-row>
+      <b-row v-if="isFirmwareUpdating === true" class="mt-3">
+        <b-col align="center">
+          <spinner size="medium" />
+        </b-col>
+      </b-row>
+      <b-collapse id="collapseUploadFirmware" class="mt-2">
+        <b-row align-v="center">
+          <b-col sm="4" />
+          <b-col sm="5">
+              <b-form-file
+                v-model="firmwareFile"
+                :state="Boolean(firmwareFile)"
+                placeholder="New firmware ..."
+                drop-placeholder="Drop file here..."
+              ></b-form-file>
+          </b-col>
+          <b-col>
+            <b-button variant="success" class="ml-1" v-b-toggle.collapseUploadFirmware @click="uploadFirmwareFile(firmwareFile)">Confirm</b-button>
+          </b-col>
+        </b-row>
+      </b-collapse>
       <b-modal id="modalRegUrlHelp"
               title="User URL"
               hide-footer
@@ -159,12 +206,14 @@ export default {
       what: 0,
       loading: false,
       deviceGroupDesc: null,
+      firmwareFile: null,
       deviceGroupName: '',
       showDescCannotEmptyAlert: false,
       showCheckNameMessage: false,
       checkNameResultMessage: '',
-      isEditDesc: false,
+      isEditDesc: true,
       isChangedNotSaved: false,
+      isFirmwareUpdating: false,
       isLoading: false,
       bspFile: null
     }
@@ -187,6 +236,7 @@ export default {
   mounted () {
     let index = this.deviceGroupIndex
     this.deviceGroup = this.$store.getters.deviceGroups[index]
+    console.log('deviceGroup: ', this.deviceGroup)
     this.deviceGroupDesc = this.deviceGroup.DeviceGroupDesc
     this.deviceGroupName = this.deviceGroup.DeviceGroupName
   },
@@ -208,6 +258,7 @@ export default {
           // s3://bucket/key
           that.deviceGroup.BspFileName = file.name
           that.isChangedNotSaved = true
+          that.$root.$emit('bv::toggle::collapse', 'collapseUploadBSP')
           that.$forceUpdate()
         })
         .catch(err => {
@@ -240,6 +291,58 @@ export default {
         that.isLoading = false
       }
     },
+    uploadFirmwareFile (file) {
+      console.log('file: ', file)
+      if (file === null) return
+      this.firmwareFile = null
+      this.isFirmwareUpdating = true
+      let reader = new window.FileReader() // if window is not used it says File READER is not defined
+      let userId = this.deviceGroup.OwnerId
+      let that = this
+      reader.onload = function (event) {
+        // dispatch fileAttached to state UI postEditor with event.target.result as read dataURL
+        let content = event.target.result
+        // still save to project bucket Storage.configure({level: 'public', bucket: this.ggS3BucketName})
+        let currentTime = (new Date()).getTime()
+        let fileName = userId + '_' + file.name + '_' + currentTime
+        Storage.put(fileName, content, {
+            contentType: 'binary/octet-stream'
+        })
+        .then(async (result) => {
+          console.log(result, fileName)
+          // s3://bucket/key
+          let newFirmware = {
+            FileName: file.name,
+            DateStamp: currentTime,
+            StorageKey: fileName
+          }
+          if ((that.deviceGroup.Firmware === undefined) || (typeof that.deviceGroup.Firmware !== 'object')) {
+            that.deviceGroup.Firmware = {}
+          }
+          that.deviceGroup.Firmware.Desired = newFirmware
+          await that.updateDeviceGroup()
+          that.isFirmwareUpdating = false
+          that.isChangedNotSaved = false
+          // for some reason, need programatically close the collapse
+          // https://github.com/bootstrap-vue/bootstrap-vue/tree/dev/src/components/collapse#v-model-support
+          that.$root.$emit('bv::toggle::collapse', 'collapseUploadFirmware')
+          that.$forceUpdate()
+        })
+        .catch(err => {
+          console.log(err)
+          that.isFirmwareUpdating = false
+          that.isChangedNotSaved = false
+        })
+        // console.log('content: ', content)
+      }
+      // https://developer.mozilla.org/en-US/docs/Web/API/FileReader
+      /*
+      .readAsDataURL() return a URL representing the file's data as a base64 encoded string
+      .readAsArrayBuffer() return an ArrayBuffer representing the file's data
+      .readAsText() return the file's data as a text string.
+      */
+      reader.readAsArrayBuffer(file)
+    },
     async updateDeviceGroup () {
       // if (this.isChangedNotSaved) {
         this.deviceGroup.DeviceGroupDesc = this.deviceGroupDesc
@@ -255,8 +358,12 @@ export default {
         if (result.hasOwnProperty('error')) {
           console.log('error: ', result.error)
         } else {
-          this.isChangedNotSaved = false
+          console.log('new deviceGroup result: ', result)
+          this.deviceGroup = result
+          this.$store.dispatch('replaceDeviceGroup', this.deviceGroup)
         }
+        this.isChangedNotSaved = false
+        this.$forceUpdate()
       // }
     },
     handleNewDeviceSubmit () {

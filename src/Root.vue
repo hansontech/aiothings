@@ -21,6 +21,7 @@ export default {
     console.log('Root.vue created too')
   },
   mounted () {
+    console.log('Root mounted')
     eventBus.$on('login', this.onLogin)
     eventBus.$on('logout', this.onLogout)
     eventBus.$on('consoleSubscribe', this.onConsoleSubscribe)
@@ -29,7 +30,9 @@ export default {
     } else {
       this.consoleSubscribeTopic = this.$store.getters.consoleSubscribeTopic
     }
-    this.onConsoleSubscribe(this.consoleSubscribeTopic)
+    if(this.$store.getters.isAuthenticated) {
+      this.onConsoleSubscribe(this.consoleSubscribeTopic)
+    }
   },
   beforeDestroy () {
     this.logoutClean()
@@ -55,6 +58,7 @@ export default {
       }
       this.consoleSubscribeTopic = subscribeTopic
       this.$store.commit('setConsoleSubscribeTopic', this.consoleSubscribeTopic)
+      console.log('entered onConsole')
       let subscribeConsoleOutputTopic = 'aiot/' + this.$store.getters.userId + '/+/' + subscribeTopic
       console.log('subscribe topic: ', subscribeConsoleOutputTopic)
       if (this.consoleSub !== null) {
@@ -152,14 +156,27 @@ export default {
 <style>
 body {
   margin: 0;
-  font-family: "Arial"; /* sans-serif; */
+  font-family: Arial; /* sans-serif; */
+  -webkit-appearance: none;
 }
 
+#footer { 
+  position: fixed; 
+  /* padding: 10px 10px 0px 10px; */
+  bottom: 0; 
+  width: 100%; 
+  /* Height of the footer*/  
+  /* height: 30px; */
+  /* background: grey; */
+} 
+
 #app {
+  /*
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
+  */
 }
 
 main {

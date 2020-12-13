@@ -1,22 +1,22 @@
 <template>
 <div> 
   <App/>
-  <b-container class="mt-2" style="min-height: 620px;">
+  <b-container style="min-height: 800px; margin-top: 75px; padding-bottom: 30px;">
       <font color="white">
-        <vue-markdown id="ShopBegin" style=" margin-top: 65px; background-color: darkcyan; padding: 20px">
+        <markdown-it-vue id="ShopBegin" style="background-color: darkcyan; padding: 20px"  content="
 
 ### Shop
 
-        </vue-markdown>
+        " />
       </font>
-      <vue-markdown class="borderLine mt-2" id="ShopIoTGateway" style="padding-top: 20px">
+      <markdown-it-vue class="mt-2" id="ShopIoTGateway" style="padding-top: 20px"  content="
 
 #### IoT Gateways
 
 Start a new IoT project from selecting your IoT Gateway.
 The gateway hardware plays as the [Thing Enabler](/docs/main#DocThingEnabler) to work locally with sensors, and to connect to AIoThings cloud.
 
-      </vue-markdown>
+      " />
       <div>
         <table style="width:100%">
           <tr>
@@ -67,10 +67,11 @@ The gateway hardware plays as the [Thing Enabler](/docs/main#DocThingEnabler) to
                       <li>Custom REST APIs to serve externally</li>
                     </ul>
         </div>
-  <vue-markdown class="mt-2">
+  <markdown-it-vue class="mt-2"  content="
   **Please [contact us](mailto:service@aiothings.com?subject=Shop) for more information.**
-  </vue-markdown> 
-  <vue-markdown id="ShopSBC700" class="borderLine mt-5" style="padding-top: 20px"> 
+  " /> 
+  <hr class="mt-4">
+  <markdown-it-vue id="ShopSBC700" class="mt-4" style="padding-top: 20px"  content="
 #### SBC700 Product Overview
 
 
@@ -95,7 +96,8 @@ The features include
 It's Mini-PCIe interfaced LPWAN modules support CAT-NB ane NB-IOT standards.
 Also, the USB port supports UIO modules for AI/AO/DI/DO with/without isolation features.
 
-  </vue-markdown>
+  " />
+  <hr class="mt-5">
   <b-row style="min-height: 300px">
     <b-col>
       <img width="300" src="/static/sbc700-image.png" style="float: center; margin-left: 20px; margin-right: 20px; margin-top: 0px;">
@@ -110,15 +112,16 @@ Also, the USB port supports UIO modules for AI/AO/DI/DO with/without isolation f
       -->
     </b-col>
   </b-row>
-  <vue-markdown class="borderLine mt-4" style="padding-top: 20px"> 
+  <hr class="mt-5">
+  <markdown-it-vue class="mt-4" style="padding-top: 20px"  content=" 
 #### Climate Sensor Hub
-  </vue-markdown>
-  <b-row class="mt-2">
+  " />
+  <b-row class="mt-4">
     <b-col cols="7">
-      <vue-markdown>
+      <markdown-it-vue  content="
 **Climate Sensor Hub** integrates SBC700 together with Temperature, CO2, Humidity, and Light sensors.
 This product is deploying to greenhouses for smart farming purposes.
-      </vue-markdown>
+      " />
     </b-col>
     <b-col cols="5">
       <img width="250" height="250" title="Climate Sensor Hub" src="/static/sbc700-climate_sensor_hub.jpg" style="float: center; margin-left: 20px; margin-right: 20px; margin-bottom: 20 px;">
@@ -130,7 +133,6 @@ This product is deploying to greenhouses for smart farming purposes.
 </template>
 
 <script>
-import VueMarkdown from 'vue-markdown'
 import { eventBus } from '../main'
 
 // utility copied from https://stackoverflow.com/questions/123999/how-to-tell-if-a-dom-element-is-visible-in-the-current-viewport
@@ -156,9 +158,6 @@ export default {
       idDocs: null,
       activeId: null
     }
-  },
-  components: {
-    VueMarkdown
   },
   computed: {
   },
@@ -235,13 +234,6 @@ table, th, td {
 table {
   border-spacing: 5px;
 }
-/*
-vue-markdown {
-  padding-bottom: 5px;
-  margin-bottom: 5px;
-  border-top: 1px solid grey
-}
-*/
 
 .borderLine {
   padding-bottom: 5px;

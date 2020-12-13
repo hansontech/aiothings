@@ -3,7 +3,7 @@
   <App/>
     <b-container fluid >
         <!-- <b-alert :show="loading" variant="info">Loading...</b-alert> -->
-        <b-row style="min-height: 620px; margin-top: 65px;">
+        <b-row style="min-height: 800px; margin-top: 65px; padding-bottom: 30px;">
           <b-col sm="3" lg="2" style="border-right: 1px solid blue">
             <at-sidebar menu="solution"></at-sidebar>
           </b-col>

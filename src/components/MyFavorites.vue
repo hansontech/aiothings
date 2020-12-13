@@ -5,7 +5,7 @@
         <h4>Favorites <small>({{favoriteServices.length}})</small></h4>
       </b-col>
       <b-col sm="auto" align="end">
-        <b-button variant="info" @click="reloadFavoriteServices()">Refresh</b-button>
+        <b-button variant="info" @click="reloadFavoriteServices()"><i class="fas fa-sync-alt" /></b-button>
       </b-col>
     </b-row>
     <b-row>
@@ -50,7 +50,7 @@
                       </b-row>
                       <b-row class="ml-0 mt-1">
                         <b-col class="at-border at-desc-display">
-                          <vue-markdown>{{service.ServiceDesc}}</vue-markdown>
+                          <markdown-it-vue :content="service.ServiceDesc" />
                         </b-col>
                       </b-row>
                       <b-row v-if="service.InputMessageTopic !== 'null'" class="ml-0 mt-1">  

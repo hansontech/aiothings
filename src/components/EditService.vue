@@ -7,8 +7,8 @@
         </b-col>
         <b-col sm="auto" align="end" >
           <b-button v-if="!isShowEdit" variant="info" @click="exportService(mservice)" v-b-popover.hover.bottom="'Export the microservice to a local file'">Export</b-button> 
-          <b-button variant="success" :disabled="mservice.UserId !== $store.getters.userId" @click="updateService()">Update</b-button>
-          <b-button variant="dark" @click="backHome()">Return<sub><b-badge class="ml-1" variant="warning" v-if="isChangedNotSaved">&nbsp;</b-badge></sub></b-button>
+          <b-button variant="success" class="ml-1" :disabled="mservice.UserId !== $store.getters.userId || $store.getters.isGuestLoggedin" @click="updateService()">Update</b-button>
+          <b-button variant="dark" class="ml-1" @click="backHome()"><i class="fas fa-arrow-left" /><sub><b-badge class="ml-1" variant="warning" v-if="isChangedNotSaved">:&nbsp;</b-badge></sub></b-button>
           <b-modal id="modalReturnConfirm"
              ref="modalReturnConfirmRef"
              hide-header
@@ -46,7 +46,7 @@
             </b-row>
             <b-row v-else>
                 <b-col>
-                  <vue-markdown class="at-desc-display">{{mservice.ServiceDesc}}</vue-markdown>
+                  <markdown-it-vue class="at-desc-display" :content="mservice.ServiceDesc" />
                 </b-col>
             </b-row> 
             <b-form-group

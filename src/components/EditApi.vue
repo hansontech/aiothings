@@ -5,8 +5,8 @@
             <h4>Edit REST API </h4>
         </b-col>
         <b-col sm="auto" align="end" >
-          <b-button variant="success" :disabled="api.UserId !== $store.getters.userId" @click="updateApi()">Update</b-button>
-          <b-button variant="dark" @click="backHome()">Return<sub><b-badge class="ml-1" variant="warning" v-if="isChangedNotSaved">&nbsp;</b-badge></sub></b-button>
+          <b-button variant="success" :disabled="api.UserId !== $store.getters.userId || $store.getters.isGuestLoggedin" @click="updateApi()">Update</b-button>
+          <b-button variant="dark"class="ml-1" @click="backHome()"><i class="fas fa-arrow-left" /><sub><b-badge class="ml-1" variant="warning" v-if="isChangedNotSaved">:&nbsp;</b-badge></sub></b-button>
           <b-modal id="modalReturnConfirm"
              ref="modalReturnConfirmRef"
              hide-header
@@ -78,7 +78,7 @@
           </b-row>
           <b-row v-else>
               <b-col>
-                <vue-markdown class="at-desc-display">{{api.Desc}}</vue-markdown>
+                <markdown-it-vue class="at-desc-display" :content="api.Desc" />
               </b-col>
           </b-row>           
           <b-row class="mt-3" v-if="api.ApiName !== null && api.ApiName !== ''">

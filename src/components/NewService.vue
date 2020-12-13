@@ -5,11 +5,11 @@
         <h3>New Service</h3>
       </b-col>
       <b-col sm="auto" align="end" >
-        <b-button variant="success" @click="createService()"
+        <b-button variant="success" @click="createService()" class="mr-1"
               v-b-popover.hover.bottom="'Create new service'">
-                Create
+                Save
         </b-button>
-        <b-button variant="dark" @click="$router.go(-1)">Cancel</b-button>
+        <b-button variant="dark" @click="$router.go(-1)"><i class="fas fa-arrow-left" /></b-button>
       </b-col>
     </b-row>
     <spinner v-if="isCreating === true" size="medium" />
@@ -95,7 +95,7 @@
                 </b-row>
                 <b-row v-else>
                     <b-col>
-                      <vue-markdown class="at-desc-display">{{mservice.ServiceDesc}}</vue-markdown>
+                      <markdown-it-vue class="at-desc-display" :content="mservice.ServiceDesc" />
                     </b-col>
                 </b-row> 
                 <b-form-group

@@ -9,6 +9,7 @@ export default {
     refreshToken: null,
     verification: null,
     isAuthenticated: false,
+    isGuestLoggedin: false,
     count: 0
   },
 
@@ -19,10 +20,11 @@ export default {
     idToken: state => state.idToken,
     refreshToken: state => state.refreshToken,
     isAuthenticated: state => state.isAuthenticated,
+    isGuestLoggedin: state => state.isGuestLoggedin,
     username: state => {
       try {
-        let cognitoUsername = state.profile['cognito:username']
-        let username = cognitoUsername.replace(/\./g, '_') // for Apple User name case .
+        const cognitoUsername = state.profile['cognito:username']
+        const username = cognitoUsername.replace(/\./g, '_') // for Apple User name case .
             // as the username is going to be used as UserId, and it cannot have characters other than a-zA-Z_
             // Apple returned sub field has the formatlike 'SignInWithApple_001315.e4ff039ee97a4392bde22a525c7bc2ff.0226'
             // must replace the . to _
@@ -35,7 +37,7 @@ export default {
       // sub field is the UUID of the authenticated user.
       // sub is globally unique and hence is unique for user pool as well.
       // Unlike username, which can be reassigned to another user in user pool, sub is never reassigned.
-      return state.profile['sub']
+      return state.profile.sub
     }
   },
   mutations: {
@@ -56,6 +58,9 @@ export default {
     },
     setAuthenticated: (state, isAuthenticated) => {
       state.isAuthenticated = isAuthenticated
+    },
+    setGuestLoggedin: (state, isGuestLoggedin) => {
+      state.isGuestLoggedin = isGuestLoggedin
     }
   },
 

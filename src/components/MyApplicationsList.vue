@@ -33,8 +33,8 @@
             <b-button variant="info" v-b-modal.walkTreeModal v-b-popover.hover.bottom="'Show microservices\' message trees'" @click="walkTree()">Tree</b-button> 
             <b-button variant="info" @click="exportServices()" v-b-popover.hover.bottom="'Export all designs to local files'">Export</b-button> 
             -->
-            <b-button variant="info" @click="reloadServices()">Refresh</b-button>
-            <b-button variant="success" @click="createService()" >Create</b-button>
+            <b-button class="ml-1" variant="info" @click="reloadServices()"><i class="fas fa-sync-alt" /></b-button>
+            <b-button class="ml-1" variant="success" @click="createService()" ><i class="fas fa-plus" /></b-button>
           </b-col>
         </b-row>
         <spinner v-if="isExporting === true" size="medium" />
@@ -54,7 +54,7 @@
           </b-col>
         </b-row>
       </div>
-      <div class="text-center mt-5" v-if="services.length === 0">
+      <div class="text-center mt-5" v-if="services === null || services.length === 0">
               No services available.
       </div>
       <b-row class="mt-2">
@@ -99,7 +99,7 @@
                     <b-dropdown-item v-if="service.hasOwnProperty('UndeployMessage') && service.IsDeployed === 'true'" @click ="undeployService(service)" ><b>Undeploy</b></b-dropdown-item>
                     <b-dropdown-item @click ="showServiceDetail(services.indexOf(service))" >Edit</b-dropdown-item>
                     <b-dropdown-item @click ="copyService(services.indexOf(service))">Duplicate</b-dropdown-item>        
-                    <b-dropdown-item v-b-modal.modalDeleteConfirm @click="deletingServiceIndex=services.indexOf(service)" >Delete</b-dropdown-item>
+                    <b-dropdown-item v-b-modal.modalDeleteConfirm @click="deletingServiceIndex=services.indexOf(service)" :disabled="$store.getters.isGuestLoggedin">Delete</b-dropdown-item>
                     <b-dropdown-divider></b-dropdown-divider>
                     <b-dropdown-item v-b-popover.hover.bottom="'Runtime logs with realtime updates'" @click ="showServiceLog(service)" >
                       <b-row>
@@ -122,7 +122,7 @@
               </b-row>
               <b-row class="ml-0 mt-1">
                 <b-col class="at-desc-display">
-                  <vue-markdown>{{service.ServiceDesc}}</vue-markdown>
+                  <markdown-it-vue :content="service.ServiceDesc" />
                 </b-col>
                 <!--
                     {{truncatedString( service.ServiceDesc, 256 )}}
@@ -363,7 +363,7 @@ export default {
         if (this.services === null) {
           this.services = []
         }
-        this.mservicesCounter = this.services.length
+        this.mservicesCounter = (this.services !== null) ? this.services.length : 0
       }
     },
     createService () {
@@ -689,4 +689,12 @@ export default {
   color: white;
 }
 
+button {
+  margin: 10px 10px 10px 10px;
+  padding: 10px 10px 10px 10px;
+}
+
+.mr-0 {
+  margin-right: 3 !important;
+}
 </style>

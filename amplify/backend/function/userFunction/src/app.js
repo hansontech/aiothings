@@ -42,7 +42,7 @@ app.get('/users', function(req, res) {
     let userId = query.userId
     var params = {
       UserPoolId: config.awsUserPoolId, /* required */
-      Filter: ('username = \"' + userId + '\"'),  /* case sensitive */
+      Filter: ('sub = \"' + userId + '\"'),  /* case sensitive */
     };
     console.log('params: ', params)
     cognitoidentityserviceprovider.listUsers(params, function(err, data) {

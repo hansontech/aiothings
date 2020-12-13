@@ -3,14 +3,14 @@
     <div>
        <b-row align-v="center" class="at-bottombar">
           <b-col align="start">
-            <h3>New IoT Device</h3>
+            <h3>New IoT Device Group</h3>
           </b-col>
           <b-col sm="auto" align="end" >
-            <b-button variant="success" @click="$router.go(-1)">Cancel</b-button>
-            <b-button variant="success" @click="createDeviceGroup()"
+            <b-button variant="success" @click="createDeviceGroup()" class="mr-1"
                   v-b-popover.hover.bottom="'Create new device group'">
-                    Create
+                    Save
             </b-button>
+            <b-button variant="success" @click="$router.go(-1)"><i class="fas fa-arrow-left" /></b-button>
           </b-col>
       </b-row>
       <b-modal ref="downloadModal" hide-footer>
@@ -79,7 +79,7 @@
     </b-row>
     <b-row v-else>
         <b-col>
-          <vue-markdown class="at-desc-display">{{deviceGroupDesc}}</vue-markdown>
+          <markdown-it-vue class="at-desc-display" :content="deviceGroupDesc" />
         </b-col>
     </b-row>
     <div class="mt-3">

@@ -5,7 +5,7 @@
           <h4 v-b-popover.hover.bottom="'Use Search to query microservices'">Shared Solutions &ensp;<small><i class="fas fa-info-circle"></i></small></h4>
         </b-col>
         <b-col align="end">
-          <b-button variant="info" @click="refreshSolutions()">Refresh</b-button>
+          <b-button variant="info" @click="refreshSolutions()"><i class="fas fa-sync-alt" /></b-button>
           <!-- <b-button align="end" variant="info" @click="createSolution()" >Add new solution</b-button> -->
         </b-col>
     </b-row>
@@ -95,7 +95,7 @@
                       </b-row>
                       <b-row class="ml-0 mt-1">
                         <b-col class="at-border at-desc-display">
-                          <vue-markdown>{{service.ServiceDesc}}</vue-markdown>
+                          <markdown-it-vue  :content="service.ServiceDesc" />
                         </b-col>
                       </b-row>
                       <b-row v-if="service.InputMessageTopic !== 'null'" class="ml-0 mt-1">  

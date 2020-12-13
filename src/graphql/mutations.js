@@ -1,5 +1,5 @@
 // this is an auto generated file. This will be overwritten
-import gql from "graphql-tag";
+import gql from 'graphql-tag'
 
 export const CreateEvent = gql`
   mutation CreateEvent(
@@ -24,7 +24,7 @@ export const CreateEvent = gql`
       }
     }
   }
-`;
+`
 export const DeleteEvent = gql`
   mutation DeleteEvent($id: ID!) {
     deleteEvent(id: $id) {
@@ -38,7 +38,7 @@ export const DeleteEvent = gql`
       }
     }
   }
-`;
+`
 export const CommentOnEvent = gql`
   mutation CommentOnEvent(
     $eventId: ID!
@@ -56,4 +56,4 @@ export const CommentOnEvent = gql`
       createdAt
     }
   }
-`;
+`

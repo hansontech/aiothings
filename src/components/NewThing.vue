@@ -6,11 +6,11 @@
             <h4>New IoT Thing</h4>
           </b-col>
           <b-col sm="auto" align="end" >
-            <b-button variant="success" @click="cancelAndReturn()">Cancel</b-button>
-            <b-button variant="success" @click="createThing()"
+            <b-button variant="success" class="mr-1" @click="createThing()"
                   v-b-popover.hover.bottom="'Create new thing'">
-                    Create
+                    Save
             </b-button>
+            <b-button variant="success" @click="cancelAndReturn()"><i class="fas fa-arrow-left" /></b-button>
           </b-col>
       </b-row>
       <b-row v-if="isLoading" class="mb-2">
@@ -63,7 +63,7 @@
     </b-row>
     <b-row v-else>
         <b-col>
-          <vue-markdown class="at-desc-display">{{thingDesc}}</vue-markdown>
+          <markdown-it-vue class="at-desc-display" :content="thingDesc" />
         </b-col>
     </b-row>
     <b-row  align-v="center" class="mt-4">

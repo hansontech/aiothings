@@ -1,9 +1,9 @@
-// The Vue build version to load with the `import` command
-// (runtime-only or standalone) has been set in webpack.base.conf with an alias.
+import './custom.scss'
 import Vue from 'vue'
+import App from './App.vue'
+import Home from './components/Home.vue'
 import Vuex from 'vuex'
 import underscore from 'vue-underscore'
-import App from './App'
 import Root from './Root'
 import NewThing from './components/NewThing'
 import AppFooter from './components/AppFooter'
@@ -17,12 +17,14 @@ import VueAxios from 'vue-axios'
 import VueAuthenticate from 'vue-authenticate'
 import axios from 'axios'
 import LiquorTree from 'liquor-tree'
-import VueMarkdown from 'vue-markdown'
+// import VueMarkdown from 'vue-markdown'
+import MarkdownItVue from 'markdown-it-vue'
+import 'markdown-it-vue/dist/markdown-it-vue.css'
 import store from './store/index.js'
-import Amplify, {Auth, API, Hub} from 'aws-amplify'
+import Amplify, { Auth, API, Hub } from 'aws-amplify'
 import { AWSIoTProvider } from '@aws-amplify/pubsub/lib/Providers'
 // import Amplify from 'aws-amplify'
-import awsmobile from './aws-exports'
+import awsmobile from './aws-exports.js'
 import config from './config'
 import atHelper from './aiot-helper'
 import VueGoogleCharts from 'vue-google-charts'
@@ -32,7 +34,7 @@ import SocialSharing from 'vue-social-sharing'
 import VueStripeCheckout from 'vue-stripe-checkout'
 import VueQrcodeReader from 'vue-qrcode-reader'
 import { library, dom } from '@fortawesome/fontawesome-svg-core'
-import { faCoffee, faHeart, faTrashAlt, faPhone, faEnvelope, faInfoCircle, faInfo, faCube, faSync, faAngleDoubleRight, faArrowAltCircleRight, faArrowAltCircleLeft, faEdit, faBullseye, faCopy } from '@fortawesome/free-solid-svg-icons'
+import { faCoffee, faHeart, faTrashAlt, faPhone, faEnvelope, faInfoCircle, faInfo, faCube, faSync, faSyncAlt, faAngleDoubleRight, faArrowAltCircleRight, faArrowAltCircleLeft, faArrowLeft, faTimes, faEdit, faAngleDoubleDown, faBullseye, faCopy, faPlus, faPlay } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faGithub, faSlack, faFacebookF, faFacebook, faLinkedin, faTwitter, faGooglePlus, faLine, faWeibo, faWeixin } from '@fortawesome/free-brands-svg-icons'
 // https://fontawesome.com/icons?d=gallery
@@ -90,6 +92,11 @@ import 'codemirror/addon/lint/lint.js'
   import 'codemirror/addon/fold/xml-fold.js'
 
 import 'codemirror/addon/display/autorefresh.js'
+import VueAwesomeSwiper from 'vue-awesome-swiper'
+
+// import style
+import 'swiper/css/swiper.css'
+Vue.use(VueAwesomeSwiper, /* { default options with global component } */)
 
 import { JSHINT } from 'jshint'
 window.JSHINT = JSHINT
@@ -127,38 +134,6 @@ const cmJsOption = {
   }
 }
 
-const cmPyOption = {
-  tabSize: 4,
-  styleActiveLine: true,
-  lineNumbers: true,
-  styleSelectedText: false,
-  // lint: true,
-  line: true,
-  autofocus: true,
-  foldGutter: true,
-  // gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter', 'CodeMirror-lint-markers'],
-  gutters: ['CodeMirror-lint-markers'],
-  // highlightSelectionMatches: { showToken: /\w/, annotateScrollbar: true },
-  mode: 'text/x-python',
-  // hint.js options
-  hintOptions: {
-    // 当匹配只有一项的时候是否自动补全
-    completeSingle: false
-  },
-  // 快捷键 可提供三种模式 sublime、emacs、vim
-  // keyMap: 'sublime',
-  matchBrackets: true,
-  showCursorWhenSelecting: true,
-  theme: 'default', // 'base16-dark',
-  // extraKeys: { 'Ctrl': 'autocomplete' },
-  autoRefresh: true,
-  lint: {
-    globalstrict: true,
-    strict: false,
-    asi: true
-  }
-}
-
 // -- Tree for submenu structure user <tree ...
 // https://amsik.github.io/liquor-tree/#Installation
 // global registration
@@ -170,7 +145,7 @@ Vue.use(LiquorTree)
 // window.LOG_LEVEL = 'DEBUG'
 // Amplify.Logger.LOG_LEVEL = 'DEBUG'
 
-library.add(faCopy, faBullseye, faEdit, faCoffee, faHeart, faTrashAlt, faPhone, faEnvelope, faInfoCircle, faInfo, faCube, faSync, faAngleDoubleRight, faArrowAltCircleRight, faArrowAltCircleLeft)
+library.add(faCopy, faBullseye, faTimes, faAngleDoubleDown, faEdit, faCoffee, faHeart, faTrashAlt, faPhone, faEnvelope, faInfoCircle, faInfo, faCube, faSync, faSyncAlt, faAngleDoubleRight, faArrowAltCircleRight, faArrowAltCircleLeft, faArrowLeft, faPlus, faPlay)
 library.add(faGithub, faSlack, faFacebook, faFacebookF, faLinkedin, faTwitter, faGooglePlus, faLine, faWeibo, faWeixin)
 
 // require more codemirror resource...
@@ -194,21 +169,30 @@ Vue.use(VueQrcodeReader)
 // https://github.com/gruhn/vue-qrcode-reader
 
 const hostUrl = window.location.protocol + '//' + window.location.host
+console.log('host url: ', hostUrl)
 // const hostUrl = 'https://d3n2wrf9ttsajg.cloudfront.net'
 // const hostUrl = 'https://www.aiothings.com'
 // const hostUrl = 'http://localhost:8080'
-let awsmobile2 = awsmobile
-awsmobile2.oauth.domain = 'auth.aiothings.com'
+const awsmobile2 = awsmobile
     // 2019/12/25
     // custom auth domain name, need to set 1) Cognito setting, 2) DNS server CNAME alias record too
     // Facebook: developer.facebook.com app to allow access from this domain name
     // Google: Trying login will show a link to add new domain name
     // Apple ID: follow https://aws.amazon.com/blogs/security/how-to-set-up-sign-in-with-apple-for-amazon-cognito/ to modify the address
 
+// if (hostUrl == 'http://localhost:8080') {
+//  awsmobile2.aws_user_pools_web_client_id = '1ppjiuenc3r59646sjoforoghg'
+  // Also need to add to identity pool authenticated settings
+  // Still not work 2020/11/29
+// }
+
+awsmobile2.oauth.domain = 'auth.aiothings.com'
+
 awsmobile2.oauth.redirectSignIn = hostUrl + '/callback/'
 awsmobile2.oauth.redirectSignOut = hostUrl + '/signout/'
+console.log('oauth: ', awsmobile2)
 awsmobile2.aws_cloud_logic_custom.push({
-  name: 'myApi',
+  name: 'iotDataApi',
   endpoint: 'https://api.aiothings.com/iotdata'
   // region: 'ap-southeast-2'
 })
@@ -235,10 +219,12 @@ Amplify.addPluggable(new AWSIoTProvider({
   aws_pubsub_region: config.awsRegion,
   aws_pubsub_endpoint: 'wss://' + config.awsIotHost + '/mqtt'
 }))
-Vue.component('vue-markdown', VueMarkdown)
-console.log('Markdown', VueMarkdown)
 
-Vue.use(VueStripeCheckout, 'pk_live_zocZmh9i0DOGAcmgI7i6MwzH00JJO7x6bH') // publishable key
+// Vue.component('vue-markdown', VueMarkdown)
+// Vue.use(VueMarkdown)
+// console.log('Markdown', VueMarkdown)
+
+//--?? Vue.use(VueStripeCheckout, 'pk_live_zocZmh9i0DOGAcmgI7i6MwzH00JJO7x6bH') // publishable key
 
 Vue.use(BootstrapVue)
 
@@ -251,82 +237,6 @@ Vue.component('social-sharing', SocialSharing)
 // FA core library
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 dom.watch() // This will kick of the initial replacement of i to svg tags and configure a MutationObserver
-
-// 'http://localhost:3000' ??
-Vue.use(VueAuthenticate, {
-  baseUrl: hostUrl, // Your API domain
-  providers: {
-    facebook: {
-      clientId: '265383824068284',
-      redirectUri: 'http://localhost:8080/auth/callback' // Your client app URL
-    }
-  },
-  bindRequestInterceptor: function () {
-    console.log('request intercepter')
-    this.$http.interceptors.request.use((config) => {
-      if (this.isAuthenticated()) {
-        config.headers['Authorization'] = [
-          this.options.tokenType, this.getToken()
-        ].join(' ')
-      } else {
-        delete config.headers['Authorization']
-      }
-      return config
-    })
-  },
-  bindResponseInterceptor: function () {
-    console.log('response intercepter')
-    this.$http.interceptors.response.use((response) => {
-      this.setToken(response)
-      console.log('response intercepter loop')
-      // let email = this.$auth.providers.facebook.scope['email']
-      // console.log(email)
-      return response
-    })
-  }
-})
-    /*
-    Auth.currentSession()
-    .then(session => {
-      // console.log('user session: ', session)
-      store.dispatch('profileUpdate', session.idToken.payload)
-    })
-    .catch(err => console.log('failed get user session: ', err))
-
-    Auth.currentCredentials()
-    .then(credentials => {
-      console.log('credentials: ', credentials)
-      const identityId = credentials._identityId
-      atHelper.allowLoginIdentityUseIoT(identityId)
-    })
-    .catch(err => console.log('get current credentials err', err))
-    */
-/*
-const authLogger = new Logger('Auth Watcher')
-authLogger.onHubCapsule = async (capsule) => {
-  // console.log('event:', capsule.payload.event)
-  if (capsule.payload.event === 'cognitoHostedUI' || capsule.payload.event === 'configured') {
-    // console.log('Hosted UI detected')
-
-    let authSessionPromise = Auth.currentSession()
-    authSessionPromise.catch(err => console.log('failed get user session: ', err))
-    let session = await authSessionPromise
-    // console.log('user session: ', session)
-    store.dispatch('profileUpdate', session.idToken.payload)
-
-    let authCredentialsPromise = Auth.currentCredentials()
-    authCredentialsPromise.catch(err => console.log('get current credentials err', err))
-    let credentials = await authCredentialsPromise
-    // console.log('credentials: ', credentials)
-    const identityId = credentials._identityId
-    await atHelper.allowLoginIdentityUseIoT(identityId)
-    // console.log('jump to mythings')
-    router.replace({ name: 'mymicroservices' })
-  }
-}
-*/
-// depreciated 2019/10/18
-// Hub.listen('auth', authLogger)
 
 Hub.listen('auth', listenHandler)
 
@@ -345,21 +255,22 @@ async function onAuthEvent (payload) {
   if (payload.event === 'cognitoHostedUI') {
     // console.log('Hosted UI detected')
 
-    let authSessionPromise = Auth.currentSession()
+    const authSessionPromise = Auth.currentSession()
     authSessionPromise.catch(err => console.log('failed get user session: ', err))
-    let session = await authSessionPromise
+    const session = await authSessionPromise
     console.log('user session: ', session)
     store.dispatch('profileUpdate', session.idToken.payload)
 
-    let authCredentialsPromise = Auth.currentCredentials()
+    const authCredentialsPromise = Auth.currentCredentials()
     authCredentialsPromise.catch(err => console.log('get current credentials err', err))
-    let credentials = await authCredentialsPromise
+    const credentials = await authCredentialsPromise
     // console.log('credentials: ', credentials)
-    const identityId = credentials._identityId
+    const identityId = credentials.identityId
     await atHelper.allowLoginIdentityUseIoT(identityId, store.getters.userId, store.getters.profile)
     // console.log('jump to mythings')
     eventBus.$emit('login')
-    router.replace({ name: 'mymicroservices' })
+    store.commit('setGuestLoggedin', false)
+    router.replace({ name: 'mythings' })
   } else if (payload.event === 'signOut') {
     eventBus.$emit('logout')
   } else if (payload.event === 'signIn_failure') {
@@ -376,30 +287,28 @@ Vue.use(underscore)
 
 Vue.config.productionTip = false
 
-/* eslint-disable no-new */
-/*
+Vue.component('markdown-it-vue', MarkdownItVue)
+Vue.component('App', App)
 new Vue({
   el: '#app',
+  template: '<Root/>',
+  // render: h => h(Home),
   router,
   store,
   cmJsOption,
-  cmPyOption,
-  template: '<App/>',
-  data: {
-    message: 'Hello AIoThings!'
-  },
+  awsmobile,
   components: {
-    App
+    Root
   }
 })
-*/
+
+/*
 Vue.component('App', App)
 new Vue({
   el: '#app',
   router,
   store,
   cmJsOption,
-  cmPyOption,
   template: '<Root/>',
   data: {
     message: 'Hello AIoThings!'
@@ -407,4 +316,5 @@ new Vue({
   components: {
     Root
   }
-})
+}).$mount('#app')
+*/

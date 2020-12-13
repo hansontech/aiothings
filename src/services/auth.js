@@ -11,7 +11,8 @@ export default {
         redirectSignIn,
         // redirectSignOut,
         scope,
-        responseType } = authConfig.oauth
+        responseType
+} = authConfig.oauth
     const clientId = authConfig.userPoolWebClientId
 
     var verification = generateVerification()
@@ -49,7 +50,7 @@ export default {
       window.location.href = 'https://' + domain + '/authorize?identity_provider=' + provider + '&response_type=' + type + '&client_id=' + clientId + '&redirect_uri=' + callback + '&state=' + verification + '&scope=' + scope
     } else {
       // Use the hosted UI
-      let url = 'https://' + domain + '/login?response_type=' + type + '&client_id=' + clientId + '&redirect_uri=' + callback + '&state=' + verification + '&scope=' + scope
+      const url = 'https://' + domain + '/login?response_type=' + type + '&client_id=' + clientId + '&redirect_uri=' + callback + '&state=' + verification + '&scope=' + scope
       console.log('url** ', url)
       window.location.href = url
     }

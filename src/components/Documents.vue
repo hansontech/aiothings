@@ -1,7 +1,7 @@
 <template>
 <div> 
   <App/>
-  <b-container style="min-height: 620px; margin-top: 65px;">
+  <b-container style="min-height: 800px; margin-top: 65px; padding-bottom: 30px;">
         <!-- https://www.codeply.com/go/p2pModdHxc/bootstrap-independent-scrolling-columns -->
         <!--
           <div class="row">

@@ -1,48 +1,51 @@
 <template>
   <div> 
    <App></App>
-   <b-container style="min-height: 620px; margin-top: 85px;">
-    <b-row align-v="center" class="mt-2 at-bottombar">
-      <h4>Account Information</h4>
+   <b-container style="min-height: 800px; margin-top: 75px; padding-bottom: 30px;">
+    <b-row align-v="center" style="color: white; background-color: darkcyan; padding: 20px">
+      <b-col>
+        <h4>Account Information</h4>
+      </b-col>
     </b-row>
-    <b-row v-if="userHasPhoto" align-v="center" class="mt-2 mb-2 text-center">
+    <b-row v-if="userHasPhoto" align-v="center" class="mt-3 mb-2 text-center">
       <b-col align="center">
       </b-col>
-      <b-col align="left" sm="7">
-        <img class="at-imageRound" v-if="userHasPhoto" v-bind:src="pictureUrl" style="max-height:1000px; max-width:1000px; height:auto; width:auto;" />
+      <b-col align="left">
+        <b-img alt="user photo" :src="pictureUrl" fluid rounded="circle" style="max-width:250px; max-height:250px;"></b-img>
+        <!-- <img class="at-imageRound" v-if="userHasPhoto" v-bind:src="pictureUrl" style="max-height:1000px; max-width:1000px; height:auto; width:auto;" /> -->
       </b-col>
     </b-row>
     <h5>
     <b-row v-if="userHasPhoto" align-v="center" class="mt-2 at-bottombar">
     </b-row>
-    <b-row align-v="center" class="mt-2 at-bottombar">
+    <b-row align-v="center" class="mt-3 at-bottombar">
       <b-col> User name: </b-col>
-      <b-col sm="7"> {{userName}} </b-col>
+      <b-col> {{userName}} </b-col>
     </b-row>
-    <b-row align-v="center" class="mt-2 at-bottombar">
+    <b-row align-v="center" class="mt-3 at-bottombar">
       <b-col>User ID:</b-col>
-      <b-col sm="7"><code>{{$store.getters.userId}}</code></b-col>
+      <b-col><code>{{$store.getters.userId}}</code></b-col>
     </b-row>
-    <b-row align-v="center" class="mt-2 at-bottombar">
+    <b-row align-v="center" class="mt-3 at-bottombar">
       <b-col> Email address: </b-col>
-      <b-col sm="7"> {{profile.email}} </b-col>  
+      <b-col> {{profile.email}} </b-col>  
     </b-row>
-    <b-row align-v="center" class="mt-2 at-bottombar">
+    <b-row align-v="center" class="mt-3 at-bottombar">
       <b-col> Registered through: </b-col>
-      <b-col sm="7"> {{registeredFrom}} </b-col>  
+      <b-col> {{registeredFrom}} </b-col>  
     </b-row>
-    <b-row align-v="center" class="mt-2 at-bottombar">
+    <b-row align-v="center" class="mt-3 at-bottombar">
       <b-col> Created since: </b-col>
-      <b-col sm="7"> {{createdDate}} </b-col> 
+      <b-col> {{createdDate}} </b-col> 
     </b-row>
-    <b-row v-if="registeredFrom == 'email'" align-v="center" class="mt-2 at-bottombar">
+    <b-row v-if="registeredFrom == 'email'" align-v="center" class="mt-3 at-bottombar">
       <b-col> Password: </b-col>
-      <b-col sm="7"> 
-        <b-button variant="info"  v-b-toggle.collapseChangePassword @click="changePasswordErrorMessage = '';inputNewPassword = ''; inputOldPassword = ''; inputNewPasswordAgain = '';">Change</b-button> 
+      <b-col> 
+        <b-button variant="primary"  v-b-toggle.collapseChangePassword @click="changePasswordErrorMessage = '';inputNewPassword = ''; inputOldPassword = ''; inputNewPasswordAgain = '';" :disabled="$store.getters.isGuestLoggedin">Change</b-button> 
       </b-col> 
     </b-row>
     <b-collapse id="collapseChangePassword" class="mt-2">
-     <b-row align-v="center" class="mt-2 at-bottombar">
+     <b-row align-v="center" class="mt-3 at-bottombar">
       <b-col> Password: </b-col>
       <b-col sm="7">
         <!--
@@ -53,19 +56,11 @@
         </b-modal>
         -->
         <b-row v-if="changePasswordErrorMessage != ''">
-          <b-col>
-            <b-badge variant="danger">
-              <b-row align-v="center">
-                <b-col col="11">
+          <b-col align="center" style="font-size: smaller; border:1px solid red; padding: 5px">
                   {{changePasswordErrorMessage}}
-                </b-col>
-                <b-col col="1">
                   <b-button variant="warning" @click="changePasswordErrorMessage = ''">
                     OK
                   </b-button>
-                </b-col>
-              </b-row>
-            </b-badge>
           </b-col>
         </b-row>   
         <b-row class="mt-2" style="font-size: smaller;">
@@ -102,8 +97,8 @@
             </b-form-group>
             <b-row>
               <b-col>
-                <b-button variant="info" @click="changePassword();">Update</b-button> 
-                <b-button variant="info" v-b-toggle.collapseChangePassword>Cancel</b-button> 
+                <b-button variant="primary" @click="changePassword();">Update</b-button> 
+                <b-button variant="info" class="ml-1" v-b-toggle.collapseChangePassword>Cancel</b-button> 
               </b-col>
             </b-row>
           </b-col>
@@ -111,10 +106,10 @@
       </b-col> 
     </b-row>
     </b-collapse>
-    <b-row align-v="center" class="mt-2 at-bottombar">
+    <b-row align-v="center" class="mt-3 at-bottombar">
       <b-col> Membership: </b-col>
-      <b-col sm="7"> 
-        <b-button variant="info" @click="checkout()" disabled>Upgrade</b-button> 
+      <b-col> 
+        <b-button variant="primary" @click="checkout()" disabled>Upgrade</b-button> 
       </b-col> 
     </b-row>
     <!-- for Stripe Checkout integration https://stripe.com/docs/payments/checkout/live -->
@@ -190,6 +185,7 @@ export default {
   },
   computed: {
     createdDate () {
+      console.log('userData: ', this.userData)
       if (this.userData.hasOwnProperty('UserCreateDate')) {
         let date = new Date(this.userData.UserCreateDate)
         date.setSeconds(0)
@@ -273,7 +269,7 @@ export default {
         this.response = err
       })
     */
-    this.userData = await atHelper.loadUser(this.profile['cognito:username'])
+    this.userData = await atHelper.loadUser(this.$store.getters.userId) // this.profile['cognito:username'])
   },
   mounted () {
     // let recaptchaScript = document.createElement('script')
