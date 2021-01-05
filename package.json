@@ -28,7 +28,7 @@
     "amazon-cognito-identity-js": "^4.3.2",
     "aws-amplify": "^3.0.18",
     "aws-iot-device-sdk": "^2.2.6",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "bootstrap-vue": "^2.15.0",
     "browser-request": "^0.3.3",
     "cheerio": "^1.0.0-rc.3",
