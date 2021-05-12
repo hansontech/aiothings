@@ -52,7 +52,7 @@
     "pako": "^1.0.11",
     "react": "^16.13.1",
     "sass-loader": "^8.0.2",
-    "swiper": "^5.4.5",
+    "swiper": "^6.5.1",
     "tls": "0.0.1",
     "vue": "^2.6.11",
     "vue-authenticate": "^1.4.1",
