@@ -1,6 +1,6 @@
 <template>
   <div> 
-   <App></App>
+   <!-- <App /> -->
    <b-container style="min-height: 800px; margin-top: 85px; padding-bottom: 30px;">
      <b-row>
        <b-col cols="10" align="center">
@@ -34,7 +34,7 @@
      <b-tabs pills card v-model="formPage" v-on:activate-tab="tabActivated" :title-link-class="['bg-primary', 'text-capitalize']">
       <b-tab title="Story" :title-link-class="tabLinkClass(0)">
         <b-form @submit="onSubmit" @reset="onReset" >
-          <div style="max-height: 410px;  overflow-y: scroll; ">
+          <div> <!--  style="max-height: 410px;  overflow-y: scroll; "> -->
           <b-form-group
             id="input-group-market-opportunity"
             label="What is the market opportunity?"

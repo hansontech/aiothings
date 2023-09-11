@@ -70,6 +70,7 @@
     "vue-social-sharing": "^2.4.7",
     "vue-stripe-checkout": "^3.3.2",
     "vue-underscore": "^0.1.4",
+    "vuedraggable": "^2.24.3",
     "vuex": "^3.4.0",
     "vuex-localstorage": "^1.0.0"
   },

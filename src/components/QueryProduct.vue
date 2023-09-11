@@ -31,7 +31,14 @@
        " />
      </b-modal>
      <!-- vertical -->
-     <b-tabs pills card v-model="formPage" v-on:activate-tab="tabActivated" :title-link-class="['bg-primary', 'text-capitalize']">
+    <draggable v-model="myArray">
+      <transition-group>
+        <div v-for="element in myArray" :key="element.id">
+            {{element.name}}
+        </div>
+      </transition-group>
+    </draggable>
+    <b-tabs pills card v-model="formPage" v-on:activate-tab="tabActivated" :title-link-class="['bg-primary', 'text-capitalize']">
       <b-tab title="Story" :title-link-class="tabLinkClass(0)">
         <b-form @submit="onSubmit" @reset="onReset" >
           <div> <!--  style="max-height: 410px;  overflow-y: scroll; "> -->
@@ -294,8 +301,13 @@
 
 
 <script>
+import draggable from 'vuedraggable'
+
 export default {
   name: 'queryForm',
+  components: {
+      draggable,
+  },
   data: function () {
     return {
       form: {
