@@ -1,24 +1,37 @@
 {
-    "prod": {
-        "awscloudformation": {
-            "AuthRoleName": "aiothings-20190217141129-authRole",
-            "UnauthRoleArn": "arn:aws:iam::414327512415:role/aiothings-20190217141129-unauthRole",
-            "AuthRoleArn": "arn:aws:iam::414327512415:role/aiothings-20190217141129-authRole",
-            "Region": "ap-southeast-2",
-            "DeploymentBucketName": "aiothings-20190217141129-deployment",
-            "UnauthRoleName": "aiothings-20190217141129-unauthRole",
-            "StackName": "aiothings-20190217141129",
-            "StackId": "arn:aws:cloudformation:ap-southeast-2:414327512415:stack/aiothings-20190217141129/1a476700-326a-11e9-a34c-0667dfb77996",
-            "AmplifyAppId": "d97zrv0j1odfv"
-        },
-        "categories": {
-            "auth": {
-                "aiotAuth": {
-                    "facebookAppId": "265383824068284",
-                    "googleClientId": "168989735160-otcg9fqm5d0ip4l0gbjd8n6vg75mguf8.apps.googleusercontent.com",
-                    "hostedUIProviderCreds": "[{\"ProviderName\":\"Facebook\",\"client_id\":\"265383824068284\",\"client_secret\":\"2a31c00a07ceecef3e32e16f771cb993\"},{\"ProviderName\":\"Google\",\"client_id\":\"168989735160-otcg9fqm5d0ip4l0gbjd8n6vg75mguf8.apps.googleusercontent.com\",\"client_secret\":\"Fs_G__7Va-yIEVBr8JrHsQMl\"}]"
-                }
-            }
+  "prod": {
+    "awscloudformation": {
+      "AuthRoleName": "aiothings-20190217141129-authRole",
+      "UnauthRoleArn": "arn:aws:iam::414327512415:role/aiothings-20190217141129-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::414327512415:role/aiothings-20190217141129-authRole",
+      "Region": "ap-southeast-2",
+      "DeploymentBucketName": "aiothings-20190217141129-deployment",
+      "UnauthRoleName": "aiothings-20190217141129-unauthRole",
+      "StackName": "aiothings-20190217141129",
+      "StackId": "arn:aws:cloudformation:ap-southeast-2:414327512415:stack/aiothings-20190217141129/1a476700-326a-11e9-a34c-0667dfb77996",
+      "AmplifyAppId": "d97zrv0j1odfv",
+      "APIGatewayAuthURL": "https://s3.amazonaws.com/aiothings-20190217141129-deployment/amplify-cfn-templates/api/APIGatewayAuthStack.json"
+    },
+    "categories": {
+      "auth": {
+        "aiotAuth": {
+          "facebookAppId": "265383824068284",
+          "googleClientId": "168989735160-otcg9fqm5d0ip4l0gbjd8n6vg75mguf8.apps.googleusercontent.com"
         }
+      },
+      "function": {
+        "thingFunction": {},
+        "solutionFunction": {},
+        "mserviceFunction": {},
+        "userFunction": {},
+        "apiFunction": {},
+        "apiAuthorizerFunction": {},
+        "aiotSignupChecker": {},
+        "jobFunction": {}
+      },
+      "storage": {
+        "aiotStorage": {}
+      }
     }
+  }
 }

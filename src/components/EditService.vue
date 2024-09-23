@@ -55,9 +55,9 @@
                   label-size="lg"
                   class="mt-3">
               <b-dropdown variant="secondary" class="mx-1" :text="currentRuntime">
-                <b-dropdown-item @click="changeRuntime('nodejs12.x')">Node.js 12.x</b-dropdown-item>
-                <b-dropdown-item @click="changeRuntime('nodejs10.x')">Node.js 10.x</b-dropdown-item>
-                <b-dropdown-item @click="changeRuntime('nodejs8.10')">Node.js 8.10</b-dropdown-item>
+                <b-dropdown-item @click="changeRuntime('nodejs18.x')">Node.js 18.x</b-dropdown-item>
+                <b-dropdown-item @click="changeRuntime('nodejs16.x')">Node.js 16.x</b-dropdown-item>
+                <b-dropdown-item @click="changeRuntime('nodejs14.x')">Node.js 14.x</b-dropdown-item>
                 <b-dropdown-item @click="changeRuntime('python3.7')">Python 3.7</b-dropdown-item>
                 <b-dropdown-item @click="changeRuntime('python2.7')">Python 2.7</b-dropdown-item>
               </b-dropdown>
@@ -213,7 +213,7 @@ export default {
       isShowEdit: false,
       showZipOnlySupportPython: false,
       showInvalidCodeHandlerAlert: false,
-      runtimeOptions: {'nodejs': 'Node.js 12.x', 'nodejs12.x': 'Node.js 12.x', 'nodejs10.x': 'Node.js 10.x', 'nodejs8.10': 'Node.js 8.10', 'python2.7': 'Python 2.7', 'python3.7': 'Python 3.7', 'python': 'Python 3.7'},
+      runtimeOptions: {'nodejs': 'Node.js 18.x', 'nodejs18.x': 'Node.js 18.x', 'nodejs16.x': 'Node.js 16.x', 'nodejs14.x': 'Node.js 14.x', 'python2.7': 'Python 2.7', 'python3.7': 'Python 3.7', 'python': 'Python 3.7'},
       codeEntryOptions: [
           {value: 'inline', text: 'Edit code inline'},
           {value: 'zip', text: 'Upload .zip file'}

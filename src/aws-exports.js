@@ -19,6 +19,29 @@ const awsmobile = {
         "responseType": "code"
     },
     "federationTarget": "COGNITO_USER_AND_IDENTITY_POOLS",
+    "aws_cognito_username_attributes": [],
+    "aws_cognito_social_providers": [
+        "FACEBOOK",
+        "GOOGLE"
+    ],
+    "aws_cognito_signup_attributes": [
+        "EMAIL"
+    ],
+    "aws_cognito_mfa_configuration": "OFF",
+    "aws_cognito_mfa_types": [
+        "SMS"
+    ],
+    "aws_cognito_password_protection_settings": {
+        "passwordPolicyMinLength": 8,
+        "passwordPolicyCharacters": [
+            "REQUIRES_LOWERCASE",
+            "REQUIRES_UPPERCASE",
+            "REQUIRES_NUMBERS"
+        ]
+    },
+    "aws_cognito_verification_mechanisms": [
+        "EMAIL"
+    ],
     "aws_content_delivery_bucket": "aiothings-20190217143527-hostingbucket-prod",
     "aws_content_delivery_bucket_region": "ap-southeast-2",
     "aws_content_delivery_url": "https://ddhnii0hf5ke.cloudfront.net",
